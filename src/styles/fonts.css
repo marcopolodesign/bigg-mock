@@ -1,0 +1,61 @@
+/*
+  Fonts are registered using Figma Make's colon-separated convention:
+  font-family: 'MessinaSansWeb:Bold' maps to the Tailwind class font-['MessinaSansWeb:Bold',sans-serif]
+
+  Available locally: Bold, Regular, Druk Wide Medium, Fixture Ultra SemiBold
+  SemiBold → mapped to Bold | Book → mapped to Regular (no local file for these weights)
+*/
+
+@font-face {
+  font-family: 'MessinaSansWeb:Bold';
+  src: url('/fonts/MessinaSansWeb-Bold.woff2') format('woff2'),
+       url('/fonts/MessinaSansWeb-Bold.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'MessinaSansWeb:SemiBold';
+  src: url('/fonts/MessinaSansWeb-Bold.woff2') format('woff2'),
+       url('/fonts/MessinaSansWeb-Bold.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'MessinaSansWeb:Regular';
+  src: url('/fonts/MessinaSansWeb-Regular.woff2') format('woff2'),
+       url('/fonts/MessinaSansWeb-Regular.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'MessinaSansWeb:Book';
+  src: url('/fonts/MessinaSansWeb-Regular.woff2') format('woff2'),
+       url('/fonts/MessinaSansWeb-Regular.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Druk Wide:Medium';
+  src: url('/fonts/Druk-WideMedium.woff2') format('woff2'),
+       url('/fonts/Druk-WideMedium.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Fixture Ultra:SemiBold';
+  src: url('/fonts/FixtureUltra-SemiBold.woff2') format('woff2'),
+       url('/fonts/FixtureUltra-SemiBold.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
