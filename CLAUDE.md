@@ -11,12 +11,13 @@ This document provides context for Claude Code when working on this React/Vite/T
 > - **Large changes (3+ files):** Run `/simplify` to spawn a Sonnet reviewer agent.
 > - The flow is: **implement → review/simplify → verify in Chrome → catchup.md**
 
-> **🌐 MANDATORY — Chrome Verification:** Before writing the catchup entry, visually verify the change in Chrome using the browser MCP tools (`mcp__claude-in-chrome__*`).
+> **🌐 MANDATORY — Chrome Verification (MOBILE ONLY):** Before writing the catchup entry, visually verify the change in Chrome using the browser MCP tools (`mcp__claude-in-chrome__*`).
 > 1. Ensure `pnpm dev` is running (start it if not).
-> 2. Open/navigate to `http://localhost:5173` in Chrome.
-> 3. Take a screenshot and confirm the UI looks correct — check the golden path and any edge cases (empty state, overflow, dark mode if applicable).
-> 4. If something looks wrong, fix it before marking the task done.
-> 5. Skip only if the change is purely non-visual (types, config, service logic with no UI surface).
+> 2. Open/navigate to `http://localhost:5175` in Chrome.
+> 3. **ALWAYS resize to mobile FIRST:** use `mcp__claude-in-chrome__resize_window` → width `390`, height `844` (iPhone viewport). Desktop screenshots are NOT acceptable as sole verification.
+> 4. Take a screenshot and confirm the UI looks correct — check the golden path and any edge cases (empty state, overflow, fixed elements like FAB/bottom nav/sticky header).
+> 5. If something looks wrong, fix it before marking the task done.
+> 6. Skip only if the change is purely non-visual (types, config, service logic with no UI surface).
 
 ## Project Overview
 
@@ -94,6 +95,8 @@ pnpm build      # Production build
 ## Recent Changes
 
 <!-- Add a one-liner per session here, newest first -->
+- **2026-06-02:** Bottom nav border-bottom added, height reduced 93px → 70px.
+- **2026-06-02:** Floating `+` FAB (green, bottom-right) — global blurred overlay with 3 reservation options, visible on all tabs.
 - **2026-06-01:** `BottomSheet` (reusable vaul shell) + `ReservarSheet` (Figma 22619:3582) — both Reservar buttons open the booking sheet.
 - **2026-06-01:** Phosphor info icon next to "Padel" triggers vaul bottom sheet explaining the recommendation reason.
 - **2026-06-01:** Root forced to `w-screen overflow-x-hidden` (BiggDayScreen + index.html) — no horizontal scroll on any tab.

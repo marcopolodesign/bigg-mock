@@ -3,7 +3,11 @@
 
 const MOCK_AVATAR_COLORS = ["#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", "#FFEAA7", "#DDA0DD"];
 
-export default function ReservarSheet() {
+interface ReservarSheetProps {
+  onConfirm?: () => void;
+}
+
+export default function ReservarSheet({ onConfirm }: ReservarSheetProps) {
   return (
     <div className="px-[10px] pt-[6px] pb-[36px]">
       {/* Card */}
@@ -58,7 +62,10 @@ export default function ReservarSheet() {
         </div>
 
         {/* CTA */}
-        <button className="w-full bg-[#565656] rounded-full py-[18px] flex items-center justify-center active:opacity-80 transition-opacity">
+        <button
+          onClick={onConfirm}
+          className="w-full bg-[#565656] rounded-full py-[18px] flex items-center justify-center active:opacity-80 transition-opacity"
+        >
           <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[17px] text-[#adff19]">
             Confirmar reserva
           </p>

@@ -4,6 +4,578 @@
 
 ---
 
+## 2026-06-02 — "Running pasadas" afternoon block for today
+
+Added `TODAY_ACTIVITIES` constant in `BiggDayScreen` with a "Running pasadas" entry (18:00hs–19:00hs, lime-green gradient). Passed to today's `DailyWorkoutCard` via the `activities` prop. Extended `DailyWorkoutCard`'s non-reserved render path to display `activities` entries before the Mobility & recovery block (so activities appear in chronological order: morning workout → activities → afternoon recommendation → Agregar).
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — Header: avatar left, "Hola Mateo!" + icons justify-between on right
+
+Restructured `Frame14` / `Frame43` in `BiggDayScreen`: avatar stays on the far left; "Hola Mateo!" greeting and the three icons now share the right side of the header with `justify-between`, so the icons align flush to the right margin.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — Reservar clase confirms into timeline; "Entrenar" CTA for non-class tabs
+
+`ReservarSheet.onConfirm` now closes the sheet and sets `todayReservedClass` state in `BiggDayScreen`. `DailyWorkoutCard` receives this as `reservedClass` and fades into the reserved timeline view (time pill, `ReservedClassCard` with blocks/avatars, Agregar button). For Home/Gym and Outdoors tabs the CTA label changes to "Entrenar" and clicking it confirms directly — no sheet. The BIGG Class tab still goes through the `ReservarSheet` flow. Transition uses a `motion.div` fade-slide-in on the reserved branch.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — Agregar button always visible after timeline
+
+Fixed `DailyWorkoutCard`: the Agregar dashed button was nested inside the `showAfternoon` block, so Wednesday (`showMorning=true`, `showAfternoon=false`) never rendered it. Moved the button outside the conditional so it appears after all timeline entries on every day.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — SleepCard: "6h" moved to top-right, full-width bar chart
+
+Moved the big "6h" number from the bottom-right of the chart row to the top-right (alongside the labels). Bar chart items now use `flex-1` instead of fixed `w-[20px]`, so the 7-bar chart stretches to fill the full card width.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — Scroll-collapse sticky header (calendar-only strip)
+
+On scroll, the `StickyHeader` translates upward using `scrollY` from the root scroll container. The "Hola Mateo!" greeting + icons row (`Frame14`) slides behind the status bar; only the week calendar days remain visible. `StatusBar` now has `backdrop-blur + bg-[rgba(255,255,255,0.85)]` so it visually covers the greeting as it slides up. Collapse amount is measured from a `ref` on `Frame14` (`frameHeight + 22px`) so it adapts if the row's height changes. The translate resets to 0 when switching tabs.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — StepsCard: progress bar + count display
+
+Replaced the weekly bar chart in `StepsCard` with a horizontal progress bar (32% filled, green). Added `3.200 / 10.000` big-number display replacing the standalone step count. Scale labels `0` / `10.000` sit below the bar.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — Bottom nav: border-bottom + reduced height
+
+Added `border-b` to bottom nav and reduced height from `93px` to `70px` to remove excess padding below the tab labels.
+
+**Files modified:** `src/app/screens/BiggDayScreen.tsx`
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — Carousel: narrower cards, fluid WorkoutCard layout, remove dashed borders
+
+Reduced carousel card width from 88% → 76% so the next card is visible at a glance. Made `WorkoutCard` fluid: left column uses `flex-1 min-w-0` instead of fixed `w-[254px]`, right clock column reduced to `w-[50px]`, exercises drop to `text-[13px]`, badge auto-sizes. Removed dashed borders from all 4 recommendation cards.
+
+**Files modified:** `src/app/screens/BiggDayScreen.tsx`
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — Sleep & Steps cards: bar charts, recommendations, remove Agregar
+
+Redesigned SleepCard and StepsCard: added 7-day bar charts (last bar highlighted), a recommendation tip at the bottom, and removed the "Agregar a mi entrenamiento" button (meaningless for sleep/steps). Cards are now self-contained (no overlap shell). Lower Body card unchanged.
+
+**Files modified:** `src/app/screens/BiggDayScreen.tsx`
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — Recommendations carousel: 4 cards with unified structure
+
+Replaced the single Padel block with a horizontal scrollable carousel titled "Recomendaciones basadas en tus hábitos". Each card has a subtitle above it and an "Agregar a mi entrenamiento" button (same design as the Padel block).
+
+**Cards:**
+- **Padel** — amber gradient, same Figma block layout (badge, exercises, clock SVG, info Drawer). Subtitle: "Llegá mejor preparado a la cancha".
+- **Sleep** — dark blue gradient, Figma-guided layout (uppercase labels top, big "6h" bottom right). Subtitle: "Dormiste menos de lo ideal".
+- **Steps** — lime-green gradient matching Figma node 22253:29098 (labels top, "3.200" bottom right). Subtitle: "Movete más durante el día".
+- **Lower Body** — white→#C2C2C2 gradient, same Padel block structure, exercises: Sentadillas con Pausa / Romanian Deadlift / Hip Thrust. Subtitle: "Balanceá tu entrenamiento".
+
+Refactored `Frame42` + sub-components into reusable `WorkoutCard` + shared `AgregarButton`. Dot indicator tracks active card.
+
+**Files modified:** `src/app/screens/BiggDayScreen.tsx`
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — Remove duplicate top Agregar + bottom Agregar z-fix
+
+Removed the incorrectly added calendar-wide Agregar button from the top of MainContent. Agregar exists only at the bottom of the timeline (inside DailyWorkoutCard). Bottom button bumped to `z-[20]` so the vertical line doesn't bleed through.
+
+**Files modified:** `src/app/screens/BiggDayScreen.tsx`, `src/app/components/DailyWorkoutCard.tsx`
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — Calendar-wide Agregar button + bottom Agregar z-fix
+
+Added full-width dashed "Agregar" button at the top of `MainContent` (below sticky header, before the timeline) that opens the FAB overlay. Also bumped the bottom timeline Agregar button from `z-10` → `z-[20]` so it definitively covers the vertical line.
+
+**Files modified:** `src/app/screens/BiggDayScreen.tsx`, `src/app/components/DailyWorkoutCard.tsx`
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — AfternoonRecommendationCard: solid white bg behind opacity content
+
+Added `absolute inset-0 bg-white rounded-[20px]` as first child of the outer relative wrapper, before dashed border and content. Solid white behind `opacity-0.55` content prevents grey page bleeding through.
+
+**Files modified:** `src/app/components/DailyWorkoutCard.tsx`
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — Activity timeline entries: Padel Game + Running (Strava auto-import)
+
+Added `ActivityEntry` interface (exported) and `ActivityCard` component to `DailyWorkoutCard`. `ActivityCard` supports: custom gradient, `timeRange` text inside the card, optional `source: "strava"` badge (orange pill "Tomado desde Strava"), and optional `addable` Agregar button with dark→lime toggle animation. Activity entries render as additional timeline nodes after the `ReservedClassCard`, each with their own time badge. Extended `PastDayData` with `activities?: ActivityEntry[]` and `DailyWorkoutCard` with `activities` prop. Pre-loaded 2026-06-01: Padel Game 12:00–13:00 (amber gradient), Running 16:30–17:15 (Strava, addable).
+
+**Files modified:** `src/app/components/DailyWorkoutCard.tsx`, `src/app/screens/BiggDayScreen.tsx`
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — Remove date header above timeline on non-today days
+
+Removed the `{!isToday && (...)}` date header block ("Lunes 1 de junio" + "Recomendado" chip) from `MainContent`. All day views now go straight to "Tu BIGG day recomendado" without a date label above the timeline.
+
+**Files modified:** `src/app/screens/BiggDayScreen.tsx`
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — Timeline line: stops at bottom-0 + white cover z-20 clears gap
+
+Vertical line changed from `bottom: -32px` → `bottom-0` (stops at component bottom, hidden behind opaque Agregar button). White cover in AfternoonRecommendationCard now uses `bottom: -16px, height: 20px, zIndex: 20` inline styles to reliably mask the line in the gap between the card and the Agregar button.
+
+**Files modified:** `src/app/components/DailyWorkoutCard.tsx`
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — Thursday future view: Mobility-only (no morning workout)
+
+Added `showMorning?: boolean` (default `true`) prop to `DailyWorkoutCard`. Thursday future branch now passes `showMorning={false} showAfternoon={true}` — shows only the Afternoon/Mobility timeline entry. Other future days keep `showMorning={true} showAfternoon={false}`. Rest-day blue pill still renders below the Mobility card on Thursday.
+
+**Files modified:** `src/app/components/DailyWorkoutCard.tsx`, `src/app/screens/BiggDayScreen.tsx`
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — Common sections on all days + Agregar button on reserved-class timeline
+
+Refactored `MainContent` from three early-return branches into a single-return layout. All days (today, past, future) now render the shared sections below the timeline: Strike de actividad (`ActivityContainer`), BIGG MOVE (`Group17`), Membresía premium (`MembershipContainer`), and Programa de referidos (`ReferralContainer`). The "Llegá mejor preparado a la cancha" + Padel block (`Frame42`) stays today-only. Also added the dashed "Agregar" `onOpenFab` button to the `reservedClass` render path in `DailyWorkoutCard`, matching the structure of the today timeline.
+
+**Files modified:** `src/app/screens/BiggDayScreen.tsx`, `src/app/components/DailyWorkoutCard.tsx`
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — Future day view: no afternoon block + Thursday rest-day pill
+
+Future day recommendations no longer show the afternoon "Mobility" entry. Added `showAfternoon` prop (default `true`) to `DailyWorkoutCard` — future branch passes `showAfternoon={false}`. For Thursdays specifically (`selectedDate.getDay() === 4`), a blue blurred pill "Día de descanso recomendado" (moon icon, `bg-[#6ab5ff]/15 border border-[#6ab5ff]/30`) renders below the card.
+
+**Files modified:** `src/app/components/DailyWorkoutCard.tsx`, `src/app/screens/BiggDayScreen.tsx`
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — Reserved class card for past days (Figma 22619:6112)
+
+Added `ReservedClass` interface (exported) and two new sub-components to `DailyWorkoutCard`: `AttendeeAvatars` (6 overlapping gray circles + "+N" count) and `ReservedClassCard` (white→light-green gradient, backdrop-blur-50, Druk_Wide title, avatars row, workout block chips, pencil icon). When `DailyWorkoutCard` receives a `reservedClass` prop it renders this view instead of the tab-switcher — same timeline structure (vertical line + time badge + italic location label). Added `PAST_DAYS` lookup map in `BiggDayScreen` keyed by ISO date; updated `MainContent`'s past-day branch to render `DailyWorkoutCard reservedClass={...}` when data exists or fall back to "Sin actividad registrada". Pre-loaded 2026-06-01: BIGG Class @ BIGG Tortuguitas 8:30AM, blocks: UPPER BODY / STRENGTH / FBA / MIDLINE.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — Calendar: future days clickable → pre-loaded recommendations view
+
+Future days in `WeekCalendar` are now tappable (removed `isClickable = !isFuture` gate). Tapping a future day shows a "plan recomendado" view: date header (e.g. "Jueves 4 de junio") with a lime "Recomendado" chip, then the full `DailyWorkoutCard` timeline with workout tabs and Reservar CTA. Past days still show "Sin actividad registrada". Added `isFutureDay` prop through `MainContent` and computed it at the `BiggDayScreen` root. Also note: linter update added `ReservedClass` type import and a `PAST_DAYS` stub in `BiggDayScreen.tsx` (prep for past-day content).
+
+**Files modified:** `src/app/screens/BiggDayScreen.tsx`
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — Calendar header: real dates + day switching
+
+Replaced the 7 hardcoded day-cell components (`Frame17`–`Frame23`, `Frame13`) in the sticky header with a dynamic `WeekCalendar` component. The component computes the real Mon–Sun week from today's date, highlights today with the green pill, shows green activity dots on past days and gray on future, and disables future day taps. Added `selectedDate` / `today` state to `BiggDayScreen` and threaded it down through `StickyHeader` → `Frame36` → `WeekCalendar`. `MainContent` now receives `isToday` + `selectedDate`: when a past day is selected the timeline collapses to a dated header ("Lunes 1 de junio") with a "Sin actividad registrada" placeholder, ready for the user to pre-load content.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — Reorder: Strike de actividad moved above BIGG MOVE
+
+Swapped `ActivityContainer` (Strike de actividad) and `Group17` (BIGG MOVE) in the `BiggDayScreen` render list. New visible order: Padel block → Strike de actividad → BIGG MOVE → Membresía → Referidos.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — Hide "Mejorá tu performance" block
+
+Added `hidden` to the wrapper div around `PerformanceContainer` in `BiggDayScreen.tsx` (line ~1069). Block is preserved in code with a `TODO: re-enable` comment.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — AfternoonRecommendationCard: absolute white cover hides line in gap
+
+Added `absolute bottom-[-10px] left-0 right-0 h-[12px] bg-[#ededed] z-[5]` div inside the outer `relative` wrapper of `AfternoonRecommendationCard`. This extends below the card's rounded bottom and masks the vertical timeline line in the gap between the card and the Agregar button. Removed the broken `-mt-[12px]` cover strip from the timeline.
+
+**Files modified:** `src/app/components/DailyWorkoutCard.tsx`
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — Timeline: cover strip hides gap line + Agregar button full opacity
+
+Moved cover strip and "Agregar" button inside Entry 2's `flex-col gap-[10px]` (was a sibling with `gap-[24px]`). Cover strip uses `bg-[#ededed] h-[2px] -mt-[12px]` to mask the vertical line in the gap. Agregar button has `bg-[#ededed]` for full opacity.
+
+**Files modified:** `src/app/components/DailyWorkoutCard.tsx`
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — Timeline: dashed "Agregar" button opens FAB overlay + crash fix
+
+Added full-width dashed "Agregar" button at the bottom of the timeline (after Afternoon card). Tapping it opens the FAB overlay (Reservar en BIGG Studios, etc.) via lifted `fabOpen` state in `BiggDayScreen`. `FloatingActionButton` now accepts optional `open`/`onOpenChange` props for controlled mode. Also fixed `getWeekDays` crash (null guard for undefined referenceDay from device-B calendar update).
+
+**Files modified:** `src/app/components/DailyWorkoutCard.tsx`, `src/app/components/FloatingActionButton.tsx`, `src/app/screens/BiggDayScreen.tsx`
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — Afternoon block: dashed border, reduced opacity, Agregar animation
+
+`AfternoonRecommendationCard` now starts at `opacity-0.55`, animates to `opacity-1` on tap via `motion`. Dashed border lifted outside `overflow-clip` wrapper so it renders correctly. "Agregar" button swaps `Plus` → `Check` with spring animation (`stiffness:500`) and label changes to "Agregado!" using `AnimatePresence`. Badge renamed "afternoon" → "Afternoon". 10AM label updated from "Clase en BIGG Recoleta" → "Tu entrenamiento del día" (generic, agnostic to tab).
+
+**Files modified:** `src/app/components/DailyWorkoutCard.tsx`
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — Timeline badges: italic description labels + rename 4PM → afternoon
+
+Each badge row is now `flex-row items-center gap-[10px]`: pill + italic grey label beside it. 10AM → "Clase en BIGG Recoleta", afternoon → "Mobility & recovery". Removed "Tarde" label from inside AfternoonRecommendationCard.
+
+**Files modified:** `src/app/components/DailyWorkoutCard.tsx`
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — Timeline: second entry "4PM / Tarde" with Mobility recommendation
+
+Added `AfternoonRecommendationCard` component based on Figma node 22619:6137. Second timeline entry (4PM badge) shows: "Tarde" label, "Mobility" title, "BIGG Soft Life" chip, "Agregar" (+) button, and a teal AI recommendation footer ("Cooldown recomendado…"). No Reservar CTA on this entry. Both entries share the same absolute vertical timeline line with a 32px tail below.
+
+**Files modified:** `src/app/components/DailyWorkoutCard.tsx`
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — DailyWorkoutCard wrapper: mb-[24px] to clear next section
+
+Added `mb-[24px]` to the DailyWorkoutCard wrapper in `BiggDayScreen.tsx` to prevent the green Reservar button from overlapping "Llegá mejor preparado a la cancha".
+
+**Files modified:** `src/app/screens/BiggDayScreen.tsx`
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — Reservar clase button: green bg, dark grey text
+
+`bg-[#3d3d3d] text-white` → `bg-[#adff19] text-[#3d3d3d]`.
+
+**Files modified:** `src/app/components/DailyWorkoutCard.tsx`
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — Timeline: vertical line extends 32px below card
+
+Changed `bottom-0` to `bottom: -32px` on the absolute vertical line so it visually extends past the "Reservar clase" button into the gap below.
+
+**Files modified:** `src/app/components/DailyWorkoutCard.tsx`
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — Timeline: flex-col layout, absolute vertical line
+
+Restructured timeline entry to `flex-col items-start`: 10AM badge at top, card below it (full width). Vertical line is `absolute left-[22px] top-0 bottom-0` running behind both elements. Card takes 100% parent width, no side column offset.
+
+**Files modified:** `src/app/components/DailyWorkoutCard.tsx`
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — Hide quick-action grid below BIGG MOVE
+
+Added `hidden` class to `Frame41` (the white card containing Nueva entreno / Cargar actividad / Rutina de recover / Más opciones) in `BiggDayScreen.tsx`. Icons are preserved in code with a `TODO: re-enable` comment.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — BIGG MOVE block: smaller card, title + subtitle always in view
+
+Reduced the BIGG MOVE card height by switching from a natural-height image (`h-auto`) to a fixed `aspectRatio: "390 / 160"` container with the image as `object-cover`. Replaced absolute `top:%` text positioning with a flexbox column (`justify-center`, `gap-[6px]`) so "BIGG MOVE" and "Movilidad, Prehab y más" are always co-visible. Scaled down the title font-size (`clamp(28px, 14.5cqw, 56px)`).
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — Timeline: proper badge size + line stub above badge
+
+Made the 10AM pill badge prominent (13px font, px-[12px] py-[6px]) to match Figma reference. Added a 14px line stub above the badge so the line runs both above and below it. Card top aligned with badge via `mt-[14px]`. Left column widened to 44px to contain the badge; card offset updated to `pl-[52px]`.
+
+**Files modified:** `src/app/components/DailyWorkoutCard.tsx`
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — Timeline: absolute overlay, card takes full width
+
+Replaced flex-row column layout with a `relative` container + absolute-positioned left timeline. Badge + vertical line are overlaid at `left:0` (16px wide), and the card uses `pl-[26px]` to take nearly the full parent width. Card is no longer constrained to ~90% of available space.
+
+**Files modified:** `src/app/components/DailyWorkoutCard.tsx`
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — Reservar clase scoped inside right card block
+
+Moved "Reservar clase" button from `BiggDayScreen.tsx` (full-width, outside card) into `DailyWorkoutCard.tsx` inside the right timeline column. Button now attaches to the bottom of the card block only and does not span the left timeline gutter.
+
+**Files modified:** `src/app/components/DailyWorkoutCard.tsx`, `src/app/screens/BiggDayScreen.tsx`
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — DailyWorkoutCard: timeline layout + dark Reservar button
+
+Removed "+Reservar Clase" top-right button from the card header. Restructured component into a timeline row: left column (~10% width) shows a dark "10AM" pill badge + thin grey vertical line; right side holds the full card (~90% width). Bottom "Reservar clase" button changed from green (`#adff19`) to dark grey (`#3d3d3d`) with white text.
+
+**Files modified:** `src/app/components/DailyWorkoutCard.tsx`, `src/app/screens/BiggDayScreen.tsx`
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — Diamond: slightly smaller + nudged up
+
+`top: 52px` → `49px`, container `size-[25px]` → `size-[20px]`, diamond `size-[17.794px]` → `size-[14px]`.
+
+**Files modified:** `src/app/components/DailyWorkoutCard.tsx`
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — Diamond indicator: tracks active tab at header/content seam
+
+Moved diamond to the outer card wrapper at `top: 52px` (the visual seam between dark header and content). Color `#3d3d3d` matches header. Animates with `transition: left 0.2s` across three positions: BIGG Class → 16%, Home/Gym → 50%, Outdoors → 84%. Old fixed white diamond removed from inside content area.
+
+**Files modified:** `src/app/components/DailyWorkoutCard.tsx`
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — FAB button: thin light grey border
+
+`border-[2.5px] border-[#3d3d3d]` → `border border-[#3d3d3d]/40` (1px, 40% opacity).
+
+**Files modified:** `src/app/components/FloatingActionButton.tsx`
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — FAB primary icons: dark grey circular border
+
+Wrapped each primary option icon in a `size-[44px] rounded-full border border-[#3d3d3d]/30` circle.
+
+**Files modified:** `src/app/components/FloatingActionButton.tsx`
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — FAB overlay: updated labels + icons
+
+Primary: "Reservar en BIGG Studios" (`Dumbbell`), "Reservar servicios" (`Sparkles`), "Contactar a Coach" (`MessageCircle`). Secondary: "Cargar actividad" (`Plus`), "Ver rutinas de BIGG Move" (`Layers`).
+
+**Files modified:** `src/app/components/FloatingActionButton.tsx`
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — FAB overlay: unified font size across both option tiers
+
+Primary cards `text-[12px]` and secondary rows `text-[16px]` both set to `text-[14px]`.
+
+**Files modified:** `src/app/components/FloatingActionButton.tsx`
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — Reservar button: negative mt, extra pt, old square button removed
+
+- Removed the square `#deffa3` Reservar button from inside `DailyWorkoutCard` content area
+- Outer "Reservar clase" button: added `mt-[-10px]` (tucks under card) and `pt-[26px]` (extra top padding to compensate overlap)
+
+**Files modified:**
+- `src/app/components/DailyWorkoutCard.tsx`
+- `src/app/screens/BiggDayScreen.tsx`
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — DailyWorkoutCard: dark selector + full-width Reservar button below
+
+**Selector:** Tab bar background changed from white-to-lime gradient to solid `#3d3d3d`. All icons and labels white. Inactive tabs at `opacity-40`.
+
+**Reservar CTA:** Full-width `bg-[#adff19]` button ("Reservar clase") placed directly below the card with `rounded-bl-[20px] rounded-br-[20px]`, no gap between card and button. 4 quick-action buttons (`Frame41`) remain in their original scroll position.
+
+**Files modified:**
+- `src/app/components/DailyWorkoutCard.tsx`
+- `src/app/screens/BiggDayScreen.tsx`
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — DailyWorkoutCard: dark selector + action buttons attached below
+
+**Selector:** Tab bar background changed from white-to-lime gradient to solid `#3d3d3d`. All icons and labels updated to white (stroke/fill `white`). Inactive tabs at `opacity-40`.
+
+**Action buttons:** `Frame41` moved from a separate scroll position to directly below `DailyWorkoutCard` with no gap — grouped in a `flex-col` wrapper. Border radius changed to `rounded-b-[20px]` only (top is flush against the card). Internal padding removed from the container; `Frame47` now spans full width with `justify-between`.
+
+**Files modified:**
+- `src/app/components/DailyWorkoutCard.tsx`
+- `src/app/screens/BiggDayScreen.tsx`
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — FAB overlay: two-tier layout (3 primary cards + 2 secondary rows)
+
+Primary options (Entrenar en BIGG Studios / Entrenar con un coach / Entrenar en un Evento) displayed as equal-width `flex-row` rectangles — icon centered on top, label centered below. Secondary options (Cargar actividad `Upload`, Ver rutinas de BIGG Move `Layers`) keep the full-width row style with icon + label + chevron. Stagger: secondary rows appear first (bottom-up), primary row last.
+
+**Files modified:** `src/app/components/FloatingActionButton.tsx`
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — FAB options: "Reservar" → "Entrenar" + new icons
+
+Updated all three FAB overlay options to use "Entrenar" and matching icons: Entrenar en BIGG Studios (`Dumbbell`), Entrenar con un coach (`Users`), Entrenar en un Evento (`CalendarDays`).
+
+**Files modified:** `src/app/components/FloatingActionButton.tsx`
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — DailyWorkoutCard tab titles updated
+
+Updated mock titles for Home/Gym → "Bigg Workout" and Outdoors → "Bigg Outdoor Workout".
+
+**Files modified:** `src/app/components/DailyWorkoutCard.tsx`
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — FAB options: icons + white/50 bg
+
+Each FAB option now has a lucide icon on the left (`MapPin`, `Sparkles`, `CalendarDays`) and `bg-white/50` background so the blurred content shows through the cards too.
+
+**Files modified:** `src/app/components/FloatingActionButton.tsx`
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — FAB overlay blur reduced
+
+`backdrop-blur-2xl bg-black/50` → `backdrop-blur-sm bg-black/30` so content is slightly visible through the overlay.
+
+**Files modified:** `src/app/components/FloatingActionButton.tsx`
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — FAB overlay z-index: nav stays visible
+
+Overlay z dropped from `z-[65]` → `z-[45]` so the bottom nav (`z-50`) renders above it. FAB button dropped from `z-[70]` → `z-[55]`. Sticky header (`z-40`) is still covered.
+
+**Files modified:** `src/app/components/FloatingActionButton.tsx`
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-02 — Floating action button with global reservation overlay
+
+Added a persistent green FAB button (bottom-right, above the bottom nav) that opens a full-screen blurred overlay with 3 reservation options. Visible on every tab.
+
+**What changed:**
+- Created `src/app/components/FloatingActionButton.tsx` — fixed `+` button (`bg-[#adff19]`, `rounded-full`, `size-[58px]`, `z-[70]`). On tap: `+` rotates 45° to `×` via Motion, and a `backdrop-blur-2xl bg-black/50` overlay (`z-[65]`) slides in. Options stagger up bottom-first (60ms each). Tapping backdrop or an option closes everything.
+- Options: "Reservar en BIGG Studios", "Reservar servicios", "Reservar Eventos" — white `rounded-[18px]` cards, full width, chevron right.
+- `BiggDayScreen` — added `<FloatingActionButton />` after `<BottomNav>` so it's always mounted regardless of active tab.
+
+**Files created:**
+- `src/app/components/FloatingActionButton.tsx`
+
+**Files modified:**
+- `src/app/screens/BiggDayScreen.tsx`
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
 ## 2026-06-01 — BottomSheet + ReservarSheet + Reservar button wiring
 
 **What changed:**

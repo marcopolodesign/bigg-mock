@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Dumbbell, Activity, Globe, Users, User } from "lucide-react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
+import { Dumbbell, Activity, Globe, Users, User, Moon, Plus } from "lucide-react";
 import { Drawer } from "vaul";
 import svgPaths from "../../imports/BiggDay/svg-03sgvqmew7";
 import imgBgHome1 from "../../imports/BiggDay/ec32944a87885236431eaada4b00483f53237695.png";
@@ -12,203 +12,73 @@ import imgSocialImage2 from "../../imports/BiggDay/36e0f024b8108d431fd8102b4139c
 import imgSocialImage3 from "../../imports/BiggDay/b292cbcf40664006c8d7417ba5e7133a81f10f12.png";
 import imgSocialImage4 from "../../imports/BiggDay/c7e91abf0983739fe423cb74e6d1c3b8d494aa30.png";
 import imgEllipse167 from "../../imports/BiggDay/0bdccca1063fe17c8030deb1278cb4c21c493290.png";
-import DailyWorkoutCard from "../components/DailyWorkoutCard";
+import DailyWorkoutCard, { type ReservedClass, type ActivityEntry } from "../components/DailyWorkoutCard";
 import BottomSheet from "../components/BottomSheet";
 import ReservarSheet from "../components/ReservarSheet";
+import FloatingActionButton from "../components/FloatingActionButton";
+
+// ─── Today's scheduled activities ────────────────────────────────────────────
+
+const TODAY_ACTIVITIES: ActivityEntry[] = [
+  {
+    time: "18:00hs",
+    timeRange: "18:00hs — 19:00hs",
+    title: "Running pasadas",
+    gradient: "linear-gradient(115deg, rgba(255,255,255,0.9) 40%, rgba(173,255,25,0.25) 120%)",
+  },
+];
+
+// ─── Past-day data ────────────────────────────────────────────────────────────
+
+interface PastDayData {
+  reservedClass?: ReservedClass;
+  activities?: ActivityEntry[];
+}
+
+const PAST_DAYS: Record<string, PastDayData> = {
+  "2026-06-01": {
+    reservedClass: {
+      time: "8:30AM",
+      location: "BIGG Tortuguitas",
+      classType: "BIGG Class",
+      blocks: ["1. UPPER BODY", "2. STRENGTH", "3. FBA", "4. MIDLINE"],
+      attendeeCount: 20,
+    },
+    activities: [
+      {
+        time: "12:00hs",
+        timeRange: "12:00hs — 13:00hs",
+        title: "Padel Game",
+        gradient: "linear-gradient(122.85deg, rgba(255,255,255,0.9) 37%, rgba(248,179,46,0.9) 114%)",
+      },
+      {
+        time: "16:30hs",
+        timeRange: "16:30hs — 17:15hs",
+        title: "Running",
+        source: "strava",
+        addable: true,
+      },
+    ],
+  },
+};
 
 // ─── Padel bloque ─────────────────────────────────────────────────────────────
 
-function Frame6() {
-  return (
-    <div className="backdrop-blur-[100px] bg-white content-stretch flex h-[20.203px] items-center justify-center px-[2px] py-[4px] relative rounded-[2.377px] shrink-0 w-[164px]">
-      <p className="[word-break:break-word] font-['MessinaSansWeb:Bold',sans-serif] leading-[normal] not-italic relative shrink-0 text-[#565656] text-[9.507px] tracking-[-0.0951px] uppercase whitespace-nowrap">
-        COMPLETE IN 15' : UPPER BODY
-      </p>
-    </div>
-  );
-}
+// ─── Shared Agregar button ────────────────────────────────────────────────────
 
-function Frame1() {
-  return (
-    <div className="content-stretch flex items-center justify-center relative rounded-[8px] shrink-0">
-      <p className="[word-break:break-word] font-['MessinaSansWeb:Regular',sans-serif] leading-[133.75%] not-italic relative shrink-0 text-[#565656] text-[16px] whitespace-nowrap">
-        20'' Pivot + Backhand
-      </p>
-    </div>
-  );
-}
-
-function Frame2() {
-  return (
-    <div className="content-stretch flex items-center justify-center relative rounded-[8px] shrink-0">
-      <p className="[word-break:break-word] font-['MessinaSansWeb:Regular',sans-serif] leading-[133.75%] not-italic relative shrink-0 text-[#565656] text-[16px] whitespace-nowrap">
-        20'' Banded Heidens
-      </p>
-    </div>
-  );
-}
-
-function Frame3() {
-  return (
-    <div className="content-stretch flex items-center justify-center relative rounded-[8px] shrink-0">
-      <p className="[word-break:break-word] font-['MessinaSansWeb:Regular',sans-serif] leading-[133.75%] not-italic relative shrink-0 text-[#565656] text-[16px] whitespace-nowrap">{`20'' Skipping In & Out of a Bumper`}</p>
-    </div>
-  );
-}
-
-function Frame4() {
-  return (
-    <div className="content-stretch flex flex-col gap-[7.5px] items-start relative shrink-0 w-[223px]">
-      <Frame1 />
-      <Frame2 />
-      <Frame3 />
-    </div>
-  );
-}
-
-function Frame7() {
-  return (
-    <div className="col-1 content-stretch flex flex-col gap-[12px] items-start ml-0 mt-0 relative row-1 w-[254px]">
-      <div className="flex items-center gap-[8px]">
-        <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] [word-break:break-word] font-['Druk_Wide:Medium',sans-serif] leading-[normal] not-italic relative shrink-0 text-[#565656] text-[28px] tracking-[-1.4px] whitespace-nowrap">
-          Padel
-        </p>
-        <Drawer.Trigger asChild>
-          <button
-            className="flex items-center justify-center size-[22px] opacity-50 hover:opacity-80 active:opacity-100 transition-opacity"
-            aria-label="¿Por qué te recomendamos esto?"
-          >
-            <svg viewBox="0 0 256 256" fill="currentColor" className="size-full text-[#565656]">
-              <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40A8,8,0,0,1,144,176ZM112,84a12,12,0,1,1,12,12A12,12,0,0,1,112,84Z" />
-            </svg>
-          </button>
-        </Drawer.Trigger>
-      </div>
-      <Frame6 />
-      <Frame4 />
-    </div>
-  );
-}
-
-function Group20() {
-  return (
-    <div className="grid-cols-[max-content] grid-rows-[max-content] inline-grid leading-[0] place-items-start relative shrink-0">
-      <Frame7 />
-    </div>
-  );
-}
-
-function Frame() {
-  return (
-    <div className="h-[67px] relative shrink-0 w-[38px]">
-      <div className="absolute inset-[0_-10.53%_-11.94%_-10.53%]">
-        <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 46 75">
-          <g filter="url(#filter0_d_1_526)" id="Frame 1773">
-            <path d={svgPaths.p3b47a200} fill="white" shapeRendering="crispEdges" />
-            <g id="Group">
-              <path d={svgPaths.pc724800} fill="black" id="Vector" />
-              <path d={svgPaths.p74cea80} fill="black" id="Vector_2" />
-            </g>
-            <g id="6â">
-              <path d={svgPaths.p1591d500} fill="black" />
-              <path d={svgPaths.p25011980} fill="black" />
-            </g>
-          </g>
-          <defs>
-            <filter colorInterpolationFilters="sRGB" filterUnits="userSpaceOnUse" height="75" id="filter0_d_1_526" width="46" x="0" y="0">
-              <feFlood floodOpacity="0" result="BackgroundImageFix" />
-              <feColorMatrix in="SourceAlpha" result="hardAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" />
-              <feOffset dy="4" />
-              <feGaussianBlur stdDeviation="2" />
-              <feComposite in2="hardAlpha" operator="out" />
-              <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0" />
-              <feBlend in2="BackgroundImageFix" mode="normal" result="effect1_dropShadow_1_526" />
-              <feBlend in="SourceGraphic" in2="effect1_dropShadow_1_526" mode="normal" result="shape" />
-            </filter>
-          </defs>
-        </svg>
-      </div>
-    </div>
-  );
-}
-
-function Frame9() {
-  return (
-    <div className="content-stretch flex flex-col items-end relative shrink-0">
-      <Frame />
-    </div>
-  );
-}
-
-function Frame10() {
-  return (
-    <div className="content-stretch flex flex-col items-end relative shrink-0 w-[88.718px]">
-      <Frame9 />
-    </div>
-  );
-}
-
-function Frame11() {
-  return (
-    <div className="content-stretch flex items-start justify-between relative shrink-0 w-full">
-      <Group20 />
-      <Frame10 />
-    </div>
-  );
-}
-
-function Frame12() {
-  return (
-    <div className="h-[214px] relative shrink-0 w-full">
-      <div className="flex flex-col justify-center size-full">
-        <div className="content-stretch flex flex-col items-start justify-center pb-[20px] pl-[20px] pt-[10px] relative size-full">
-          <Frame11 />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function NewBloque() {
-  return (
-    <div
-      className="content-stretch flex flex-col items-end mb-[-34px] overflow-clip relative rounded-bl-[20px] rounded-br-[20px] rounded-tl-[8px] rounded-tr-[8px] shrink-0 w-full z-[2]"
-      style={{ backgroundImage: "linear-gradient(165.134deg, rgb(255, 255, 255) 20.391%, rgb(248, 179, 46) 105.1%)" }}
-      data-name="New Bloque"
-    >
-      <Frame12 />
-    </div>
-  );
-}
-
-function Group() {
-  return (
-    <div className="absolute inset-[8.33%_8.33%_0.78%_8.73%]" data-name="Group">
-      <svg className="absolute block inset-0 size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 19.9067 21.8139">
-        <g id="Group">
-          <g id="Vector" />
-          <path d={svgPaths.p3d8e2800} fill="#F8B32E" id="Vector_2" />
-        </g>
-      </svg>
-    </div>
-  );
-}
-
-function MingcuteAiLine3() {
-  return (
-    <div className="overflow-clip relative shrink-0 size-[24px]" data-name="mingcute:ai-line">
-      <Group />
-    </div>
-  );
-}
-
-function Frame35() {
+function AgregarButton() {
   return (
     <div className="bg-[rgba(255,255,255,0.8)] relative shrink-0 w-full z-[1]">
       <div className="flex flex-row items-center justify-center size-full">
         <div className="content-stretch flex gap-[10px] items-center justify-center pb-[15px] pt-[45px] px-[10px] relative size-full">
-          <MingcuteAiLine3 />
-          <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] [word-break:break-word] font-['MessinaSansWeb:SemiBold',sans-serif] leading-[1.13] not-italic relative shrink-0 text-[#f8b32e] text-[15px] tracking-[-0.15px] whitespace-nowrap">
+          <div className="overflow-clip relative shrink-0 size-[24px]">
+            <div className="absolute inset-[8.33%_8.33%_0.78%_8.73%]">
+              <svg className="absolute block inset-0 size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 19.9067 21.8139">
+                <path d={svgPaths.p3d8e2800} fill="#F8B32E" />
+              </svg>
+            </div>
+          </div>
+          <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] font-['MessinaSansWeb:SemiBold',sans-serif] leading-[1.13] not-italic relative shrink-0 text-[#f8b32e] text-[15px] tracking-[-0.15px] whitespace-nowrap">
             Agregar a mi entrenamiento
           </p>
         </div>
@@ -217,45 +87,97 @@ function Frame35() {
   );
 }
 
-function Frame42() {
+// ─── Workout recommendation card (Padel + Lower Body) ─────────────────────────
+
+interface WorkoutCardProps {
+  gradient: string;
+  title: string;
+  badge: string;
+  exercises: string[];
+  drawerBadge: React.ReactNode;
+  drawerBody: React.ReactNode;
+}
+
+function WorkoutCard({ gradient, title, badge, exercises, drawerBadge, drawerBody }: WorkoutCardProps) {
   return (
     <Drawer.Root>
       <div className="relative rounded-[20px] shrink-0 w-full">
         <div className="content-stretch flex flex-col isolate items-center overflow-clip relative rounded-[inherit] size-full">
-          <NewBloque />
-          <Frame35 />
+          {/* Main gradient card */}
+          <div
+            className="content-stretch flex flex-col items-end mb-[-34px] overflow-clip relative rounded-bl-[20px] rounded-br-[20px] rounded-tl-[8px] rounded-tr-[8px] shrink-0 w-full z-[2]"
+            style={{ backgroundImage: gradient }}
+          >
+            <div className="h-[214px] relative shrink-0 w-full">
+              <div className="flex flex-col justify-center size-full">
+                <div className="content-stretch flex flex-col items-start justify-center pb-[20px] pl-[20px] pt-[10px] relative size-full">
+                  <div className="content-stretch flex items-start justify-between relative shrink-0 w-full">
+                    {/* Left: title, badge, exercises */}
+                    <div className="content-stretch flex flex-col gap-[10px] items-start flex-1 min-w-0">
+                      <div className="flex items-center gap-[8px]">
+                        <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] font-['Druk_Wide:Medium',sans-serif] leading-[normal] not-italic relative shrink-0 text-[#565656] text-[22px] tracking-[-1px] whitespace-nowrap">
+                          {title}
+                        </p>
+                        <Drawer.Trigger asChild>
+                          <button
+                            className="flex items-center justify-center size-[20px] opacity-50 hover:opacity-80 active:opacity-100 transition-opacity shrink-0"
+                            aria-label="¿Por qué te recomendamos esto?"
+                          >
+                            <svg viewBox="0 0 256 256" fill="currentColor" className="size-full text-[#565656]">
+                              <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40A8,8,0,0,1,144,176ZM112,84a12,12,0,1,1,12,12A12,12,0,0,1,112,84Z" />
+                            </svg>
+                          </button>
+                        </Drawer.Trigger>
+                      </div>
+                      <div className="backdrop-blur-[100px] bg-white flex items-center h-[18px] px-[6px] py-[3px] relative rounded-[3px] self-start">
+                        <p className="font-['MessinaSansWeb:Bold',sans-serif] leading-[normal] not-italic relative shrink-0 text-[#565656] text-[8px] tracking-[-0.08px] uppercase whitespace-nowrap">
+                          {badge}
+                        </p>
+                      </div>
+                      <div className="flex flex-col gap-[6px] w-full">
+                        {exercises.map((ex, i) => (
+                          <p key={i} className="font-['MessinaSansWeb:Regular',sans-serif] leading-[133.75%] not-italic relative shrink-0 text-[#565656] text-[13px]">
+                            {ex}
+                          </p>
+                        ))}
+                      </div>
+                    </div>
+                    {/* Right: clock SVG */}
+                    <div className="content-stretch flex flex-col items-end relative shrink-0 w-[50px]">
+                      <div className="h-[67px] relative shrink-0 w-[38px]">
+                        <div className="absolute inset-[0_-10.53%_-11.94%_-10.53%]">
+                          <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 46 75">
+                            <path d={svgPaths.p3b47a200} fill="white" shapeRendering="crispEdges" />
+                            <path d={svgPaths.pc724800} fill="black" />
+                            <path d={svgPaths.p74cea80} fill="black" />
+                            <path d={svgPaths.p1591d500} fill="black" />
+                            <path d={svgPaths.p25011980} fill="black" />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <AgregarButton />
         </div>
-        <div aria-hidden className="absolute border border-[#a3a3a3] border-dashed inset-0 pointer-events-none rounded-[20px]" />
       </div>
       <Drawer.Portal>
         <Drawer.Overlay className="fixed inset-0 bg-black/40 z-[60]" />
         <Drawer.Content className="fixed bottom-0 left-0 right-0 z-[60] flex flex-col rounded-t-[24px] bg-white outline-none">
-          {/* Handle */}
           <div className="flex justify-center pt-[14px] pb-[6px]">
             <div className="w-[40px] h-[4px] rounded-full bg-[#d4d4d4]" />
           </div>
-          {/* Body */}
           <div className="flex flex-col gap-[20px] px-[24px] pt-[12px] pb-[48px]">
             <Drawer.Title className="font-['MessinaSansWeb:Bold',sans-serif] text-[#3d3d3d] text-[20px] tracking-[-0.5px] leading-[1.2]">
               ¿Por qué te recomendamos esto?
             </Drawer.Title>
-            {/* Activity badge */}
-            <div className="flex items-center gap-[10px]">
-              <div className="bg-[rgba(248,179,46,0.15)] px-[12px] py-[6px] rounded-full flex items-center gap-[6px]">
-                <div className="size-[7px] rounded-full bg-[#f8b32e]" />
-                <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[#b07c00] text-[13px] tracking-[-0.3px]">
-                  Padel
-                </p>
-              </div>
-              <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[#a3a3a3] text-[13px] tracking-[-0.26px]">
-                actividad cargada recientemente
-              </p>
+            {drawerBadge}
+            <div className="font-['MessinaSansWeb:Regular',sans-serif] text-[#565656] text-[15px] leading-[1.55] tracking-[-0.3px]">
+              {drawerBody}
             </div>
-            <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[#565656] text-[15px] leading-[1.55] tracking-[-0.3px]">
-              Cargaste una actividad de{" "}
-              <span className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[#3d3d3d]">Padel</span>,
-              así que armamos este bloque de movilidad y técnica específico para que llegués mejor preparado a la cancha y reduzcas el riesgo de lesiones.
-            </p>
             <Drawer.Close asChild>
               <button className="w-full bg-[#3d3d3d] text-white font-['MessinaSansWeb:SemiBold',sans-serif] text-[15px] tracking-[-0.3px] py-[15px] rounded-[14px]">
                 Entendido
@@ -268,24 +190,252 @@ function Frame42() {
   );
 }
 
+// ─── Recommendation cards ─────────────────────────────────────────────────────
+
+function SleepCard() {
+  const sleepData = [7.5, 6.5, 8, 7, 8, 7, 6];
+  const sleepDays = ["L", "M", "M", "J", "V", "S", "D"];
+  const sleepMax = 9;
+  const maxBarH = 62;
+
+  return (
+    <div className="relative rounded-[20px] shrink-0 w-full">
+      <div
+        className="overflow-clip relative rounded-[20px] w-full"
+        style={{ background: "linear-gradient(70deg, #1a2040 2%, #2e1e6e 74%)" }}
+      >
+        <div className="flex flex-col h-[260px] p-[15px]">
+          {/* Top row: labels + big number */}
+          <div className="flex items-start justify-between shrink-0">
+            <div className="flex flex-col gap-[4px]">
+              <p className="font-['MessinaSansWeb:Bold',sans-serif] text-[rgba(255,255,255,0.5)] text-[8px] tracking-[-0.08px] uppercase whitespace-nowrap">
+                SUEÑO ANOCHE
+              </p>
+              <p className="font-['MessinaSansWeb:Bold',sans-serif] text-[rgba(255,255,255,0.5)] text-[8px] tracking-[-0.08px] uppercase whitespace-nowrap">
+                OBJETIVO: 8 HORAS
+              </p>
+            </div>
+            <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] font-['Druk_Wide:Medium',sans-serif] text-white text-[40px] leading-[1] tracking-[-2px] shrink-0">
+              6h
+            </p>
+          </div>
+          {/* Full-width bar chart */}
+          <div className="flex items-end flex-1 pb-[6px] pt-[8px]">
+            <div className="flex items-end w-full" style={{ gap: '4px' }}>
+              {sleepData.map((v, i) => (
+                <div key={i} className="flex flex-col items-center gap-[4px] flex-1">
+                  <div
+                    className="w-full rounded-[4px]"
+                    style={{
+                      height: `${(v / sleepMax) * maxBarH}px`,
+                      background: i === sleepData.length - 1 ? '#7b9de8' : 'rgba(255,255,255,0.2)',
+                    }}
+                  />
+                  <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[rgba(255,255,255,0.3)] text-[7px]">
+                    {sleepDays[i]}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+          {/* Recommendation */}
+          <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[rgba(255,255,255,0.55)] text-[11px] leading-[1.4] tracking-[-0.22px] shrink-0">
+            Dormite temprano hoy para alcanzar tu objetivo mañana
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StepsCard() {
+  const current = 3200;
+  const goal = 10000;
+  const pct = Math.min((current / goal) * 100, 100);
+
+  return (
+    <div className="relative rounded-[20px] shrink-0 w-full">
+      <div
+        className="overflow-clip relative rounded-[20px] w-full"
+        style={{ backgroundImage: "linear-gradient(70.32deg, rgb(237, 237, 237) 1.58%, rgb(222, 255, 163) 73.75%)" }}
+      >
+        <div className="flex flex-col h-[260px] p-[15px] gap-[10px]">
+          {/* Label */}
+          <p className="font-['MessinaSansWeb:Bold',sans-serif] text-[#585858] text-[8px] tracking-[-0.08px] uppercase whitespace-nowrap shrink-0">
+            PASOS DE HOY
+          </p>
+
+          {/* Big count */}
+          <div className="flex items-baseline gap-[6px] flex-1">
+            <p className="font-['Druk_Wide:Medium',sans-serif] text-[#3d3d3d] text-[48px] leading-[1] tracking-[-2px]">
+              3.200
+            </p>
+            <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[#585858] text-[18px] leading-[1] tracking-[-0.5px]">
+              / 10.000
+            </p>
+          </div>
+
+          {/* Progress bar */}
+          <div className="shrink-0 flex flex-col gap-[6px]">
+            <div className="w-full h-[8px] rounded-full bg-black/10 overflow-hidden">
+              <div
+                className="h-full rounded-full"
+                style={{ width: `${pct}%`, background: '#3d6b00' }}
+              />
+            </div>
+            <div className="flex justify-between">
+              <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[#585858] text-[9px]">0</p>
+              <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[#585858] text-[9px]">10.000</p>
+            </div>
+          </div>
+
+          {/* Recommendation */}
+          <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[#585858] text-[11px] leading-[1.4] tracking-[-0.22px] shrink-0">
+            Caminá 6.800 pasos más para alcanzar tu objetivo diario
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Recommendations carousel ─────────────────────────────────────────────────
+
+const RECOMMENDATION_ITEMS = [
+  {
+    subtitle: "Llegá mejor preparado a la cancha",
+    card: (
+      <WorkoutCard
+        gradient="linear-gradient(165.134deg, rgb(255, 255, 255) 20.391%, rgb(248, 179, 46) 105.1%)"
+        title="Padel"
+        badge="COMPLETE IN 15' : UPPER BODY"
+        exercises={["20'' Pivot + Backhand", "20'' Banded Heidens", "20'' Skipping In & Out of a Bumper"]}
+        drawerBadge={
+          <div className="flex items-center gap-[10px]">
+            <div className="bg-[rgba(248,179,46,0.15)] px-[12px] py-[6px] rounded-full flex items-center gap-[6px]">
+              <div className="size-[7px] rounded-full bg-[#f8b32e]" />
+              <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[#b07c00] text-[13px] tracking-[-0.3px]">Padel</p>
+            </div>
+            <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[#a3a3a3] text-[13px] tracking-[-0.26px]">actividad cargada recientemente</p>
+          </div>
+        }
+        drawerBody={<>Cargaste una actividad de{" "}<span className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[#3d3d3d]">Padel</span>, así que armamos este bloque de movilidad y técnica específico para que llegués mejor preparado a la cancha y reduzcas el riesgo de lesiones.</>}
+      />
+    ),
+  },
+  { subtitle: "Dormiste menos de lo ideal", card: <SleepCard /> },
+  { subtitle: "Movete más durante el día", card: <StepsCard /> },
+  {
+    subtitle: "Balanceá tu entrenamiento",
+    card: (
+      <WorkoutCard
+        gradient="linear-gradient(165.134deg, rgb(255, 255, 255) 20.391%, rgb(194, 194, 194) 105.1%)"
+        title="Lower Body"
+        badge="COMPLETE IN 15' : LOWER BODY"
+        exercises={["20'' Sentadillas con Pausa", "20'' Romanian Deadlift", "20'' Hip Thrust"]}
+        drawerBadge={
+          <div className="flex items-center gap-[10px]">
+            <div className="bg-[rgba(163,163,163,0.15)] px-[12px] py-[6px] rounded-full flex items-center gap-[6px]">
+              <div className="size-[7px] rounded-full bg-[#a3a3a3]" />
+              <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[#666666] text-[13px] tracking-[-0.3px]">Upper Body × 3</p>
+            </div>
+            <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[#a3a3a3] text-[13px] tracking-[-0.26px]">entrenamientos esta semana</p>
+          </div>
+        }
+        drawerBody={<>Realizaste 3 sesiones de{" "}<span className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[#3d3d3d]">Upper Body</span>{" "}esta semana — equilibrá con Lower Body para evitar desbalances musculares y fortalecer el tren inferior.</>}
+      />
+    ),
+  },
+];
+
+function RecommendationsCarousel() {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const handleScroll = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const containerLeft = el.getBoundingClientRect().left;
+    const containerRight = containerLeft + el.clientWidth;
+    const children = Array.from(el.children).slice(0, RECOMMENDATION_ITEMS.length) as HTMLElement[];
+    let best = 0, bestVis = -1;
+    children.forEach((child, i) => {
+      const rect = child.getBoundingClientRect();
+      const vis = Math.min(rect.right, containerRight) - Math.max(rect.left, containerLeft);
+      if (vis > bestVis) { bestVis = vis; best = i; }
+    });
+    setActiveIndex(best);
+  }, []);
+
+  return (
+    <div className="flex flex-col gap-[14px] w-full">
+      <div
+        ref={scrollRef}
+        onScroll={handleScroll}
+        className="flex gap-[12px] overflow-x-auto"
+        style={{ scrollSnapType: "x mandatory", scrollbarWidth: "none", WebkitOverflowScrolling: "touch" } as React.CSSProperties}
+      >
+        {RECOMMENDATION_ITEMS.map(({ subtitle, card }, i) => (
+          <div
+            key={i}
+            className="flex flex-col gap-[8px] shrink-0 flex-[0_0_76%]"
+            style={{ scrollSnapAlign: "start" }}
+          >
+            <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[#565656] text-[13px] tracking-[-0.3px] leading-[1.3]">
+              {subtitle}
+            </p>
+            {card}
+          </div>
+        ))}
+        {/* trailing spacer so last card can snap correctly */}
+        <div className="shrink-0 w-[1px]" aria-hidden />
+      </div>
+
+      {/* Dot indicator */}
+      <div className="flex items-center justify-center gap-[6px]">
+        {RECOMMENDATION_ITEMS.map((_, i) => (
+          <div
+            key={i}
+            className="rounded-full transition-all duration-200"
+            style={{
+              width: i === activeIndex ? 16 : 6,
+              height: 6,
+              background: i === activeIndex ? "#3d3d3d" : "#d4d4d4",
+            }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ─── BIGG MOVE ────────────────────────────────────────────────────────────────
 
 function Group17() {
   return (
-    <div className="relative w-full overflow-hidden rounded-[12.936px]" style={{ containerType: "inline-size" }}>
-      <img alt="" className="block w-full h-auto object-cover pointer-events-none rounded-[12.936px]" src={imgRectangle1025} />
-      <p
-        className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] [word-break:break-word] absolute font-['Fixture_Ultra:SemiBold',sans-serif] leading-[1.005] not-italic text-white whitespace-nowrap"
-        style={{ left: "5.4%", top: "47%", fontSize: "clamp(32px, 30.1cqw, 120px)" }}
-      >
-        BIGG MOVE
-      </p>
-      <p
-        className="[word-break:break-word] absolute font-['MessinaSansWeb:SemiBold',sans-serif] leading-[1.005] not-italic text-white whitespace-nowrap"
-        style={{ left: "6.6%", top: "83.4%", fontSize: "clamp(8px, 3.44cqw, 14px)" }}
-      >
-        Movilidad, Prehab y más
-      </p>
+    <div
+      className="relative w-full overflow-hidden rounded-[12.936px]"
+      style={{ containerType: "inline-size", aspectRatio: "390 / 160" }}
+    >
+      <img
+        alt=""
+        className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+        src={imgRectangle1025}
+      />
+      <div className="absolute inset-0 flex flex-col justify-end gap-[6px] px-[5.4%] pb-[12px]">
+        <p
+          className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] [word-break:break-word] font-['Fixture_Ultra:SemiBold',sans-serif] leading-[1.005] not-italic text-white whitespace-nowrap"
+          style={{ fontSize: "clamp(28px, 14.5cqw, 56px)" }}
+        >
+          BIGG MOVE
+        </p>
+        <p
+          className="[word-break:break-word] font-['MessinaSansWeb:SemiBold',sans-serif] leading-[1.005] not-italic text-white whitespace-nowrap"
+          style={{ fontSize: "clamp(11px, 3.44cqw, 14px)" }}
+        >
+          Movilidad, Prehab y más
+        </p>
+      </div>
     </div>
   );
 }
@@ -444,8 +594,9 @@ function Frame47() {
 }
 
 function Frame41() {
+  // TODO: re-enable quick-action grid when ready
   return (
-    <div className="backdrop-blur-[2px] bg-white relative rounded-[20px] shrink-0 w-full">
+    <div className="hidden backdrop-blur-[2px] bg-white relative rounded-[20px] shrink-0 w-full">
       <div className="flex flex-row items-center justify-center size-full">
         <div className="content-stretch flex items-center justify-center p-[20px] relative size-full">
           <Frame47 />
@@ -1029,19 +1180,63 @@ function SocialContainer() {
 
 // ─── Main scroll content ───────────────────────────────────────────────────────
 
-function MainContent({ onReservar }: { onReservar: () => void }) {
+function MainContent({ onReservar, onConfirmWorkout, onOpenFab, isToday, isFutureDay, selectedDate, todayReservedClass }: { onReservar: () => void; onConfirmWorkout: (data: ReservedClass) => void; onOpenFab: () => void; isToday: boolean; isFutureDay: boolean; selectedDate: Date; todayReservedClass: ReservedClass | null }) {
+  const dateKey = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}`;
+  const pastData = isToday ? undefined : PAST_DAYS[dateKey];
+
   return (
     <div className="flex flex-col gap-[16px] items-center w-full px-[20px] pt-[197px]">
-      {/* Interactive Daily Workout Card */}
-      <div className="w-full max-w-[388px]">
-        <DailyWorkoutCard onReservar={onReservar} />
+
+      {/* ── Timeline ── */}
+      <div className="w-full max-w-[388px] mb-[24px]">
+        {isToday ? (
+          <DailyWorkoutCard
+            onReservar={onReservar}
+            onConfirmWorkout={onConfirmWorkout}
+            onOpenFab={onOpenFab}
+            reservedClass={todayReservedClass ?? undefined}
+            activities={TODAY_ACTIVITIES}
+          />
+        ) : pastData?.reservedClass ? (
+          <DailyWorkoutCard reservedClass={pastData.reservedClass} activities={pastData.activities} onOpenFab={onOpenFab} />
+        ) : isFutureDay ? (
+          selectedDate.getDay() === 4
+            ? <DailyWorkoutCard onOpenFab={onOpenFab} showMorning={false} showAfternoon={true} />
+            : <DailyWorkoutCard onReservar={onReservar} onConfirmWorkout={onConfirmWorkout} onOpenFab={onOpenFab} showMorning={true} showAfternoon={false} />
+        ) : (
+          <div className="bg-[rgba(255,255,255,0.5)] rounded-[8px] p-[20px] flex items-center justify-center min-h-[120px]">
+            <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[#a3a3a3] text-[15px] tracking-[-0.3px] text-center">
+              Sin actividad registrada
+            </p>
+          </div>
+        )}
       </div>
 
-      <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] [word-break:break-word] font-['MessinaSansWeb:Bold',sans-serif] leading-[normal] not-italic text-[#3d3d3d] text-[18px] tracking-[-0.45px] whitespace-nowrap w-full max-w-[388px]">
-        Llegá mejor preparado a la cancha
-      </p>
+      {/* Thursday rest-day pill — future days only */}
+      {isFutureDay && selectedDate.getDay() === 4 && (
+        <div className="w-full max-w-[388px] flex items-center gap-[10px] backdrop-blur-sm bg-[#6ab5ff]/15 border border-[#6ab5ff]/30 rounded-full px-[16px] py-[10px]">
+          <Moon size={15} className="text-[#4a90d9] shrink-0" />
+          <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[#4a6fa5] text-[13px] tracking-[-0.26px]">
+            Día de descanso recomendado
+          </p>
+        </div>
+      )}
+
+      {/* ── Today-only: Recommendations carousel ── */}
+      {isToday && (
+        <>
+          <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] [word-break:break-word] font-['MessinaSansWeb:Bold',sans-serif] leading-[normal] not-italic text-[#3d3d3d] text-[18px] tracking-[-0.45px] w-full max-w-[388px]">
+            Recomendaciones basadas en tus hábitos
+          </p>
+          <div className="w-full max-w-[388px]">
+            <RecommendationsCarousel />
+          </div>
+        </>
+      )}
+
+      {/* ── Common sections — all days ── */}
       <div className="w-full max-w-[388px]">
-        <Frame42 />
+        <ActivityContainer />
       </div>
       <div className="w-full max-w-[388px]">
         <Group17 />
@@ -1050,12 +1245,10 @@ function MainContent({ onReservar }: { onReservar: () => void }) {
         <Frame41 />
       </div>
       <div className="w-full max-w-[388px]">
-        <ActivityContainer />
-      </div>
-      <div className="w-full max-w-[388px]">
         <MembershipContainer />
       </div>
-      <div className="w-full max-w-[388px]">
+      {/* TODO: re-enable Mejorá tu performance block */}
+      <div className="hidden w-full max-w-[388px]">
         <PerformanceContainer />
       </div>
       <div className="w-full max-w-[388px]">
@@ -1069,11 +1262,8 @@ function MainContent({ onReservar }: { onReservar: () => void }) {
 
 function Frame43() {
   return (
-    <div className="content-stretch flex gap-[10px] items-center relative shrink-0 w-[185.804px]">
-      <div className="relative shrink-0 size-[38px]">
-        <img alt="" className="absolute block inset-0 max-w-none size-full" height="38" src={imgEllipse167} width="38" />
-      </div>
-      <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] [word-break:break-word] font-['MessinaSansWeb:Bold',sans-serif] leading-[normal] not-italic relative shrink-0 text-[#565656] text-[16px] tracking-[-0.4px] whitespace-nowrap">Hola Mateo!</p>
+    <div className="relative shrink-0 size-[38px]">
+      <img alt="" className="absolute block inset-0 max-w-none size-full" height="38" src={imgEllipse167} width="38" />
     </div>
   );
 }
@@ -1143,161 +1333,131 @@ function Frame14() {
   return (
     <div className="content-stretch flex items-center justify-between relative shrink-0 w-full">
       <Frame43 />
-      <Frame5 />
-    </div>
-  );
-}
-
-function Frame45() {
-  return (
-    <div className="h-[3.232px] relative shrink-0 w-[9.464px]">
-      <svg className="absolute block inset-0 size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 9.46387 3.23193">
-        <g id="Frame 1171276483">
-          <circle cx="1.61597" cy="1.61597" fill="#1EA05A" id="Ellipse 307" r="1.61597" />
-          <circle cx="7.8479" cy="1.61597" fill="#F8B32E" id="Ellipse 308" r="1.61597" />
-        </g>
-      </svg>
-    </div>
-  );
-}
-
-function Frame17() {
-  return (
-    <div className="content-stretch flex flex-col gap-[5px] items-center justify-center relative shrink-0 w-[25px]">
-      <Frame45 />
-      <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] [word-break:break-word] font-['MessinaSansWeb:Regular',sans-serif] leading-[normal] not-italic relative shrink-0 text-[#565656] text-[13px] tracking-[-0.325px] whitespace-nowrap">Lun</p>
-      <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] [word-break:break-word] font-['MessinaSansWeb:Bold',sans-serif] leading-[normal] not-italic relative shrink-0 text-[#565656] text-[16px] tracking-[-0.4px] whitespace-nowrap">1</p>
-    </div>
-  );
-}
-
-function Frame18() {
-  return (
-    <div className="content-stretch flex flex-col gap-[5px] items-center justify-center relative shrink-0 w-[25px]">
-      <div className="relative shrink-0 size-[3.232px]">
-        <svg className="absolute block inset-0 size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 3.23193 3.23193">
-          <circle cx="1.61597" cy="1.61597" fill="#A3A3A3" id="Ellipse 307" r="1.61597" />
-        </svg>
+      <div className="flex items-center justify-between gap-[16px] flex-1 pl-[12px]">
+        <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] font-['MessinaSansWeb:Bold',sans-serif] leading-[normal] not-italic text-[#565656] text-[16px] tracking-[-0.4px] whitespace-nowrap">Hola Mateo!</p>
+        <Frame5 />
       </div>
-      <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] [word-break:break-word] font-['MessinaSansWeb:Regular',sans-serif] leading-[normal] not-italic relative shrink-0 text-[#565656] text-[13px] tracking-[-0.325px] whitespace-nowrap">Mar</p>
-      <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] [word-break:break-word] font-['MessinaSansWeb:Bold',sans-serif] leading-[normal] not-italic relative shrink-0 text-[#565656] text-[16px] tracking-[-0.4px] whitespace-nowrap">2</p>
     </div>
   );
 }
 
-function Frame24() {
+// ─── Calendar week helpers ────────────────────────────────────────────────────
+
+const DAY_ABBRS_ES = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+const MONTH_NAMES_ES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+
+function getWeekDays(referenceDay: Date): Date[] {
+  if (!referenceDay) return [];
+  const dow = referenceDay.getDay();
+  const mondayOffset = dow === 0 ? -6 : 1 - dow;
+  const monday = new Date(referenceDay);
+  monday.setDate(referenceDay.getDate() + mondayOffset);
+  monday.setHours(0, 0, 0, 0);
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    return d;
+  });
+}
+
+function isSameDay(a: Date, b: Date): boolean {
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+}
+
+function WeekCalendar({
+  today,
+  selectedDate,
+  onSelectDate,
+}: {
+  today: Date;
+  selectedDate: Date;
+  onSelectDate: (d: Date) => void;
+}) {
+  const weekDays = getWeekDays(today);
+  if (!weekDays.length) return null;
+
   return (
-    <div className="bg-[#d6ff8c] content-stretch flex flex-col gap-[5px] items-center p-[10px] relative rounded-[8px] shrink-0">
-      <div aria-hidden className="absolute border border-[#a3a3a3] border-solid inset-0 pointer-events-none rounded-[8px]" />
-      <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] [word-break:break-word] font-['MessinaSansWeb:Regular',sans-serif] leading-[normal] not-italic relative shrink-0 text-[#565656] text-[13px] tracking-[-0.325px] whitespace-nowrap">Miércoles</p>
-      <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] [word-break:break-word] font-['MessinaSansWeb:Bold',sans-serif] leading-[normal] not-italic relative shrink-0 text-[#565656] text-[16px] tracking-[-0.4px] whitespace-nowrap">3</p>
+    <div className="content-stretch flex items-center justify-between relative shrink-0 w-full">
+      {weekDays.map((day) => {
+        const isToday = isSameDay(day, today);
+        const isFuture = !isToday && day > today;
+        const isSelected = isSameDay(day, selectedDate);
+
+        return (
+          <button
+            key={day.getTime()}
+            onClick={() => onSelectDate(day)}
+            className={[
+              "content-stretch flex flex-col gap-[5px] items-center justify-center relative shrink-0 transition-opacity cursor-pointer active:opacity-70",
+              isFuture && !isSelected ? "opacity-50" : "",
+              isSelected
+                ? "bg-[#d6ff8c] px-[10px] py-[8px] rounded-[8px] border border-solid border-[#a3a3a3]"
+                : "w-[25px]",
+            ].join(" ")}
+          >
+            {/* Activity dots */}
+            {isSelected ? (
+              <div className="h-[3.232px] w-[1px]" />
+            ) : isToday ? (
+              <div className="h-[3.232px] relative shrink-0 w-[9.464px]">
+                <svg className="absolute block inset-0 size-full" fill="none" viewBox="0 0 9.46387 3.23193">
+                  <circle cx="1.61597" cy="1.61597" fill="#1EA05A" r="1.61597" />
+                  <circle cx="7.8479" cy="1.61597" fill="#F8B32E" r="1.61597" />
+                </svg>
+              </div>
+            ) : (
+              <div className="relative shrink-0 size-[3.232px]">
+                <svg className="absolute block inset-0 size-full" fill="none" viewBox="0 0 3.23193 3.23193">
+                  <circle cx="1.61597" cy="1.61597" fill={isFuture ? "#a3a3a3" : "#ADFF19"} r="1.61597" />
+                </svg>
+              </div>
+            )}
+            {/* Day abbreviation */}
+            <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] font-['MessinaSansWeb:Regular',sans-serif] leading-[normal] not-italic relative shrink-0 text-[#565656] text-[13px] tracking-[-0.325px] whitespace-nowrap">
+              {DAY_ABBRS_ES[day.getDay()]}
+            </p>
+            {/* Day number */}
+            <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] font-['MessinaSansWeb:Bold',sans-serif] leading-[normal] not-italic relative shrink-0 text-[#565656] text-[16px] tracking-[-0.4px] whitespace-nowrap">
+              {day.getDate()}
+            </p>
+          </button>
+        );
+      })}
     </div>
   );
 }
 
-function Frame19() {
-  return (
-    <div className="content-stretch flex flex-col items-center justify-center relative shrink-0 w-[54.443px]">
-      <Frame24 />
-    </div>
-  );
-}
 
-function Frame20() {
-  return (
-    <div className="content-stretch flex flex-col gap-[5px] items-center justify-center relative shrink-0 w-[25px]">
-      <div className="relative shrink-0 size-[3.232px]">
-        <svg className="absolute block inset-0 size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 3.23193 3.23193">
-          <circle cx="1.61597" cy="1.61597" fill="#565656" id="Ellipse 307" r="1.61597" />
-        </svg>
-      </div>
-      <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] [word-break:break-word] font-['MessinaSansWeb:Regular',sans-serif] leading-[normal] not-italic relative shrink-0 text-[#565656] text-[13px] tracking-[-0.325px] whitespace-nowrap">Jue</p>
-      <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] [word-break:break-word] font-['MessinaSansWeb:Bold',sans-serif] leading-[normal] not-italic relative shrink-0 text-[#565656] text-[16px] tracking-[-0.4px] whitespace-nowrap">4</p>
-    </div>
-  );
-}
+function StickyHeader({ today, selectedDate, onSelectDate, scrollY }: { today: Date; selectedDate: Date; onSelectDate: (d: Date) => void; scrollY: number }) {
+  const titleRowRef = useRef<HTMLDivElement>(null);
+  const [maxCollapse, setMaxCollapse] = useState(62);
 
-function Frame46() {
-  return (
-    <div className="h-[3.232px] relative shrink-0 w-[15.696px]">
-      <svg className="absolute block inset-0 size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 15.6958 3.23193">
-        <g id="Frame 1171276483">
-          <circle cx="1.61597" cy="1.61597" fill="#1EA05A" id="Ellipse 307" r="1.61597" />
-          <circle cx="7.8479" cy="1.61597" fill="#F8B32E" id="Ellipse 308" r="1.61597" />
-          <circle cx="14.0798" cy="1.61597" fill="#2AB3CC" id="Ellipse 309" r="1.61597" />
-        </g>
-      </svg>
-    </div>
-  );
-}
+  useEffect(() => {
+    if (titleRowRef.current) {
+      // StatusBar is z-50 at y=0–40. StickyHeader has pt-60, so Frame14 starts at header-y=60.
+      // With translation T: Frame14 bottom is at viewport-y = (60 + frameHeight) - T.
+      // Set Frame14 bottom ≤ 38px (just inside the status bar cover) → T = frameHeight + 22.
+      // WeekCalendar then appears at viewport-y = (110 - T) = 88 - frameHeight ≈ 50px.
+      const frameHeight = titleRowRef.current.offsetHeight;
+      setMaxCollapse(frameHeight + 22);
+    }
+  }, []);
 
-function Frame21() {
-  return (
-    <div className="content-stretch flex flex-col gap-[5px] items-center justify-center relative shrink-0 w-[25px]">
-      <Frame46 />
-      <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] [word-break:break-word] font-['MessinaSansWeb:Regular',sans-serif] leading-[normal] not-italic relative shrink-0 text-[#565656] text-[13px] tracking-[-0.325px] whitespace-nowrap">Vie</p>
-      <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] [word-break:break-word] font-['MessinaSansWeb:Bold',sans-serif] leading-[normal] not-italic relative shrink-0 text-[#565656] text-[16px] tracking-[-0.4px] whitespace-nowrap">5</p>
-    </div>
-  );
-}
+  const translateY = Math.min(scrollY, maxCollapse);
 
-function Frame22() {
   return (
-    <div className="content-stretch flex flex-col gap-[5px] items-center justify-center relative shrink-0 w-[25px]">
-      <div className="relative shrink-0 size-[3.232px]">
-        <svg className="absolute block inset-0 size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 3.23193 3.23193">
-          <circle cx="1.61597" cy="1.61597" fill="#565656" id="Ellipse 307" r="1.61597" />
-        </svg>
-      </div>
-      <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] [word-break:break-word] font-['MessinaSansWeb:Regular',sans-serif] leading-[normal] not-italic relative shrink-0 text-[#565656] text-[13px] tracking-[-0.325px] whitespace-nowrap">Sab</p>
-      <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] [word-break:break-word] font-['MessinaSansWeb:Bold',sans-serif] leading-[normal] not-italic relative shrink-0 text-[#565656] text-[16px] tracking-[-0.4px] whitespace-nowrap">6</p>
-    </div>
-  );
-}
-
-function Frame23() {
-  return (
-    <div className="content-stretch flex flex-col gap-[5px] items-center justify-center relative shrink-0 w-[25px]">
-      <div className="relative shrink-0 size-[3.232px]">
-        <svg className="absolute block inset-0 size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 3.23193 3.23193">
-          <circle cx="1.61597" cy="1.61597" fill="#565656" id="Ellipse 307" r="1.61597" />
-        </svg>
-      </div>
-      <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] [word-break:break-word] font-['MessinaSansWeb:Regular',sans-serif] leading-[normal] not-italic relative shrink-0 text-[#565656] text-[13px] tracking-[-0.325px] whitespace-nowrap">Dom</p>
-      <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] [word-break:break-word] font-['MessinaSansWeb:Bold',sans-serif] leading-[normal] not-italic relative shrink-0 text-[#565656] text-[16px] tracking-[-0.4px] whitespace-nowrap">7</p>
-    </div>
-  );
-}
-
-function Frame13() {
-  return (
-    <div className="content-stretch flex h-[41px] items-center justify-between relative shrink-0 w-full">
-      <Frame17 />
-      <Frame18 />
-      <Frame19 />
-      <Frame20 />
-      <Frame21 />
-      <Frame22 />
-      <Frame23 />
-    </div>
-  );
-}
-
-function Frame36() {
-  return (
-    <div className="content-stretch flex flex-col gap-[12px] items-start relative shrink-0 w-full">
-      <Frame14 />
-      <Frame13 />
-    </div>
-  );
-}
-
-function StickyHeader() {
-  return (
-    <div className="fixed backdrop-blur-[2px] bg-[rgba(255,255,255,0.8)] flex justify-center left-0 pb-[20px] pt-[60px] px-[20px] rounded-bl-[20px] rounded-br-[20px] top-0 w-screen z-40">
+    <div
+      className="fixed backdrop-blur-[2px] bg-[rgba(255,255,255,0.8)] flex justify-center left-0 pb-[20px] pt-[60px] px-[20px] rounded-bl-[20px] rounded-br-[20px] top-0 w-screen z-40"
+      style={{ transform: `translateY(-${translateY}px)` }}
+    >
       <div aria-hidden className="absolute border border-[rgba(255,255,255,0.1)] border-solid inset-0 pointer-events-none rounded-bl-[20px] rounded-br-[20px]" />
       <div className="w-full max-w-[388px]">
-        <Frame36 />
+        <div className="content-stretch flex flex-col gap-[12px] items-start relative shrink-0 w-full">
+          <div ref={titleRowRef}>
+            <Frame14 />
+          </div>
+          <WeekCalendar today={today} selectedDate={selectedDate} onSelectDate={onSelectDate} />
+        </div>
       </div>
     </div>
   );
@@ -1307,7 +1467,7 @@ function StickyHeader() {
 
 function StatusBar() {
   return (
-    <div className="fixed top-0 left-0 w-screen h-[40px] z-50 flex items-center justify-between px-[26.88px]">
+    <div className="fixed top-0 left-0 w-screen h-[40px] z-50 flex items-center justify-between px-[26.88px] bg-white">
       <p className="[word-break:break-word] font-['SF_UI_Text:Bold',sans-serif] leading-[18px] not-italic text-[16px] text-black tracking-[-0.96px]">08:34</p>
       <div className="flex items-center gap-[10px]">
         <p className="[word-break:break-word] font-['SF_Compact_Display:Semibold',sans-serif] leading-[normal] not-italic text-[14.238px] text-black w-[19px]">4G</p>
@@ -1367,7 +1527,7 @@ const BOTTOM_TABS: { id: BottomTabId; label: string; Icon: React.ElementType }[]
 
 function BottomNav({ activeTab, onTabChange }: { activeTab: BottomTabId; onTabChange: (id: BottomTabId) => void }) {
   return (
-    <div className="fixed bg-[#ededed] border-[#a3a3a3] border-solid border-t h-[93px] left-0 bottom-0 w-screen z-50 flex justify-center items-start pt-[10px]">
+    <div className="fixed bg-[#ededed] border-[#a3a3a3] border-solid border-t border-b h-[70px] left-0 bottom-0 w-screen z-50 flex justify-center items-start pt-[10px]">
       <div className="flex items-start justify-around w-full max-w-[428px] px-[8px]">
         {BOTTOM_TABS.map(({ id, label, Icon }) => {
           const isActive = activeTab === id;
@@ -1402,9 +1562,31 @@ function BottomNav({ activeTab, onTabChange }: { activeTab: BottomTabId; onTabCh
 export default function BiggDayScreen() {
   const [activeTab, setActiveTab] = useState<BottomTabId>("train");
   const [reservarOpen, setReservarOpen] = useState(false);
+  const [fabOpen, setFabOpen] = useState(false);
+  const [todayReservedClass, setTodayReservedClass] = useState<ReservedClass | null>(null);
+  const [headerScrollY, setHeaderScrollY] = useState(0);
+  const [today] = useState(() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d;
+  });
+  const [selectedDate, setSelectedDate] = useState(today);
+  const isToday = isSameDay(selectedDate, today);
+  const isFutureDay = !isToday && selectedDate > today;
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Reset scroll position when switching away from train tab
+  useEffect(() => {
+    if (activeTab !== "train") setHeaderScrollY(0);
+  }, [activeTab]);
+
+  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    if (activeTab !== "train") return;
+    setHeaderScrollY(e.currentTarget.scrollTop);
+  }, [activeTab]);
 
   return (
-    <div className="bg-[#ededed] relative w-screen h-full overflow-x-hidden overflow-y-auto" data-name="BIGG Day">
+    <div ref={scrollRef} onScroll={handleScroll} className="bg-[#ededed] relative w-screen h-full overflow-x-hidden overflow-y-auto" data-name="BIGG Day">
       {/* Background image */}
       <div className="absolute h-[780.001px] left-0 top-0 w-full" data-name="bg-home 1">
         <img alt="" className="absolute inset-0 max-w-none object-cover opacity-50 pointer-events-none size-full" src={imgBgHome1} />
@@ -1455,7 +1637,15 @@ export default function BiggDayScreen() {
       {/* Tab content */}
       {activeTab === "train" && (
         <div className="pb-[93px]">
-          <MainContent onReservar={() => setReservarOpen(true)} />
+          <MainContent
+            onReservar={() => setReservarOpen(true)}
+            onConfirmWorkout={(data) => setTodayReservedClass(data)}
+            onOpenFab={() => setFabOpen(true)}
+            isToday={isToday}
+            isFutureDay={isFutureDay}
+            selectedDate={selectedDate}
+            todayReservedClass={todayReservedClass}
+          />
         </div>
       )}
       {activeTab === "activity" && <PlaceholderTabContent label="Actividad — próximamente" />}
@@ -1464,17 +1654,29 @@ export default function BiggDayScreen() {
       {activeTab === "perfil" && <PlaceholderTabContent label="Perfil — próximamente" />}
 
       {/* Fixed overlays */}
-      {activeTab === "train" && <StickyHeader />}
+      {activeTab === "train" && <StickyHeader today={today} selectedDate={selectedDate} onSelectDate={setSelectedDate} scrollY={headerScrollY} />}
       <StatusBar />
       <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
+      <FloatingActionButton open={fabOpen} onOpenChange={setFabOpen} />
 
-      {/* Reservar sheet — triggered by any Reservar button */}
+      {/* Reservar sheet — triggered by BIGG Class Reservar button */}
       <BottomSheet
         open={reservarOpen}
         onClose={() => setReservarOpen(false)}
         title="Reservar clase"
       >
-        <ReservarSheet />
+        <ReservarSheet
+          onConfirm={() => {
+            setTodayReservedClass({
+              time: "10:00AM",
+              location: "BIGG Recoleta",
+              classType: "BIGG Class",
+              blocks: ["1. UPPER BODY", "2. STRENGTH", "3. FBA", "4. MIDLINE"],
+              attendeeCount: 26,
+            });
+            setReservarOpen(false);
+          }}
+        />
       </BottomSheet>
     </div>
   );
