@@ -95,6 +95,10 @@ pnpm build      # Production build
 ## Recent Changes
 
 <!-- Add a one-liner per session here, newest first -->
+- **2026-06-03:** "Racha de actividad" rediseñada (antes "Strike de actividad") — número de racha + 🔥, récord, strip semanal data-driven con "hoy", línea motivacional; se eliminó el andamiaje de posiciones absolutas.
+- **2026-06-03:** Fuentes externas — `SourceChip` reusable (Strava / Garmin / Apple Health); proveniencia en el timeline de actividad y en las cards de Sueño (Apple Health) y Pasos (Garmin).
+- **2026-06-03:** Acciones rápidas fijas (Reservar · Coach · Cargar) en el header (`QuickActions` dentro de `StickyHeader`) + bottom sheet de contacto al coach.
+- **2026-06-03:** Home redesign — clase principal como hero con "why" visible, complementos (pasadas/mobility) separados en "Para completar tu día", filtros de espacio (BIGG/Home/Outdoors) eliminados del home (se resuelven en programación).
 - **2026-06-02:** Bottom nav border-bottom added, height reduced 93px → 70px.
 - **2026-06-02:** Floating `+` FAB (green, bottom-right) — global blurred overlay with 3 reservation options, visible on all tabs.
 - **2026-06-01:** `BottomSheet` (reusable vaul shell) + `ReservarSheet` (Figma 22619:3582) — both Reservar buttons open the booking sheet.

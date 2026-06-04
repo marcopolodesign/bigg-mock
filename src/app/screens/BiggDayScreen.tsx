@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
-import { Dumbbell, Activity, Globe, Users, User, Moon, Plus } from "lucide-react";
+import { Dumbbell, Activity, Globe, Users, User, Moon, Plus, CalendarPlus, MessageCircle, CirclePlus, Flame, Check } from "lucide-react";
 import { Drawer } from "vaul";
 import svgPaths from "../../imports/BiggDay/svg-03sgvqmew7";
 import imgBgHome1 from "../../imports/BiggDay/ec32944a87885236431eaada4b00483f53237695.png";
@@ -13,6 +13,8 @@ import imgSocialImage3 from "../../imports/BiggDay/b292cbcf40664006c8d7417ba5e71
 import imgSocialImage4 from "../../imports/BiggDay/c7e91abf0983739fe423cb74e6d1c3b8d494aa30.png";
 import imgEllipse167 from "../../imports/BiggDay/0bdccca1063fe17c8030deb1278cb4c21c493290.png";
 import DailyWorkoutCard, { type ReservedClass, type ActivityEntry } from "../components/DailyWorkoutCard";
+import SourceChip from "../components/SourceChip";
+import WhyLine from "../components/WhyLine";
 import BottomSheet from "../components/BottomSheet";
 import ReservarSheet from "../components/ReservarSheet";
 import FloatingActionButton from "../components/FloatingActionButton";
@@ -25,6 +27,7 @@ const TODAY_ACTIVITIES: ActivityEntry[] = [
     timeRange: "18:00hs — 19:00hs",
     title: "Running pasadas",
     gradient: "linear-gradient(115deg, rgba(255,255,255,0.9) 40%, rgba(173,255,25,0.25) 120%)",
+    why: "Sumás fondo aeróbico sin chocar con tu clase de fuerza de la mañana",
   },
 ];
 
@@ -242,6 +245,9 @@ function SleepCard() {
           <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[rgba(255,255,255,0.55)] text-[11px] leading-[1.4] tracking-[-0.22px] shrink-0">
             Dormite temprano hoy para alcanzar tu objetivo mañana
           </p>
+          <div className="shrink-0 mt-[8px]">
+            <SourceChip source="apple-health" prefix="Datos de" onDark />
+          </div>
         </div>
       </div>
     </div>
@@ -293,6 +299,7 @@ function StepsCard() {
           <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[#585858] text-[11px] leading-[1.4] tracking-[-0.22px] shrink-0">
             Caminá 6.800 pasos más para alcanzar tu objetivo diario
           </p>
+          <SourceChip source="garmin" prefix="Datos de" />
         </div>
       </div>
     </div>
@@ -606,217 +613,102 @@ function Frame41() {
   );
 }
 
-// ─── Activity ─────────────────────────────────────────────────────────────────
+// ─── Activity streak ──────────────────────────────────────────────────────────
 
-function ActivityHeader() {
-  return (
-    <div className="[word-break:break-word] content-stretch flex font-['MessinaSansWeb:Bold',sans-serif] items-center justify-between leading-[normal] not-italic relative shrink-0 text-[#3d3d3d] w-full whitespace-nowrap" data-name="Activity Header">
-      <p className="relative shrink-0 text-[16px] tracking-[-0.48px]">Strike de actividad</p>
-      <p className="relative shrink-0 text-[13px] tracking-[-0.39px]">+ Agregar nueva</p>
-    </div>
-  );
+type StreakState = "done" | "today" | "future";
+
+interface StreakDay {
+  letter: string;
+  state: StreakState;
 }
 
-function Ellipse() {
-  return (
-    <div className="col-1 h-[29.771px] ml-0 mt-0 relative row-1 w-[30.399px]">
-      <div className="absolute inset-[-1.8%_-1.76%]">
-        <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 31.4722 30.8436">
-          <g id="Ellipse 87">
-            <path d={svgPaths.p8517600} id="Vector" stroke="#858585" strokeWidth="1.07282" />
-          </g>
-        </svg>
+// Mock: this week's activity. `today` = pending (not trained yet), `done` =
+// trained, `future` = upcoming. STREAK_COUNT carries across weeks.
+const STREAK_DAYS: StreakDay[] = [
+  { letter: "L", state: "done" },
+  { letter: "M", state: "done" },
+  { letter: "M", state: "today" },
+  { letter: "J", state: "future" },
+  { letter: "V", state: "future" },
+  { letter: "S", state: "future" },
+  { letter: "D", state: "future" },
+];
+
+const STREAK_COUNT = 4;
+const STREAK_RECORD = 9;
+
+function StreakDot({ state }: { state: StreakState }) {
+  if (state === "done") {
+    return (
+      <div className="flex items-center justify-center size-[28px] rounded-full bg-[#adff19]">
+        <Check size={15} strokeWidth={2.5} className="text-[#3d3d3d]" />
       </div>
-    </div>
-  );
-}
-
-function ActivityIcon() {
-  return (
-    <div className="col-1 grid-cols-[max-content] grid-rows-[max-content] inline-grid ml-0 mt-[0.6px] place-items-start relative row-1" data-name="Activity Icon">
-      <Ellipse />
-      <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] [word-break:break-word] col-1 font-['Messina_Sans_Trial:Regular',sans-serif] leading-[normal] ml-[12.2px] mt-[11.89px] not-italic relative row-1 text-[#858585] text-[8.583px] whitespace-nowrap">L</p>
-    </div>
-  );
-}
-
-function Ellipse1() {
-  return (
-    <div className="col-1 h-[30.962px] ml-0 mt-0 relative row-1 w-[31.615px]">
-      <svg className="absolute block inset-0 size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 31.6154 30.9616">
-        <g id="Ellipse 87">
-          <path d={svgPaths.p30144d00} id="Vector" stroke="#858585" strokeWidth="1.07282" />
-        </g>
-      </svg>
-    </div>
-  );
-}
-
-function ActivityIcon1() {
-  return (
-    <div className="col-1 grid-cols-[max-content] grid-rows-[max-content] inline-grid ml-[51.78px] mt-0 place-items-start relative row-1" data-name="Activity Icon">
-      <Ellipse1 />
-      <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] [word-break:break-word] col-1 font-['Messina_Sans_Trial:Regular',sans-serif] leading-[normal] ml-[11.81px] mt-[12.48px] not-italic relative row-1 text-[#858585] text-[8.583px] whitespace-nowrap">M</p>
-    </div>
-  );
-}
-
-function Ellipse2() {
-  return (
-    <div className="col-1 h-[29.771px] ml-0 mt-0 relative row-1 w-[30.399px]">
-      <svg className="absolute block inset-0 size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 30.3994 29.7707">
-        <g id="Ellipse 87">
-          <path d={svgPaths.p3b6698b0} fill="#ADFF19" id="Vector" />
-        </g>
-      </svg>
-    </div>
-  );
-}
-
-function ActivityIcon2() {
-  return (
-    <div className="col-1 grid-cols-[max-content] grid-rows-[max-content] inline-grid ml-[157.15px] mt-[0.6px] place-items-start relative row-1" data-name="Activity Icon">
-      <Ellipse2 />
-      <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] [word-break:break-word] col-1 font-['Messina_Sans_Trial:Bold',sans-serif] leading-[normal] ml-[12.7px] mt-[11.89px] not-italic relative row-1 text-[#565656] text-[8.583px] whitespace-nowrap">J</p>
-    </div>
-  );
-}
-
-function Ellipse3() {
-  return (
-    <div className="col-1 h-[29.771px] ml-0 mt-0 relative row-1 w-[30.399px]">
-      <div className="absolute inset-[-1.8%_-1.76%]">
-        <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 31.4722 30.8436">
-          <g id="Ellipse 87">
-            <path d={svgPaths.p3b54ae70} id="Vector" stroke="#858585" strokeWidth="1.07282" />
-          </g>
-        </svg>
-      </div>
-    </div>
-  );
-}
-
-function ActivityIcon3() {
-  return (
-    <div className="col-1 grid-cols-[max-content] grid-rows-[max-content] inline-grid ml-[314.31px] mt-[0.6px] place-items-start relative row-1" data-name="Activity Icon">
-      <Ellipse3 />
-      <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] [word-break:break-word] col-1 font-['Messina_Sans_Trial:Regular',sans-serif] leading-[normal] ml-[11.7px] mt-[11.89px] not-italic relative row-1 text-[#858585] text-[8.583px] whitespace-nowrap">D</p>
-    </div>
-  );
-}
-
-function Ellipse6() {
-  return (
-    <div className="col-1 h-[29.771px] ml-0 mt-0 relative row-1 w-[30.399px]">
-      <svg className="absolute block inset-0 size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 30.3994 29.7707">
-        <g id="Ellipse 124">
-          <path d={svgPaths.p3b6698b0} fill="#ADFF19" id="Vector" />
-        </g>
-      </svg>
-    </div>
-  );
-}
-
-function ActivityIcon4() {
-  return (
-    <div className="col-1 grid-cols-[max-content] grid-rows-[max-content] inline-grid ml-[261.92px] mt-[0.6px] place-items-start relative row-1" data-name="Activity Icon">
-      <Ellipse6 />
-      <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] [word-break:break-word] col-1 font-['Messina_Sans_Trial:Bold',sans-serif] leading-[normal] ml-[12.2px] mt-[11.89px] not-italic relative row-1 text-[#565656] text-[8.583px] whitespace-nowrap">S</p>
-    </div>
-  );
-}
-
-function Ellipse5() {
-  return (
-    <div className="col-1 h-[29.771px] ml-0 mt-0 relative row-1 w-[30.399px]">
-      <svg className="absolute block inset-0 size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 30.3994 29.7707">
-        <g id="Ellipse 123">
-          <path d={svgPaths.p3b6698b0} fill="#ADFF19" id="Vector" />
-        </g>
-      </svg>
-    </div>
-  );
-}
-
-function ActivityIcon5() {
-  return (
-    <div className="col-1 grid-cols-[max-content] grid-rows-[max-content] inline-grid ml-[209.54px] mt-[0.6px] place-items-start relative row-1" data-name="Activity Icon">
-      <Ellipse5 />
-      <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] [word-break:break-word] col-1 font-['Messina_Sans_Trial:Bold',sans-serif] leading-[normal] ml-[12.2px] mt-[11.89px] not-italic relative row-1 text-[#565656] text-[8.583px] whitespace-nowrap">V</p>
-    </div>
-  );
-}
-
-function RepeatGrid() {
-  return (
-    <div className="col-1 grid-cols-[max-content] grid-rows-[max-content] inline-grid ml-0 mt-0 place-items-start relative row-1" data-name="Repeat Grid 14">
-      <ActivityIcon />
-      <ActivityIcon1 />
-      <ActivityIcon2 />
-      <ActivityIcon3 />
-      <ActivityIcon4 />
-      <ActivityIcon5 />
-    </div>
-  );
-}
-
-function ActivityGrid() {
-  return (
-    <div className="col-1 grid-cols-[max-content] grid-rows-[max-content] inline-grid ml-0 mt-0 place-items-start relative row-1" data-name="Activity Grid">
-      <RepeatGrid />
-    </div>
-  );
-}
-
-function Ellipse4() {
-  return (
-    <div className="col-1 h-[29.771px] ml-[104.77px] mt-[0.6px] relative row-1 w-[30.399px]">
-      <svg className="absolute block inset-0 size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 30.3994 29.7707">
-        <g id="Ellipse 122">
-          <path d={svgPaths.p37f55f80} fill="#ADFF19" id="Vector" />
-        </g>
-      </svg>
-    </div>
-  );
-}
-
-function ActivityContent() {
-  return (
-    <div className="grid-cols-[max-content] grid-rows-[max-content] inline-grid leading-[0] place-items-start relative shrink-0" data-name="Activity Content">
-      <ActivityGrid />
-      <Ellipse4 />
-      <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] [word-break:break-word] col-1 font-['Messina_Sans_Trial:Regular',sans-serif] leading-[normal] ml-[115.97px] mt-[12.48px] not-italic relative row-1 text-[#565656] text-[8.583px] whitespace-nowrap">M</p>
-      <div className="col-1 h-0 ml-[239.33px] mt-[15.48px] relative row-1 w-[22.59px]" data-name="Path 1467">
-        <div className="absolute inset-[-0.5px_0]">
-          <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 22.5902 1">
-            <path d="M0 0.5H22.5902" id="Path 1467" stroke="#ADFF19" />
-          </svg>
-        </div>
-      </div>
-      <div className="col-1 h-0 ml-[187.33px] mt-[15.48px] relative row-1 w-[22.59px]" data-name="Path 1468">
-        <div className="absolute inset-[-0.5px_0]">
-          <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 22.5902 1">
-            <path d="M0 0.5H22.5902" id="Path 1467" stroke="#ADFF19" />
-          </svg>
-        </div>
-      </div>
-      <div className="col-1 h-0 ml-[134.33px] mt-[15.48px] relative row-1 w-[22.59px]" data-name="Path 1469">
-        <div className="absolute inset-[-0.5px_0]">
-          <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 22.5902 1">
-            <path d="M0 0.5H22.5902" id="Path 1467" stroke="#ADFF19" />
-          </svg>
-        </div>
-      </div>
-    </div>
-  );
+    );
+  }
+  if (state === "today") {
+    return <div className="size-[28px] rounded-full border-[2px] border-dashed border-[#3d3d3d]" />;
+  }
+  return <div className="size-[28px] rounded-full border border-solid border-[#c4c4c4]" />;
 }
 
 function ActivityContainer() {
   return (
     <div className="bg-[rgba(255,255,255,0.5)] relative rounded-[8px] shrink-0 w-full" data-name="Activity Container">
-      <div className="content-stretch flex flex-col gap-[20px] items-start p-[20px] relative size-full">
-        <ActivityHeader />
-        <ActivityContent />
+      <div className="flex flex-col gap-[16px] items-start p-[20px] w-full">
+
+        {/* Header */}
+        <div className="flex items-center justify-between w-full">
+          <p className="font-['MessinaSansWeb:Bold',sans-serif] text-[#3d3d3d] text-[16px] tracking-[-0.48px] whitespace-nowrap">
+            Racha de actividad
+          </p>
+          <p className="font-['MessinaSansWeb:Bold',sans-serif] text-[#3d3d3d] text-[13px] tracking-[-0.39px] whitespace-nowrap">
+            + Agregar nueva
+          </p>
+        </div>
+
+        {/* Big streak count + record */}
+        <div className="flex items-end justify-between w-full">
+          <div className="flex items-end gap-[10px]">
+            <Flame size={30} strokeWidth={2} className="text-[#adff19] fill-[#adff19] shrink-0 mb-[2px]" />
+            <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] font-['Druk_Wide:Medium',sans-serif] text-[40px] text-[#3d3d3d] leading-[0.9] tracking-[-2px]">
+              {STREAK_COUNT}
+            </p>
+            <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[#585858] text-[15px] tracking-[-0.3px] pb-[5px]">
+              días seguidos
+            </p>
+          </div>
+          <div className="bg-[#ededed] px-[10px] py-[4px] rounded-full shrink-0">
+            <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[#858585] text-[11px] tracking-[-0.22px] whitespace-nowrap">
+              Récord: {STREAK_RECORD} días
+            </p>
+          </div>
+        </div>
+
+        {/* Week strip — data-driven, with connectors between consecutive done days */}
+        <div className="flex items-start w-full">
+          {STREAK_DAYS.map((d, i) => (
+            <React.Fragment key={i}>
+              {i > 0 && (
+                <div
+                  className="flex-1 h-[2px] mt-[13px] rounded-full"
+                  style={{ background: STREAK_DAYS[i - 1].state === "done" && d.state === "done" ? "#adff19" : "#d4d4d4" }}
+                />
+              )}
+              <div className="flex flex-col items-center gap-[6px] shrink-0 w-[28px]">
+                <StreakDot state={d.state} />
+                <span className={`font-['MessinaSansWeb:Regular',sans-serif] text-[11px] tracking-[-0.22px] ${d.state === "future" ? "text-[#a3a3a3]" : "text-[#565656]"}`}>
+                  {d.letter}
+                </span>
+              </div>
+            </React.Fragment>
+          ))}
+        </div>
+
+        {/* Motivational why */}
+        <WhyLine>
+          Llevás {STREAK_COUNT} días seguidos. Entrená hoy para no cortar la racha.
+        </WhyLine>
+
       </div>
     </div>
   );
@@ -1180,19 +1072,19 @@ function SocialContainer() {
 
 // ─── Main scroll content ───────────────────────────────────────────────────────
 
-function MainContent({ onReservar, onConfirmWorkout, onOpenFab, isToday, isFutureDay, selectedDate, todayReservedClass }: { onReservar: () => void; onConfirmWorkout: (data: ReservedClass) => void; onOpenFab: () => void; isToday: boolean; isFutureDay: boolean; selectedDate: Date; todayReservedClass: ReservedClass | null }) {
+function MainContent({ onReservar, onOpenFab, isToday, isFutureDay, selectedDate, todayReservedClass }: { onReservar: () => void; onOpenFab: () => void; isToday: boolean; isFutureDay: boolean; selectedDate: Date; todayReservedClass: ReservedClass | null }) {
   const dateKey = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}`;
   const pastData = isToday ? undefined : PAST_DAYS[dateKey];
 
   return (
-    <div className="flex flex-col gap-[16px] items-center w-full px-[20px] pt-[197px]">
+    // pt clears the fixed StickyHeader (greeting + week calendar + quick actions ≈ 253px)
+    <div className="flex flex-col gap-[16px] items-center w-full px-[20px] pt-[253px]">
 
       {/* ── Timeline ── */}
       <div className="w-full max-w-[388px] mb-[24px]">
         {isToday ? (
           <DailyWorkoutCard
             onReservar={onReservar}
-            onConfirmWorkout={onConfirmWorkout}
             onOpenFab={onOpenFab}
             reservedClass={todayReservedClass ?? undefined}
             activities={TODAY_ACTIVITIES}
@@ -1202,7 +1094,7 @@ function MainContent({ onReservar, onConfirmWorkout, onOpenFab, isToday, isFutur
         ) : isFutureDay ? (
           selectedDate.getDay() === 4
             ? <DailyWorkoutCard onOpenFab={onOpenFab} showMorning={false} showAfternoon={true} />
-            : <DailyWorkoutCard onReservar={onReservar} onConfirmWorkout={onConfirmWorkout} onOpenFab={onOpenFab} showMorning={true} showAfternoon={false} />
+            : <DailyWorkoutCard onReservar={onReservar} onOpenFab={onOpenFab} showMorning={true} showAfternoon={false} />
         ) : (
           <div className="bg-[rgba(255,255,255,0.5)] rounded-[8px] p-[20px] flex items-center justify-center min-h-[120px]">
             <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[#a3a3a3] text-[15px] tracking-[-0.3px] text-center">
@@ -1428,7 +1320,36 @@ function WeekCalendar({
 }
 
 
-function StickyHeader({ today, selectedDate, onSelectDate, scrollY }: { today: Date; selectedDate: Date; onSelectDate: (d: Date) => void; scrollY: number }) {
+// ─── Quick actions (fixed in header) ──────────────────────────────────────────
+
+const QUICK_ACTIONS = [
+  { id: "reservar", label: "Reservar", Icon: CalendarPlus },
+  { id: "coach", label: "Coach", Icon: MessageCircle },
+  { id: "actividad", label: "Cargar", Icon: CirclePlus },
+] as const;
+
+function QuickActions({ onReservar, onContactCoach, onOpenFab }: { onReservar: () => void; onContactCoach: () => void; onOpenFab: () => void }) {
+  const handlers: Record<string, () => void> = { reservar: onReservar, coach: onContactCoach, actividad: onOpenFab };
+
+  return (
+    <div className="flex items-stretch gap-[8px] w-full">
+      {QUICK_ACTIONS.map(({ id, label, Icon }) => (
+        <button
+          key={id}
+          onClick={handlers[id]}
+          className="flex-1 flex items-center justify-center gap-[7px] bg-white border border-[#a3a3a3] border-solid rounded-[12px] py-[10px] px-[8px] active:opacity-70 transition-opacity"
+        >
+          <Icon size={17} strokeWidth={1.75} className="text-[#3d3d3d] shrink-0" />
+          <span className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[#3d3d3d] text-[13px] tracking-[-0.26px] whitespace-nowrap">
+            {label}
+          </span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function StickyHeader({ today, selectedDate, onSelectDate, scrollY, onReservar, onContactCoach, onOpenFab }: { today: Date; selectedDate: Date; onSelectDate: (d: Date) => void; scrollY: number; onReservar: () => void; onContactCoach: () => void; onOpenFab: () => void }) {
   const titleRowRef = useRef<HTMLDivElement>(null);
   const [maxCollapse, setMaxCollapse] = useState(62);
 
@@ -1457,6 +1378,7 @@ function StickyHeader({ today, selectedDate, onSelectDate, scrollY }: { today: D
             <Frame14 />
           </div>
           <WeekCalendar today={today} selectedDate={selectedDate} onSelectDate={onSelectDate} />
+          <QuickActions onReservar={onReservar} onContactCoach={onContactCoach} onOpenFab={onOpenFab} />
         </div>
       </div>
     </div>
@@ -1562,6 +1484,7 @@ function BottomNav({ activeTab, onTabChange }: { activeTab: BottomTabId; onTabCh
 export default function BiggDayScreen() {
   const [activeTab, setActiveTab] = useState<BottomTabId>("train");
   const [reservarOpen, setReservarOpen] = useState(false);
+  const [coachOpen, setCoachOpen] = useState(false);
   const [fabOpen, setFabOpen] = useState(false);
   const [todayReservedClass, setTodayReservedClass] = useState<ReservedClass | null>(null);
   const [headerScrollY, setHeaderScrollY] = useState(0);
@@ -1639,7 +1562,6 @@ export default function BiggDayScreen() {
         <div className="pb-[93px]">
           <MainContent
             onReservar={() => setReservarOpen(true)}
-            onConfirmWorkout={(data) => setTodayReservedClass(data)}
             onOpenFab={() => setFabOpen(true)}
             isToday={isToday}
             isFutureDay={isFutureDay}
@@ -1654,7 +1576,7 @@ export default function BiggDayScreen() {
       {activeTab === "perfil" && <PlaceholderTabContent label="Perfil — próximamente" />}
 
       {/* Fixed overlays */}
-      {activeTab === "train" && <StickyHeader today={today} selectedDate={selectedDate} onSelectDate={setSelectedDate} scrollY={headerScrollY} />}
+      {activeTab === "train" && <StickyHeader today={today} selectedDate={selectedDate} onSelectDate={setSelectedDate} scrollY={headerScrollY} onReservar={() => setReservarOpen(true)} onContactCoach={() => setCoachOpen(true)} onOpenFab={() => setFabOpen(true)} />}
       <StatusBar />
       <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
       <FloatingActionButton open={fabOpen} onOpenChange={setFabOpen} />
@@ -1677,6 +1599,25 @@ export default function BiggDayScreen() {
             setReservarOpen(false);
           }}
         />
+      </BottomSheet>
+
+      {/* Contactar coach sheet — triggered by the fixed Coach quick action */}
+      <BottomSheet open={coachOpen} onClose={() => setCoachOpen(false)} title="Contactar coach">
+        <div className="flex flex-col gap-[20px] px-[24px] pb-[40px] pt-[8px]">
+          <div className="flex items-center gap-[14px]">
+            <img alt="" className="size-[52px] rounded-full object-cover" src={imgEllipse167} />
+            <div className="flex flex-col gap-[2px]">
+              <p className="font-['MessinaSansWeb:Bold',sans-serif] text-[#3d3d3d] text-[17px] tracking-[-0.4px]">Juan Pérez</p>
+              <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[#a3a3a3] text-[13px] tracking-[-0.26px]">Tu coach en BIGG Recoleta</p>
+            </div>
+          </div>
+          <button className="w-full bg-[#adff19] rounded-[14px] py-[15px] flex items-center justify-center active:opacity-80 transition-opacity">
+            <span className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[#3d3d3d] text-[15px] tracking-[-0.3px]">Enviar mensaje</span>
+          </button>
+          <button className="w-full bg-white border border-[#a3a3a3] border-solid rounded-[14px] py-[15px] flex items-center justify-center active:opacity-70 transition-opacity">
+            <span className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[#3d3d3d] text-[15px] tracking-[-0.3px]">Agendar sesión 1:1</span>
+          </button>
+        </div>
       </BottomSheet>
     </div>
   );

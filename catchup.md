@@ -4,6 +4,64 @@
 
 ---
 
+## 2026-06-03 — Rediseño "Racha de actividad" (antes "Strike de actividad")
+
+Se reescribió por completo el bloque de streak en `BiggDayScreen` (`ActivityContainer`). Antes: fila de 7 círculos con posiciones absolutas hardcodeadas (`ml-[157.15px]`, etc.) y un componente por día (frágil, no data-driven, sin número de racha). Ahora:
+- **Número de racha grande** (Druk Wide 40px) + icono `Flame` + chip "Récord: 9 días".
+- **Copy en español:** "Racha de actividad" (antes "Strike de actividad", que no era español correcto).
+- **Strip semanal data-driven:** mapea `STREAK_DAYS` (estado `done` / `today` / `future`) en un `flex`; días cumplidos en lime con check, conectados por línea lime entre días consecutivos; "hoy" marcado con anillo punteado; futuros en gris.
+- **Línea motivacional** con el mismo lenguaje *why* (cyan + `Sparkles`): "Llevás N días seguidos. Entrená hoy para no cortar la racha."
+- Se eliminaron las funciones `Ellipse*` / `ActivityIcon*` / `RepeatGrid` / `ActivityGrid` / `ActivityContent` (todo el andamiaje de posiciones absolutas). Nuevo helper `StreakDot` + tipo `StreakState`.
+
+Resultado visible: card de racha legible, motivadora y mantenible. Datos mock (`STREAK_COUNT=4`, `STREAK_RECORD=9`) fáciles de ajustar. Verificado en Chrome 390×844.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-03 — Fuentes externas: SourceChip (Strava / Garmin / Apple Health)
+
+Nuevo componente reusable `src/app/components/SourceChip.tsx` para mostrar la proveniencia de datos importados de fuentes externas. Soporta `strava` / `garmin` / `apple-health` (label + color por fuente vía `SOURCE_META`), con `prefix` opcional ("Tomado desde" / "Datos de") y variante `onDark` para cards de fondo oscuro.
+
+Aplicado en:
+- **Timeline de actividad** (`ActivityCard` en `DailyWorkoutCard`): el tipo `ActivityEntry.source` se generalizó de `"strava"` a `DataSource`; el badge hardcodeado de Strava se reemplazó por `<SourceChip prefix="Tomado desde" />`. La actividad "Running" de días pasados sigue mostrando "Tomado desde Strava".
+- **Card de Sueño** (`SleepCard`): chip "Datos de Apple Health" (variante `onDark`, sobre el fondo navy).
+- **Card de Pasos** (`StepsCard`): chip "Datos de Garmin".
+
+Resultado visible: las recomendaciones basadas en hábitos (sueño, pasos) ahora declaran de qué fuente externa salen sus datos, y el timeline de actividad usa el mismo lenguaje de proveniencia para cualquier fuente. Verificado en Chrome 390×844 (sueño, pasos y badge de Strava en día pasado).
+
+Pendiente: conectar los datos reales de estas fuentes (hoy son mock) y un flujo de "conectar apps".
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-03 — Acciones rápidas fijas en el header (Reservar · Coach · Cargar)
+
+Nuevo componente `QuickActions` en `BiggDayScreen`: barra de 3 acciones (Reservar / Coach / Cargar) con icono + label, renderizada dentro del `StickyHeader` debajo del `WeekCalendar`, así queda **fija** y siempre visible (al colapsar el header en scroll se oculta solo el saludo; calendario + acciones permanecen). Wiring: Reservar → `ReservarSheet`, Coach → nuevo bottom sheet de contacto (`coachOpen` state, avatar + "Enviar mensaje" + "Agendar sesión 1:1"), Cargar → overlay del FAB. Iconos lucide `CalendarPlus` / `MessageCircle` / `CirclePlus`. Se subió el `pt` del `MainContent` 197px → 253px para despejar el header más alto.
+
+Resultado visible: acceso permanente a las 3 acciones clave desde cualquier punto del scroll del home. Verificado en Chrome 390×844 (estado normal, colapso en scroll, y apertura del sheet de Coach).
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-03 — Home redesign: clase como hero + complementos separados + "why" visible
+
+Rediseño del home alineado a la reunión (recomendaciones diarias). En `DailyWorkoutCard` (vista no-reservada):
+- **Filtros de espacio eliminados:** se quitó el tab switcher BIGG Class / Home/Gym / Outdoors (más sus iconos, `TABS`, `TabId`, `buildReservedClass` y el import de `svgPaths`). El home recomienda *qué* entrenar; el lugar se resuelve después en programación/reserva. La clase queda fija como BIGG Class (`MORNING_CLASS`).
+- **Hero:** la clase pasa a ser la recomendación principal bajo el header "Tu entrenamiento de hoy / Tu recomendación principal" — título Druk Wide 32px + banda de *why* siempre visible + CTA "Reservar clase".
+- **Complementos separados:** pasadas + Mobility se movieron a una sección aparte "Para completar tu día", en su propio timeline secundario debajo del hero.
+- **"Why" en todas las recomendaciones:** se agregó `why` a `ClassData` y campo opcional `why` a `ActivityEntry` (render con icono `Sparkles` en cyan `#2ab3cc`, unificando el lenguaje del "porqué" que ya usaba el card de Mobility). La pasada de `TODAY_ACTIVITIES` ahora incluye su `why`.
+
+Resultado visible: el home prioriza visualmente el entrenamiento del día con su justificación, y los complementos (movilidad, descanso, actividades) quedan subordinados y separados. Verificado en Chrome a 390×844.
+
+Pendiente (próximas slices): acciones rápidas fijas (Reservar · Contactar coach · Cargar actividad), integración de fuentes externas (Strava/Garmin/Apple-Android Health) en el timeline y en las justificaciones.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
 ## 2026-06-02 — "Running pasadas" afternoon block for today
 
 Added `TODAY_ACTIVITIES` constant in `BiggDayScreen` with a "Running pasadas" entry (18:00hs–19:00hs, lime-green gradient). Passed to today's `DailyWorkoutCard` via the `activities` prop. Extended `DailyWorkoutCard`'s non-reserved render path to display `activities` entries before the Mobility & recovery block (so activities appear in chronological order: morning workout → activities → afternoon recommendation → Agregar).

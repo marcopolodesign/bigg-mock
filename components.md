@@ -69,19 +69,13 @@ All components from the shadcn/ui library are present. Key ones in active use:
 
 ### `DailyWorkoutCard`
 **File:** `src/app/components/DailyWorkoutCard.tsx`
-**Props:** `onReservar?: () => void` — called by both the "+Reservar Clase" header link and the lime "Reservar" card button
-**State:** `activeTab: 'bigg-class' | 'home-gym' | 'outdoors'` — defaults to `'bigg-class'`
-**Renders:** Section header ("Tu BIGG day recomendado" + "+Reservar Clase" link) + a two-layer card:
-  - **Tab selector** (glassmorphism pill, white→lime gradient): 3 clickable tabs with icons. Active tab = full opacity + SemiBold + underline. Inactive = 30% opacity.
-  - **Content area** (white→grey gradient): Druk_Wide title, two info chips, lime `#deffa3` "Reservar" CTA button, decorative rotated white diamond.
-**Behavior:** Clicking a tab updates `activeTab`, swapping the title and chips. Transition: `opacity duration-200` on tab buttons.
-**Mock data per tab:**
-| Tab | Title | Chips |
-|-----|-------|-------|
-| BIGG Class | BIGG Class | 10:00AM, BIGG Recoleta |
-| Home/Gym | Home / Gym | Flexible, En casa |
-| Outdoors | Outdoors | 07:30AM, Palermo |
-**Icons:** SVG paths from `src/imports/BiggDay/svg-03sgvqmew7` (`p23dee300`, `p1fab3c00`, `pbbc2500`). Reservar icon: `p2b363c00`.
+**Props:** `onReservar?`, `onConfirmWorkout?`, `onOpenFab?`, `reservedClass?`, `activities?: ActivityEntry[]`, `showMorning?`, `showAfternoon?`
+**Layout (recommended/non-reserved view):** two stacked sections, no space filters.
+  - **Hero — "Tu entrenamiento de hoy" / "Tu recomendación principal":** the day's main class as the visual anchor. White→grey gradient card with Druk_Wide 32px title (`MORNING_CLASS`), info chips, an always-visible *why* band (`Sparkles` + cyan `#2ab3cc` text), and the lime `#adff19` "Reservar clase" CTA tucked under the card.
+  - **Complements — "Para completar tu día":** secondary recommendations (`activities` + the Mobility/`AfternoonRecommendationCard`) in their own timeline (vertical line + time pills), subordinate to the hero.
+**The "why":** every recommendation shows a justification. `ClassData.why` for the hero class; `ActivityEntry.why?` (optional) for activities; the Mobility card has its own cooldown rationale. All rendered with `Sparkles` in cyan `#2ab3cc` — the unified "why" language across the app.
+**Reserved view:** when `reservedClass` is set, fades into a timeline with `ReservedClassCard` (blocks + attendee avatars) followed by any `activities` and the Agregar button.
+**Note:** the space-selection tabs (BIGG Class / Home/Gym / Outdoors) were removed — the home recommends *what* to train; the location is resolved later in the programming/reservation screen.
 
 ---
 
@@ -96,6 +90,31 @@ All components from the shadcn/ui library are present. Key ones in active use:
   - **Train** — full main content (DailyWorkoutCard + Padel + BIGG MOVE + Action buttons + Activity + Membership + Performance + Referral). StickyHeader (calendar/date strip) only shown on this tab.
   - **Activity / BIGG World / Perfil** — placeholder screens ("próximamente")
   - **Community** — `CommunityTabContent` wrapping `SocialContainer` (IG component: @BIGG.fit, social images, hashtags)
-**Currently interactive:** `DailyWorkoutCard` (Daily Workout section), `BottomNav` (tab switching)
+**Currently interactive:** `DailyWorkoutCard` (Daily Workout section), `BottomNav` (tab switching), `QuickActions` (fixed header actions)
+**Header:** `StickyHeader` (Train tab only) = greeting (`Frame14`) + `WeekCalendar` + `QuickActions`. Collapses on scroll by translating up by the greeting's height (greeting tucks behind the status bar; calendar + quick actions stay visible/fixed).
+
+### `ActivityContainer` (Racha de actividad)
+**Defined in:** `src/app/screens/BiggDayScreen.tsx`
+**Purpose:** Activity-streak card (renamed from "Strike de actividad" → "Racha de actividad"). Shows the streak count (Druk Wide + `Flame`), a record chip, a data-driven 7-day strip, and a motivational "why" line.
+**Data:** `STREAK_DAYS: { letter, state: "done" | "today" | "future" }[]`, plus `STREAK_COUNT` / `STREAK_RECORD` (mock). Strip is a `flex` map with lime connectors between consecutive `done` days; "today" = dashed ring; helper `StreakDot`. No absolute positioning (replaced the old `Ellipse*`/`ActivityIcon*` machinery).
+
+### `QuickActions`
+**Defined in:** `src/app/screens/BiggDayScreen.tsx` (rendered inside `StickyHeader`)
+**Props:** `onReservar: () => void`, `onContactCoach: () => void`, `onOpenFab: () => void`
+**Purpose:** Fixed row of 3 primary quick actions — **Reservar** (→ `ReservarSheet`), **Coach** (→ contact-coach `BottomSheet`: avatar + "Enviar mensaje" + "Agendar sesión 1:1"), **Cargar** (→ FAB overlay). Compact pills (white bg, `#a3a3a3` border, `rounded-12`), icon + label, `flex-1`. Icons: lucide `CalendarPlus` / `MessageCircle` / `CirclePlus`.
+**Note:** `MainContent` uses `pt-[253px]` to clear the header that now includes this row.
+
+### `SourceChip`
+**File:** `src/app/components/SourceChip.tsx`
+**Exports:** default `SourceChip`, `type DataSource = "strava" | "garmin" | "apple-health"`
+**Props:** `source: DataSource`, `prefix?: string` (e.g. "Tomado desde" / "Datos de"), `onDark?: boolean`
+**Purpose:** Provenance chip for data imported from external fitness/health sources. Per-source label + color via internal `SOURCE_META` (Strava `#fc4c02`, Garmin `#007cc3`, Apple Health `#fe375f`). Renders a colored dot + label pill; `onDark` switches to a translucent-white pill for dark backgrounds.
+**Used by:** `ActivityCard` (timeline activities — "Tomado desde …"), `SleepCard` ("Datos de Apple Health", `onDark`), `StepsCard` ("Datos de Garmin").
+
+### `WhyLine`
+**File:** `src/app/components/WhyLine.tsx`
+**Props:** `children: ReactNode`, `iconSize?: number` (default 16)
+**Purpose:** The "why" / AI-recommendation line — `Sparkles` (cyan `#2ab3cc`) + cyan text — used wherever the home explains *why* something is recommended. Centralizes the cyan/type spec.
+**Used by:** hero class why-band + `ActivityCard` + `AfternoonRecommendationCard` (all in `DailyWorkoutCard`), and the `ActivityContainer` streak line in `BiggDayScreen`.
 
 <!-- Add new custom components below as they are created -->
