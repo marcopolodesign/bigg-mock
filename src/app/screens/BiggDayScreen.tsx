@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
-import { Dumbbell, Activity, Globe, Users, User, Moon, Plus, CalendarPlus, MessageCircle, CirclePlus, Flame, Check } from "lucide-react";
+import { Dumbbell, Activity, Globe, Users, User, Moon, Plus, Flame, Check } from "lucide-react";
 import { Drawer } from "vaul";
 import svgPaths from "../../imports/BiggDay/svg-03sgvqmew7";
 import imgBgHome1 from "../../imports/BiggDay/ec32944a87885236431eaada4b00483f53237695.png";
@@ -1077,8 +1077,8 @@ function MainContent({ onReservar, onOpenFab, isToday, isFutureDay, selectedDate
   const pastData = isToday ? undefined : PAST_DAYS[dateKey];
 
   return (
-    // pt clears the fixed StickyHeader (greeting + week calendar + quick actions ≈ 253px)
-    <div className="flex flex-col gap-[16px] items-center w-full px-[20px] pt-[253px]">
+    // pt clears the fixed StickyHeader (greeting + week calendar ≈ 197px)
+    <div className="flex flex-col gap-[16px] items-center w-full px-[20px] pt-[197px]">
 
       {/* ── Timeline ── */}
       <div className="w-full max-w-[388px] mb-[24px]">
@@ -1320,36 +1320,7 @@ function WeekCalendar({
 }
 
 
-// ─── Quick actions (fixed in header) ──────────────────────────────────────────
-
-const QUICK_ACTIONS = [
-  { id: "reservar", label: "Reservar", Icon: CalendarPlus },
-  { id: "coach", label: "Coach", Icon: MessageCircle },
-  { id: "actividad", label: "Cargar", Icon: CirclePlus },
-] as const;
-
-function QuickActions({ onReservar, onContactCoach, onOpenFab }: { onReservar: () => void; onContactCoach: () => void; onOpenFab: () => void }) {
-  const handlers: Record<string, () => void> = { reservar: onReservar, coach: onContactCoach, actividad: onOpenFab };
-
-  return (
-    <div className="flex items-stretch gap-[8px] w-full">
-      {QUICK_ACTIONS.map(({ id, label, Icon }) => (
-        <button
-          key={id}
-          onClick={handlers[id]}
-          className="flex-1 flex items-center justify-center gap-[7px] bg-white border border-[#a3a3a3] border-solid rounded-[12px] py-[10px] px-[8px] active:opacity-70 transition-opacity"
-        >
-          <Icon size={17} strokeWidth={1.75} className="text-[#3d3d3d] shrink-0" />
-          <span className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[#3d3d3d] text-[13px] tracking-[-0.26px] whitespace-nowrap">
-            {label}
-          </span>
-        </button>
-      ))}
-    </div>
-  );
-}
-
-function StickyHeader({ today, selectedDate, onSelectDate, scrollY, onReservar, onContactCoach, onOpenFab }: { today: Date; selectedDate: Date; onSelectDate: (d: Date) => void; scrollY: number; onReservar: () => void; onContactCoach: () => void; onOpenFab: () => void }) {
+function StickyHeader({ today, selectedDate, onSelectDate, scrollY }: { today: Date; selectedDate: Date; onSelectDate: (d: Date) => void; scrollY: number }) {
   const titleRowRef = useRef<HTMLDivElement>(null);
   const [maxCollapse, setMaxCollapse] = useState(62);
 
@@ -1378,7 +1349,6 @@ function StickyHeader({ today, selectedDate, onSelectDate, scrollY, onReservar, 
             <Frame14 />
           </div>
           <WeekCalendar today={today} selectedDate={selectedDate} onSelectDate={onSelectDate} />
-          <QuickActions onReservar={onReservar} onContactCoach={onContactCoach} onOpenFab={onOpenFab} />
         </div>
       </div>
     </div>
@@ -1484,7 +1454,6 @@ function BottomNav({ activeTab, onTabChange }: { activeTab: BottomTabId; onTabCh
 export default function BiggDayScreen() {
   const [activeTab, setActiveTab] = useState<BottomTabId>("train");
   const [reservarOpen, setReservarOpen] = useState(false);
-  const [coachOpen, setCoachOpen] = useState(false);
   const [fabOpen, setFabOpen] = useState(false);
   const [todayReservedClass, setTodayReservedClass] = useState<ReservedClass | null>(null);
   const [headerScrollY, setHeaderScrollY] = useState(0);
@@ -1576,7 +1545,7 @@ export default function BiggDayScreen() {
       {activeTab === "perfil" && <PlaceholderTabContent label="Perfil — próximamente" />}
 
       {/* Fixed overlays */}
-      {activeTab === "train" && <StickyHeader today={today} selectedDate={selectedDate} onSelectDate={setSelectedDate} scrollY={headerScrollY} onReservar={() => setReservarOpen(true)} onContactCoach={() => setCoachOpen(true)} onOpenFab={() => setFabOpen(true)} />}
+      {activeTab === "train" && <StickyHeader today={today} selectedDate={selectedDate} onSelectDate={setSelectedDate} scrollY={headerScrollY} />}
       <StatusBar />
       <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
       <FloatingActionButton open={fabOpen} onOpenChange={setFabOpen} />
@@ -1601,24 +1570,6 @@ export default function BiggDayScreen() {
         />
       </BottomSheet>
 
-      {/* Contactar coach sheet — triggered by the fixed Coach quick action */}
-      <BottomSheet open={coachOpen} onClose={() => setCoachOpen(false)} title="Contactar coach">
-        <div className="flex flex-col gap-[20px] px-[24px] pb-[40px] pt-[8px]">
-          <div className="flex items-center gap-[14px]">
-            <img alt="" className="size-[52px] rounded-full object-cover" src={imgEllipse167} />
-            <div className="flex flex-col gap-[2px]">
-              <p className="font-['MessinaSansWeb:Bold',sans-serif] text-[#3d3d3d] text-[17px] tracking-[-0.4px]">Juan Pérez</p>
-              <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[#a3a3a3] text-[13px] tracking-[-0.26px]">Tu coach en BIGG Recoleta</p>
-            </div>
-          </div>
-          <button className="w-full bg-[#adff19] rounded-[14px] py-[15px] flex items-center justify-center active:opacity-80 transition-opacity">
-            <span className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[#3d3d3d] text-[15px] tracking-[-0.3px]">Enviar mensaje</span>
-          </button>
-          <button className="w-full bg-white border border-[#a3a3a3] border-solid rounded-[14px] py-[15px] flex items-center justify-center active:opacity-70 transition-opacity">
-            <span className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[#3d3d3d] text-[15px] tracking-[-0.3px]">Agendar sesión 1:1</span>
-          </button>
-        </div>
-      </BottomSheet>
     </div>
   );
 }

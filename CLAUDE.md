@@ -95,6 +95,7 @@ pnpm build      # Production build
 ## Recent Changes
 
 <!-- Add a one-liner per session here, newest first -->
+- **2026-06-04:** Se quitaron las acciones rápidas del header (Reservar/Coach/Cargar) — no pegaban con el header; siguen accesibles desde el hero y el FAB. Header vuelve a saludo + calendario.
 - **2026-06-03:** "Racha de actividad" rediseñada (antes "Strike de actividad") — número de racha + 🔥, récord, strip semanal data-driven con "hoy", línea motivacional; se eliminó el andamiaje de posiciones absolutas.
 - **2026-06-03:** Fuentes externas — `SourceChip` reusable (Strava / Garmin / Apple Health); proveniencia en el timeline de actividad y en las cards de Sueño (Apple Health) y Pasos (Garmin).
 - **2026-06-03:** Acciones rápidas fijas (Reservar · Coach · Cargar) en el header (`QuickActions` dentro de `StickyHeader`) + bottom sheet de contacto al coach.

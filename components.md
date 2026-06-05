@@ -90,19 +90,13 @@ All components from the shadcn/ui library are present. Key ones in active use:
   - **Train** — full main content (DailyWorkoutCard + Padel + BIGG MOVE + Action buttons + Activity + Membership + Performance + Referral). StickyHeader (calendar/date strip) only shown on this tab.
   - **Activity / BIGG World / Perfil** — placeholder screens ("próximamente")
   - **Community** — `CommunityTabContent` wrapping `SocialContainer` (IG component: @BIGG.fit, social images, hashtags)
-**Currently interactive:** `DailyWorkoutCard` (Daily Workout section), `BottomNav` (tab switching), `QuickActions` (fixed header actions)
-**Header:** `StickyHeader` (Train tab only) = greeting (`Frame14`) + `WeekCalendar` + `QuickActions`. Collapses on scroll by translating up by the greeting's height (greeting tucks behind the status bar; calendar + quick actions stay visible/fixed).
+**Currently interactive:** `DailyWorkoutCard` (Daily Workout section), `BottomNav` (tab switching)
+**Header:** `StickyHeader` (Train tab only) = greeting (`Frame14`) + `WeekCalendar`. Collapses on scroll by translating up by the greeting's height (greeting tucks behind the status bar; calendar stays visible).
 
 ### `ActivityContainer` (Racha de actividad)
 **Defined in:** `src/app/screens/BiggDayScreen.tsx`
 **Purpose:** Activity-streak card (renamed from "Strike de actividad" → "Racha de actividad"). Shows the streak count (Druk Wide + `Flame`), a record chip, a data-driven 7-day strip, and a motivational "why" line.
 **Data:** `STREAK_DAYS: { letter, state: "done" | "today" | "future" }[]`, plus `STREAK_COUNT` / `STREAK_RECORD` (mock). Strip is a `flex` map with lime connectors between consecutive `done` days; "today" = dashed ring; helper `StreakDot`. No absolute positioning (replaced the old `Ellipse*`/`ActivityIcon*` machinery).
-
-### `QuickActions`
-**Defined in:** `src/app/screens/BiggDayScreen.tsx` (rendered inside `StickyHeader`)
-**Props:** `onReservar: () => void`, `onContactCoach: () => void`, `onOpenFab: () => void`
-**Purpose:** Fixed row of 3 primary quick actions — **Reservar** (→ `ReservarSheet`), **Coach** (→ contact-coach `BottomSheet`: avatar + "Enviar mensaje" + "Agendar sesión 1:1"), **Cargar** (→ FAB overlay). Compact pills (white bg, `#a3a3a3` border, `rounded-12`), icon + label, `flex-1`. Icons: lucide `CalendarPlus` / `MessageCircle` / `CirclePlus`.
-**Note:** `MainContent` uses `pt-[253px]` to clear the header that now includes this row.
 
 ### `SourceChip`
 **File:** `src/app/components/SourceChip.tsx`

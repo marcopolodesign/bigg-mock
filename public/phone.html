@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BIGG Mock — iPhone preview</title>
+  <style>
+    :root {
+      /* iPhone 14 / 13 logical viewport */
+      --screen-w: 390px;
+      --screen-h: 844px;
+      --bezel: 14px;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      height: 100%;
+    }
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 48px;
+      flex-wrap: wrap;
+      padding: 40px;
+      background: radial-gradient(circle at 50% 0%, #f4f4f5 0%, #d4d4d8 100%);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+    }
+
+    .device {
+      position: relative;
+      width: calc(var(--screen-w) + var(--bezel) * 2);
+      padding: var(--bezel);
+      background: linear-gradient(150deg, #3a3a3c 0%, #1c1c1e 45%, #2c2c2e 100%);
+      border-radius: 56px;
+      box-shadow:
+        0 2px 0 1px rgba(255, 255, 255, 0.12) inset,
+        0 40px 80px -20px rgba(0, 0, 0, 0.45),
+        0 10px 24px -8px rgba(0, 0, 0, 0.3);
+    }
+
+    .screen {
+      position: relative;
+      width: var(--screen-w);
+      height: var(--screen-h);
+      border-radius: 44px;
+      overflow: hidden;
+      background: #000;
+    }
+
+    .screen iframe {
+      width: var(--screen-w);
+      height: var(--screen-h);
+      border: 0;
+      display: block;
+      background: #ededed;
+    }
+
+    /* Dynamic island */
+    .island {
+      position: absolute;
+      top: 11px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 122px;
+      height: 34px;
+      background: #000;
+      border-radius: 20px;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .caption {
+      margin-top: 18px;
+      text-align: center;
+      color: #71717a;
+      font-size: 13px;
+      letter-spacing: -0.2px;
+    }
+
+    .hint {
+      max-width: 240px;
+      color: #52525b;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .hint b { color: #18181b; }
+  </style>
+</head>
+<body>
+  <div>
+    <div class="device">
+      <div class="screen">
+        <div class="island"></div>
+        <iframe src="/" title="BIGG Mock"></iframe>
+      </div>
+    </div>
+    <p class="caption">BIGG Mock · iPhone preview</p>
+  </div>
+
+  <p class="hint">
+    Vista de la app dentro de un marco de iPhone (390×844).<br /><br />
+    Si cambiás algo en el código, refrescá esta página y el <b>iframe</b> recarga la app.
+  </p>
+</body>
+</html>

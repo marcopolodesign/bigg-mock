@@ -4,6 +4,18 @@
 
 ---
 
+## 2026-06-04 — Se quitaron las acciones rápidas (Reservar/Coach/Cargar)
+
+Decisión de diseño: las acciones rápidas no terminaban de pegar con el header. Se probó moverlas al contenido y finalmente se eliminaron por completo. Se removió el componente `QuickActions` + `QUICK_ACTIONS`, el bottom sheet de contacto al coach (`coachOpen` state + sheet), la prop `onContactCoach` de `MainContent`/`StickyHeader`, y los imports lucide `CalendarPlus` / `MessageCircle` / `CirclePlus`. El `StickyHeader` vuelve a ser saludo + calendario, y `MainContent` recupera `pt-[197px]`.
+
+Las acciones siguen accesibles: reservar vía el botón del hero, y "Contactar a Coach" / cargar actividad desde el FAB verde (`FloatingActionButton`, que ya las tenía).
+
+Resultado visible: header más limpio, sin la fila de 3 pills. Verificado con build de producción (el bundle bajó ~3KB).
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
 ## 2026-06-03 — Rediseño "Racha de actividad" (antes "Strike de actividad")
 
 Se reescribió por completo el bloque de streak en `BiggDayScreen` (`ActivityContainer`). Antes: fila de 7 círculos con posiciones absolutas hardcodeadas (`ml-[157.15px]`, etc.) y un componente por día (frágil, no data-driven, sin número de racha). Ahora:
