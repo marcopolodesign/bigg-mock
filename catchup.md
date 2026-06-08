@@ -4,6 +4,14 @@
 
 ---
 
+## 2026-06-08 — BlockCard rediseñado para matchear el bloque de Pádel
+
+`BlockCard` en `ProgrammingSection` refactorizado para replicar el layout de `WorkoutCard` (Pádel): columna izquierda (título Druk Wide + badge de modalidad + lista de movimientos) y columna derecha con el mismo SVG decorativo del reloj (`svgPaths` importado de `BiggDay`). Se eliminó el pill de duración del footer. Se removió el badge de "BLOQUE X" del card (el row label de arriba ya lo indica). Se limpiaron las props `rowLabel` e `isWarmup` de `BlockCard` que quedaron sin uso.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
 ## 2026-06-05 — Racha de actividad real-time + días de entrenamiento del onboarding
 
 `ActivityContainer` y la lógica de racha rediseñados para ser completamente reactivos a la fecha real. Se eliminaron los datos estáticos (`STREAK_DAYS`, `STREAK_COUNT`); reemplazados por `buildWeekStrip()` que computa el strip semanal desde `new Date()`. Se agregó `ONBOARDING_TRAINING_DAYS` (días elegidos en onboarding, actualmente L–S). Nuevos estados de punto: `done` (verde lleno), `today-training` (dashed negro — V hoy), `scheduled` (dashed lime — días futuros del onboarding), `past-rest` y `future-rest` (grises). El contador de racha calcula días consecutivos entrenados hacia atrás, ignorando los días de descanso. Se agregaron entradas a `PAST_DAYS` para 02–04 Jun para completar la racha de 4 días (L–J). Línea motivacional dinámica según si hoy es día de entreno o descanso.

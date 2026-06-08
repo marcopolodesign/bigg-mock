@@ -95,6 +95,7 @@ pnpm build      # Production build
 ## Recent Changes
 
 <!-- Add a one-liner per session here, newest first -->
+- **2026-06-08:** `BlockCard` rediseñado para matchear Pádel — layout columna izq (Druk title + badge modalidad + movimientos) + columna der (SVG reloj de `svgPaths`). Removido pill de duración y badge "BLOQUE X" del card.
 - **2026-06-05:** Racha de actividad real-time — `buildWeekStrip()` desde `new Date()`; `ONBOARDING_TRAINING_DAYS` muestra dashed-lime en días futuros programados; V (hoy) con ring negro punteado; racha y texto motivacional dinámicos.
 - **2026-06-05:** Timeline unificado — se eliminó "Para completar tu día"; un solo timeline (10AM BIGG Class → 18:00hs Running pasadas → Afternoon Mobility); `WhyLine` estandarizado inline en todas las cards.
 - **2026-06-08:** `ProgrammingScreen` — pantalla completa slide-in (spring) desde FAB → "Ver programación"; back arrow regresa al home. Sin warmup, 4 bloques, tap-to-select lime-green + CTA "Agregar".

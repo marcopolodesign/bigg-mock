@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback } from "react";
 import { motion } from "motion/react";
+import svgPaths from "../../imports/BiggDay/svg-03sgvqmew7";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -120,14 +121,10 @@ const PROGRAMMING_ROWS: ProgrammingRow[] = [
 
 function BlockCard({
   block,
-  rowLabel,
-  isWarmup,
   selected,
   onSelect,
 }: {
   block: StimulusBlock;
-  rowLabel: string;
-  isWarmup?: boolean;
   selected: boolean;
   onSelect: () => void;
 }) {
@@ -154,30 +151,9 @@ function BlockCard({
         transition: { type: "spring", stiffness: 300, damping: 20 },
       }}
     >
-      {/* Header badges (top-left absolute row, like HeadersBlock) */}
-      <div className="absolute top-[10px] left-[14px] flex items-center gap-[6px] z-10">
-        <div
-          className="flex items-center h-[20px] px-[10px] rounded-[3px]"
-          style={{
-            backgroundColor: selected
-              ? "rgba(0,0,0,0.25)"
-              : isWarmup
-              ? "#ff5040"
-              : "white",
-            boxShadow: "0 2px 5px rgba(0,0,0,0.18)",
-          }}
-        >
-          <p
-            className="font-['MessinaSansWeb:Bold',sans-serif] text-[9px] tracking-[-0.09px] uppercase leading-none"
-            style={{
-              color: selected ? "white" : isWarmup ? "white" : "#3d3d3d",
-            }}
-          >
-            {isWarmup ? "WARMUP" : rowLabel}
-          </p>
-        </div>
-
-        {selected && (
+      {/* Checkmark badge — only when selected */}
+      {selected && (
+        <div className="absolute top-[10px] left-[14px] z-10">
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
@@ -187,66 +163,63 @@ function BlockCard({
               <path d="M3 8l3.5 3.5L13 5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </motion.div>
-        )}
-      </div>
+        </div>
+      )}
 
-      {/* Body */}
-      <div className="flex flex-col pt-[44px] pb-[14px] px-[16px] h-full gap-[6px]">
-        {/* Stimulus title */}
-        <p
-          className="font-['Druk_Wide:Medium',sans-serif] leading-[1.05] tracking-[-0.8px] shrink-0"
-          style={{
-            fontSize: block.stimulus.length > 12 ? "22px" : "26px",
-            color: selected ? "#1a3d00" : textColor,
-          }}
-        >
-          {block.stimulus}
-        </p>
+      {/* Body — left content + right clock column (same layout as WorkoutCard/Padel) */}
+      <div className="flex items-start pt-[10px] pb-[14px] px-[16px] h-full gap-[8px]">
+        {/* Left column */}
+        <div className="flex flex-col gap-[10px] flex-1 min-w-0">
+          {/* Stimulus title */}
+          <p
+            className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] font-['Druk_Wide:Medium',sans-serif] leading-[normal] tracking-[-1px]"
+            style={{
+              fontSize: block.stimulus.length > 12 ? "20px" : "22px",
+              color: selected ? "#1a3d00" : textColor,
+            }}
+          >
+            {block.stimulus}
+          </p>
 
-        {/* Modality tag */}
-        <p
-          className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[11px] tracking-[-0.22px] uppercase shrink-0"
-          style={{ color: selected ? "rgba(0,60,0,0.6)" : "#a3a3a3" }}
-        >
-          {block.modality}
-        </p>
-
-        {/* Divider */}
-        <div
-          className="w-full shrink-0 mt-[2px]"
-          style={{ height: "1px", background: selected ? "rgba(0,0,0,0.12)" : "rgba(0,0,0,0.08)" }}
-        />
-
-        {/* Movements list */}
-        <div className="flex flex-col gap-[5px] flex-1">
-          {block.movements.map((mv, i) => (
+          {/* Modality badge */}
+          <div
+            className="backdrop-blur-[100px] flex items-center h-[18px] px-[6px] py-[3px] rounded-[3px] self-start"
+            style={{ background: selected ? "rgba(0,0,0,0.18)" : "white" }}
+          >
             <p
-              key={i}
-              className="font-['MessinaSansWeb:Regular',sans-serif] text-[13px] leading-[1.3] tracking-[-0.26px]"
-              style={{ color: selected ? "#1a3d00" : textColor }}
+              className="font-['MessinaSansWeb:Bold',sans-serif] text-[8px] tracking-[-0.08px] uppercase leading-none whitespace-nowrap"
+              style={{ color: selected ? "white" : "#565656" }}
             >
-              {mv}
+              {block.modality}
             </p>
-          ))}
+          </div>
+
+          {/* Movements list */}
+          <div className="flex flex-col gap-[6px]">
+            {block.movements.map((mv, i) => (
+              <p
+                key={i}
+                className="font-['MessinaSansWeb:Regular',sans-serif] leading-[133.75%] text-[13px]"
+                style={{ color: selected ? "#1a3d00" : textColor }}
+              >
+                {mv}
+              </p>
+            ))}
+          </div>
         </div>
 
-        {/* Footer: duration */}
-        <div className="flex items-center gap-[6px] mt-[4px] shrink-0">
-          <div
-            className="flex items-center gap-[4px] px-[8px] py-[3px] rounded-full"
-            style={{ background: selected ? "rgba(0,0,0,0.15)" : "rgba(0,0,0,0.06)" }}
-          >
-            {/* Clock icon */}
-            <svg viewBox="0 0 16 16" fill="none" className="size-[11px] shrink-0">
-              <circle cx="8" cy="8" r="6.5" stroke={selected ? "white" : "#a3a3a3"} strokeWidth="1.2" />
-              <path d="M8 5v3l2 1.5" stroke={selected ? "white" : "#a3a3a3"} strokeWidth="1.2" strokeLinecap="round" />
-            </svg>
-            <p
-              className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[10px] tracking-[-0.2px]"
-              style={{ color: selected ? "white" : "#a3a3a3" }}
-            >
-              {block.duration}
-            </p>
+        {/* Right column: clock SVG — same as WorkoutCard/Padel */}
+        <div className="flex flex-col items-end shrink-0 w-[50px]">
+          <div className="h-[67px] relative shrink-0 w-[38px]">
+            <div className="absolute inset-[0_-10.53%_-11.94%_-10.53%]">
+              <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 46 75">
+                <path d={svgPaths.p3b47a200} fill={selected ? "rgba(255,255,255,0.4)" : "white"} shapeRendering="crispEdges" />
+                <path d={svgPaths.pc724800} fill={selected ? "#1a3d00" : "black"} />
+                <path d={svgPaths.p74cea80} fill={selected ? "#1a3d00" : "black"} />
+                <path d={svgPaths.p1591d500} fill={selected ? "#1a3d00" : "black"} />
+                <path d={svgPaths.p25011980} fill={selected ? "#1a3d00" : "black"} />
+              </svg>
+            </div>
           </div>
         </div>
       </div>
@@ -298,8 +271,6 @@ function ProgrammingRow({
           <div key={block.id} style={{ scrollSnapAlign: "start" }}>
             <BlockCard
               block={block}
-              rowLabel={row.label}
-              isWarmup={row.isWarmup}
               selected={selectedId === block.id}
               onSelect={() => onSelect(block.id)}
             />
