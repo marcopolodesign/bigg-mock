@@ -4,6 +4,46 @@
 
 ---
 
+## 2026-06-05 — Racha de actividad real-time + días de entrenamiento del onboarding
+
+`ActivityContainer` y la lógica de racha rediseñados para ser completamente reactivos a la fecha real. Se eliminaron los datos estáticos (`STREAK_DAYS`, `STREAK_COUNT`); reemplazados por `buildWeekStrip()` que computa el strip semanal desde `new Date()`. Se agregó `ONBOARDING_TRAINING_DAYS` (días elegidos en onboarding, actualmente L–S). Nuevos estados de punto: `done` (verde lleno), `today-training` (dashed negro — V hoy), `scheduled` (dashed lime — días futuros del onboarding), `past-rest` y `future-rest` (grises). El contador de racha calcula días consecutivos entrenados hacia atrás, ignorando los días de descanso. Se agregaron entradas a `PAST_DAYS` para 02–04 Jun para completar la racha de 4 días (L–J). Línea motivacional dinámica según si hoy es día de entreno o descanso.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-05 — Timeline unificado en Train: un solo timeline con BIGG Class a las 10AM
+
+`DailyWorkoutCard` rediseñado: se eliminaron las secciones "Tu entrenamiento de hoy" (hero) y "Para completar tu día" (complementos separados), reemplazadas por un único timeline vertical (mismo patrón que la vista de clase reservada). Ahora el flujo es: `10AM` BIGG Class → `18:00hs` Running pasadas → `Afternoon` Mobility. Los tres usan el mismo patrón de recomendación: `WhyLine` inline dentro del cuerpo de la card, sin bandas separadas inferiores. `AfternoonRecommendationCard` simplificado: se eliminó la sección blanca inferior con `pt-[45px]` y el `mb-[-34px]`, moviendo el `WhyLine` al interior de la columna de contenido.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-08 — ProgrammingSection como pantalla completa (slide-in desde FAB)
+
+Se reemplazó el `BottomSheet` de programación por un `ProgrammingScreen` de pantalla completa (`src/app/components/ProgrammingScreen.tsx`). Al tocar "Ver programación" en el FAB, la pantalla hace slide-in desde la derecha (spring animation con `motion/react` + `AnimatePresence`). Header fijo con flecha de vuelta + título "Programación". Se eliminó el título duplicado de `ProgrammingSection` (la sección ahora muestra solo el contador de seleccionados). Back button → slide-out de vuelta al home.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-05 — ProgrammingSection movida al FAB ("Ver programación")
+
+Se quitó el WARMUP de `ProgrammingSection` y se eliminó la inserción inline en `BiggDayScreen`. En su lugar, el FAB ahora tiene una acción "Ver programación" (con ícono `CalendarDays`) como primera opción secundaria. Al tocarla, se abre un `BottomSheet` de 92vh con `ProgrammingSection` dentro — drag handle, scroll vertical, scroll horizontal por fila. Selección de bloques y CTA "Agregar N bloques" funciona dentro del sheet.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-05 — ProgrammingSection: bloques de estímulo horizontales (newProgramming)
+
+Nuevo componente `ProgrammingSection` (`src/app/components/ProgrammingSection.tsx`) que replica la pantalla `newProgramming` de la biggapp en web. Estructura: 5 filas (`WARMUP` + `BLOQUE 1–4`), cada una con un scroll horizontal snap-to de tarjetas de estímulo (`Lower Body`, `Upper Body`, `HIIT Metabólico`, `Core & Midline`, `Mobility`, etc.). Al tocar una tarjeta: selección con animación lime-green + checkmark badge; al seleccionar cualquier bloque aparece un CTA verde `Agregar N bloques al entrenamiento`. Integrado en `BiggDayScreen` después del timeline `DailyWorkoutCard`, visible en todos los días.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
 ## 2026-06-04 — Se quitaron las acciones rápidas (Reservar/Coach/Cargar)
 
 Decisión de diseño: las acciones rápidas no terminaban de pegar con el header. Se probó moverlas al contenido y finalmente se eliminaron por completo. Se removió el componente `QuickActions` + `QUICK_ACTIONS`, el bottom sheet de contacto al coach (`coachOpen` state + sheet), la prop `onContactCoach` de `MainContent`/`StickyHeader`, y los imports lucide `CalendarPlus` / `MessageCircle` / `CirclePlus`. El `StickyHeader` vuelve a ser saludo + calendario, y `MainContent` recupera `pt-[197px]`.

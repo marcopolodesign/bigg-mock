@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Plus, Dumbbell, Sparkles, MessageCircle, Layers } from "lucide-react";
+import { Plus, Dumbbell, Sparkles, MessageCircle, Layers, CalendarDays } from "lucide-react";
 
 const PRIMARY_OPTIONS = [
   { label: "Reservar en BIGG Studios", Icon: Dumbbell },
@@ -8,17 +8,13 @@ const PRIMARY_OPTIONS = [
   { label: "Contactar a Coach", Icon: MessageCircle },
 ];
 
-const SECONDARY_OPTIONS = [
-  { label: "Cargar actividad", Icon: Plus },
-  { label: "Ver rutinas de BIGG Move", Icon: Layers },
-];
-
 interface FABProps {
   open?: boolean;
   onOpenChange?: (v: boolean) => void;
+  onVerProgramacion?: () => void;
 }
 
-export default function FloatingActionButton({ open: controlledOpen, onOpenChange }: FABProps = {}) {
+export default function FloatingActionButton({ open: controlledOpen, onOpenChange, onVerProgramacion }: FABProps = {}) {
   const [internalOpen, setInternalOpen] = useState(false);
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const setOpen = (v: boolean) => {
@@ -69,19 +65,23 @@ export default function FloatingActionButton({ open: controlledOpen, onOpenChang
               </motion.div>
 
               {/* Secondary options — single row with icon + label + chevron */}
-              {SECONDARY_OPTIONS.map(({ label, Icon }, i) => (
+              {[
+                { label: "Ver programación", Icon: CalendarDays, action: () => { setOpen(false); onVerProgramacion?.(); } },
+                { label: "Cargar actividad", Icon: Plus, action: () => setOpen(false) },
+                { label: "Ver rutinas de BIGG Move", Icon: Layers, action: () => setOpen(false) },
+              ].map(({ label, Icon, action }, i, arr) => (
                 <motion.button
                   key={label}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 12 }}
                   transition={{
-                    delay: (SECONDARY_OPTIONS.length - 1 - i) * 0.07,
+                    delay: (arr.length - 1 - i) * 0.07,
                     duration: 0.24,
                     ease: [0.22, 1, 0.36, 1],
                   }}
                   className="w-full bg-white/50 rounded-[18px] px-[22px] py-[18px] flex items-center gap-[14px] active:opacity-70"
-                  onClick={() => setOpen(false)}
+                  onClick={action}
                 >
                   <Icon size={20} strokeWidth={1.75} className="shrink-0 text-[#3d3d3d]" />
                   <span className="flex-1 font-['MessinaSansWeb:SemiBold',sans-serif] text-[#3d3d3d] text-[14px] tracking-[-0.28px] text-left">

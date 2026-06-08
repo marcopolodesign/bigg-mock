@@ -1,4 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
+import { AnimatePresence } from "motion/react";
 import { Dumbbell, Activity, Globe, Users, User, Moon, Plus, Flame, Check } from "lucide-react";
 import { Drawer } from "vaul";
 import svgPaths from "../../imports/BiggDay/svg-03sgvqmew7";
@@ -18,6 +19,7 @@ import WhyLine from "../components/WhyLine";
 import BottomSheet from "../components/BottomSheet";
 import ReservarSheet from "../components/ReservarSheet";
 import FloatingActionButton from "../components/FloatingActionButton";
+import ProgrammingScreen from "../components/ProgrammingScreen";
 
 // ─── Today's scheduled activities ────────────────────────────────────────────
 
@@ -62,6 +64,33 @@ const PAST_DAYS: Record<string, PastDayData> = {
         addable: true,
       },
     ],
+  },
+  "2026-06-02": {
+    reservedClass: {
+      time: "7:00AM",
+      location: "BIGG Palermo",
+      classType: "BIGG Class",
+      blocks: ["1. CORE", "2. PUSH", "3. CARDIO"],
+      attendeeCount: 15,
+    },
+  },
+  "2026-06-03": {
+    reservedClass: {
+      time: "8:00AM",
+      location: "BIGG Palermo",
+      classType: "BIGG Class",
+      blocks: ["1. LEGS", "2. PULL", "3. ENDURANCE"],
+      attendeeCount: 18,
+    },
+  },
+  "2026-06-04": {
+    reservedClass: {
+      time: "7:30AM",
+      location: "BIGG Tortuguitas",
+      classType: "BIGG Class",
+      blocks: ["1. FULL BODY", "2. STRENGTH", "3. CONDITIONING"],
+      attendeeCount: 12,
+    },
   },
 };
 
@@ -615,43 +644,121 @@ function Frame41() {
 
 // ─── Activity streak ──────────────────────────────────────────────────────────
 
-type StreakState = "done" | "today" | "future";
+// Days the user selected during onboarding (0 = Sunday, 1 = Monday, …, 6 = Saturday)
+const ONBOARDING_TRAINING_DAYS: number[] = [1, 2, 3, 4, 5, 6]; // Mon – Sat
+
+const STREAK_RECORD = 9;
+
+type DayKind = "done" | "today-training" | "today-rest" | "scheduled" | "past-rest" | "future-rest";
 
 interface StreakDay {
   letter: string;
-  state: StreakState;
+  kind: DayKind;
+  isTrainingDay: boolean;
 }
 
-// Mock: this week's activity. `today` = pending (not trained yet), `done` =
-// trained, `future` = upcoming. STREAK_COUNT carries across weeks.
-const STREAK_DAYS: StreakDay[] = [
-  { letter: "L", state: "done" },
-  { letter: "M", state: "done" },
-  { letter: "M", state: "today" },
-  { letter: "J", state: "future" },
-  { letter: "V", state: "future" },
-  { letter: "S", state: "future" },
-  { letter: "D", state: "future" },
-];
+function localDateStr(d: Date): string {
+  // "YYYY-MM-DD" in local timezone — matches PAST_DAYS keys
+  return d.toLocaleDateString("sv");
+}
 
-const STREAK_COUNT = 4;
-const STREAK_RECORD = 9;
+function buildWeekStrip(): { days: StreakDay[]; streakCount: number } {
+  const now = new Date();
+  const todayStr = localDateStr(now);
 
-function StreakDot({ state }: { state: StreakState }) {
-  if (state === "done") {
-    return (
-      <div className="flex items-center justify-center size-[28px] rounded-full bg-[#adff19]">
-        <Check size={15} strokeWidth={2.5} className="text-[#3d3d3d]" />
-      </div>
-    );
+  // Monday of the current week
+  const dow = now.getDay(); // 0 = Sun
+  const offsetToMonday = dow === 0 ? -6 : 1 - dow;
+  const monday = new Date(now);
+  monday.setDate(now.getDate() + offsetToMonday);
+  monday.setHours(0, 0, 0, 0);
+
+  const todayMidnight = new Date(now);
+  todayMidnight.setHours(0, 0, 0, 0);
+
+  const letters = ["L", "M", "M", "J", "V", "S", "D"];
+  const days: StreakDay[] = [];
+
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    const dateStr = localDateStr(d);
+    const isToday = dateStr === todayStr;
+    const isPast = d.getTime() < todayMidnight.getTime();
+    const dowJs = d.getDay();
+    const isTrainingDay = ONBOARDING_TRAINING_DAYS.includes(dowJs);
+    const trained = !!PAST_DAYS[dateStr];
+
+    let kind: DayKind;
+    if (isToday) {
+      kind = isTrainingDay ? "today-training" : "today-rest";
+    } else if (isPast) {
+      kind = trained ? "done" : "past-rest";
+    } else {
+      kind = isTrainingDay ? "scheduled" : "future-rest";
+    }
+
+    days.push({ letter: letters[i], kind, isTrainingDay });
   }
-  if (state === "today") {
-    return <div className="size-[28px] rounded-full border-[2px] border-dashed border-[#3d3d3d]" />;
+
+  // Streak: consecutive trained days going backwards from yesterday;
+  // rest days (not a training day) don't break the streak.
+  let streakCount = 0;
+  for (let i = days.length - 1; i >= 0; i--) {
+    const { kind, isTrainingDay: itd } = days[i];
+    if (kind === "today-training" || kind === "today-rest" || kind === "scheduled" || kind === "future-rest") continue;
+    if (kind === "done") { streakCount++; continue; }
+    if (kind === "past-rest" && !itd) continue; // genuine rest day — streak intact
+    break; // missed a scheduled training day
   }
-  return <div className="size-[28px] rounded-full border border-solid border-[#c4c4c4]" />;
+
+  return { days, streakCount };
+}
+
+function StreakDot({ kind }: { kind: DayKind }) {
+  switch (kind) {
+    case "done":
+      return (
+        <div className="flex items-center justify-center size-[28px] rounded-full bg-[#adff19]">
+          <Check size={15} strokeWidth={2.5} className="text-[#3d3d3d]" />
+        </div>
+      );
+    case "today-training":
+      return <div className="size-[28px] rounded-full border-[2px] border-dashed border-[#3d3d3d]" />;
+    case "today-rest":
+      return <div className="size-[28px] rounded-full border border-solid border-[#c4c4c4]" />;
+    case "scheduled":
+      // Onboarding-selected future training day — dashed lime ring
+      return <div className="size-[28px] rounded-full" style={{ border: "1.5px dashed rgba(173,255,25,0.75)" }} />;
+    case "past-rest":
+      return <div className="size-[28px] rounded-full border border-solid border-[#d4d4d4]" />;
+    case "future-rest":
+    default:
+      return <div className="size-[28px] rounded-full border border-solid border-[#ebebeb]" />;
+  }
+}
+
+function labelColor(kind: DayKind): string {
+  if (kind === "done" || kind === "today-training") return "text-[#565656]";
+  if (kind === "scheduled") return "text-[#7ab800]";
+  return "text-[#a3a3a3]";
+}
+
+function connectorColor(left: DayKind, right: DayKind): string {
+  if (left === "done" && right === "done") return "#adff19";
+  return "#e0e0e0";
 }
 
 function ActivityContainer() {
+  const { days, streakCount } = buildWeekStrip();
+  const todayIsTraining = days.some((d) => d.kind === "today-training");
+
+  const motivational = streakCount > 0
+    ? todayIsTraining
+      ? `Llevás ${streakCount} días seguidos. Entrená hoy para no cortar la racha.`
+      : `Llevás ${streakCount} días seguidos. Hoy es día de descanso — seguís mañana.`
+    : "¡Empezá hoy tu racha de actividad!";
+
   return (
     <div className="bg-[rgba(255,255,255,0.5)] relative rounded-[8px] shrink-0 w-full" data-name="Activity Container">
       <div className="flex flex-col gap-[16px] items-start p-[20px] w-full">
@@ -671,7 +778,7 @@ function ActivityContainer() {
           <div className="flex items-end gap-[10px]">
             <Flame size={30} strokeWidth={2} className="text-[#adff19] fill-[#adff19] shrink-0 mb-[2px]" />
             <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] font-['Druk_Wide:Medium',sans-serif] text-[40px] text-[#3d3d3d] leading-[0.9] tracking-[-2px]">
-              {STREAK_COUNT}
+              {streakCount}
             </p>
             <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[#585858] text-[15px] tracking-[-0.3px] pb-[5px]">
               días seguidos
@@ -684,19 +791,19 @@ function ActivityContainer() {
           </div>
         </div>
 
-        {/* Week strip — data-driven, with connectors between consecutive done days */}
+        {/* Week strip */}
         <div className="flex items-start w-full">
-          {STREAK_DAYS.map((d, i) => (
+          {days.map((d, i) => (
             <React.Fragment key={i}>
               {i > 0 && (
                 <div
                   className="flex-1 h-[2px] mt-[13px] rounded-full"
-                  style={{ background: STREAK_DAYS[i - 1].state === "done" && d.state === "done" ? "#adff19" : "#d4d4d4" }}
+                  style={{ background: connectorColor(days[i - 1].kind, d.kind) }}
                 />
               )}
               <div className="flex flex-col items-center gap-[6px] shrink-0 w-[28px]">
-                <StreakDot state={d.state} />
-                <span className={`font-['MessinaSansWeb:Regular',sans-serif] text-[11px] tracking-[-0.22px] ${d.state === "future" ? "text-[#a3a3a3]" : "text-[#565656]"}`}>
+                <StreakDot kind={d.kind} />
+                <span className={`font-['MessinaSansWeb:Regular',sans-serif] text-[11px] tracking-[-0.22px] ${labelColor(d.kind)}`}>
                   {d.letter}
                 </span>
               </div>
@@ -705,9 +812,7 @@ function ActivityContainer() {
         </div>
 
         {/* Motivational why */}
-        <WhyLine>
-          Llevás {STREAK_COUNT} días seguidos. Entrená hoy para no cortar la racha.
-        </WhyLine>
+        <WhyLine>{motivational}</WhyLine>
 
       </div>
     </div>
@@ -1455,6 +1560,7 @@ export default function BiggDayScreen() {
   const [activeTab, setActiveTab] = useState<BottomTabId>("train");
   const [reservarOpen, setReservarOpen] = useState(false);
   const [fabOpen, setFabOpen] = useState(false);
+  const [programmingOpen, setProgrammingOpen] = useState(false);
   const [todayReservedClass, setTodayReservedClass] = useState<ReservedClass | null>(null);
   const [headerScrollY, setHeaderScrollY] = useState(0);
   const [today] = useState(() => {
@@ -1548,7 +1654,7 @@ export default function BiggDayScreen() {
       {activeTab === "train" && <StickyHeader today={today} selectedDate={selectedDate} onSelectDate={setSelectedDate} scrollY={headerScrollY} />}
       <StatusBar />
       <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
-      <FloatingActionButton open={fabOpen} onOpenChange={setFabOpen} />
+      <FloatingActionButton open={fabOpen} onOpenChange={setFabOpen} onVerProgramacion={() => setProgrammingOpen(true)} />
 
       {/* Reservar sheet — triggered by BIGG Class Reservar button */}
       <BottomSheet
@@ -1569,6 +1675,13 @@ export default function BiggDayScreen() {
           }}
         />
       </BottomSheet>
+
+      {/* Programación screen — triggered by FAB "Ver programación" */}
+      <AnimatePresence>
+        {programmingOpen && (
+          <ProgrammingScreen onBack={() => setProgrammingOpen(false)} />
+        )}
+      </AnimatePresence>
 
     </div>
   );

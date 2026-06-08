@@ -111,4 +111,11 @@ All components from the shadcn/ui library are present. Key ones in active use:
 **Purpose:** The "why" / AI-recommendation line — `Sparkles` (cyan `#2ab3cc`) + cyan text — used wherever the home explains *why* something is recommended. Centralizes the cyan/type spec.
 **Used by:** hero class why-band + `ActivityCard` + `AfternoonRecommendationCard` (all in `DailyWorkoutCard`), and the `ActivityContainer` streak line in `BiggDayScreen`.
 
+### `ProgrammingSection`
+**File:** `src/app/components/ProgrammingSection.tsx`
+**Props:** none (self-contained with mock data)
+**Purpose:** Replicates the native `newProgramming` screen — 5 horizontally-scrollable rows (WARMUP + BLOQUE 1–4), each row containing stimulus block cards (Lower Body, Upper Body, HIIT, etc.). Tapping a card selects it (lime-green state + checkmark); selecting any block reveals a "Agregar N bloques al entrenamiento" CTA. Uses `motion/react` for selection animation.
+**Data shape:** `ProgrammingRow[]` → `StimulusBlock[]` (id, stimulus, modality, duration, movements, gradient). All mock data lives inside the file.
+**Used by:** `BiggDayScreen` (injected after the DailyWorkoutCard timeline, before Recommendations).
+
 <!-- Add new custom components below as they are created -->

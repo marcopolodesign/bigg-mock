@@ -50,13 +50,13 @@ function AfternoonRecommendationCard() {
         animate={{ opacity: added ? 1 : 0.55 }}
         transition={{ duration: 0.5 }}
       >
-        {/* Top: gradient section */}
+        {/* Single gradient section — WhyLine inline (running pasadas pattern) */}
         <div
-          className="backdrop-blur-[50px] content-stretch flex gap-[20px] items-start mb-[-34px] p-[20px] relative rounded-bl-[20px] rounded-br-[20px] shrink-0 w-full z-[2]"
+          className="backdrop-blur-[50px] content-stretch flex gap-[20px] items-start p-[20px] relative rounded-[20px] shrink-0 w-full"
           style={{ backgroundImage: "linear-gradient(112.876deg, rgba(255,255,255,0.9) 37.068%, rgba(42,179,204,0.9) 114.32%)" }}
         >
-          {/* Left: title + chip */}
-          <div className="content-stretch flex flex-[1_0_0] flex-col gap-[20px] items-start min-w-px relative">
+          {/* Left: title + chip + why */}
+          <div className="content-stretch flex flex-[1_0_0] flex-col gap-[16px] items-start min-w-px relative">
             <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] font-['Druk_Wide:Medium',sans-serif] text-[26px] text-[#565656] tracking-[-1.3px] whitespace-nowrap">
               Mobility
             </p>
@@ -65,6 +65,7 @@ function AfternoonRecommendationCard() {
                 BIGG Soft Life
               </p>
             </div>
+            <WhyLine>Cooldown recomendado por tu entrenamiento de la mañana en BIGG Recoleta</WhyLine>
           </div>
 
           {/* Right: Agregar / Agregado button */}
@@ -103,13 +104,6 @@ function AfternoonRecommendationCard() {
               {added ? "Agregado!" : "Agregar"}
             </motion.p>
           </button>
-        </div>
-
-        {/* Bottom: AI recommendation */}
-        <div className="bg-[rgba(255,255,255,0.8)] flex pb-[15px] pt-[45px] px-[10px] relative shrink-0 w-full z-[1]">
-          <WhyLine iconSize={18}>
-            Cooldown recomendado por tu entrenamiento de la mañana en BIGG Recoleta
-          </WhyLine>
         </div>
       </motion.div>
     </div>
@@ -281,121 +275,96 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, reservedClass,
     );
   }
 
-  const hasComplements = Boolean(activities?.length) || showAfternoon;
-
+  // ── Single unified timeline (recommendation state) ──
   return (
-    <div className="flex flex-col gap-[28px] items-start relative shrink-0 w-full">
+    <div className="relative w-full">
+      <div className="absolute left-[22px] top-0 bottom-0 w-[1px] bg-[#c4c4c4]" />
+      <div className="flex flex-col items-start gap-[24px]">
 
-      {/* ══ HERO — recomendación principal del día ══ */}
-      {showMorning && (
-        <div className="flex flex-col items-start gap-[12px] w-full">
-          <div className="flex flex-col gap-[2px]">
-            <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] font-['MessinaSansWeb:Bold',sans-serif] text-[18px] text-[#3d3d3d] tracking-[-0.45px]">
-              Tu entrenamiento de hoy
-            </p>
-            <p className="font-['MessinaSansWeb:Regular',sans-serif] italic text-[#a3a3a3] text-[13px] tracking-[-0.26px]">
-              Tu recomendación principal
-            </p>
-          </div>
-
-          <div className="w-full flex flex-col items-center">
-            <div className="overflow-clip relative rounded-[20px] w-full">
-              {/* Content area */}
-              <div
-                className="backdrop-blur-[50px] flex gap-[20px] items-center p-[24px] relative w-full"
-                style={{ backgroundImage: "linear-gradient(115.214deg, rgba(255, 255, 255, 0.9) 51.472%, rgba(163, 163, 163, 0.9) 114.32%)" }}
-              >
-                <div className="flex flex-[1_0_0] flex-col gap-[16px] items-start min-w-px">
-                  <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] [word-break:break-word] font-['Druk_Wide:Medium',sans-serif] leading-[1] not-italic text-[32px] text-[#565656] tracking-[-1.6px]">
-                    {active.title}
-                  </p>
-                  <div className="flex gap-[10px] items-start flex-wrap">
-                    {active.chips.map((chip) => (
-                      <div key={chip} className="bg-[#ededed] flex items-center justify-center p-[7.5px] rounded-[8px]">
-                        <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] font-['MessinaSansWeb:Regular',sans-serif] text-[13px] text-black tracking-[-0.325px] whitespace-nowrap">
-                          {chip}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-              {/* Why band — always visible */}
-              <div className="bg-[rgba(255,255,255,0.85)] flex px-[24px] py-[14px] w-full">
-                <WhyLine iconSize={18}>{active.why}</WhyLine>
-              </div>
+        {/* BIGG Class at 10AM */}
+        {showMorning && (
+          <div className="flex flex-col items-start gap-[10px] w-full">
+            <div className="relative z-10 flex flex-row items-center gap-[10px]">
+              <TimePill label="10AM" />
+              <p className="font-['MessinaSansWeb:Regular',sans-serif] italic text-[#a3a3a3] text-[13px] tracking-[-0.26px]">
+                BIGG Recoleta
+              </p>
             </div>
-            {/* Reservar clase button */}
-            <button
-              onClick={onReservar}
-              className="w-full bg-[#adff19] rounded-bl-[20px] rounded-br-[20px] mt-[-10px] pt-[26px] pb-[16px] flex items-center justify-center active:opacity-80 transition-opacity"
-            >
-              <span className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[#3d3d3d] text-[15px] tracking-[-0.3px]">
-                Reservar clase
-              </span>
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ══ COMPLEMENTOS — para completar tu día ══ */}
-      {hasComplements && (
-        <div className="flex flex-col items-start gap-[12px] w-full">
-          <div className="flex flex-col gap-[2px]">
-            <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] font-['MessinaSansWeb:Bold',sans-serif] text-[18px] text-[#3d3d3d] tracking-[-0.45px]">
-              Para completar tu día
-            </p>
-            <p className="font-['MessinaSansWeb:Regular',sans-serif] italic text-[#a3a3a3] text-[13px] tracking-[-0.26px]">
-              Movilidad, descanso y actividades sugeridas
-            </p>
-          </div>
-
-          {/* Timeline of secondary recommendations */}
-          <div className="relative w-full">
-            <div className="absolute left-[22px] top-[12px] bottom-[12px] w-[1px] bg-[#c4c4c4]" />
-            <div className="flex flex-col items-start gap-[24px]">
-
-              {activities?.map((activity, i) => (
-                <div key={i} className="flex flex-col items-start gap-[10px] w-full">
-                  <div className="relative z-10 flex flex-row items-center gap-[10px]">
-                    <TimePill label={activity.time} />
-                  </div>
-                  <div className="relative z-10 w-full">
-                    <ActivityCard entry={activity} />
-                  </div>
-                </div>
-              ))}
-
-              {showAfternoon && (
-                <div className="flex flex-col items-start gap-[10px] w-full">
-                  <div className="relative z-10 flex flex-row items-center gap-[10px]">
-                    <TimePill label="Afternoon" />
-                    <p className="font-['MessinaSansWeb:Regular',sans-serif] italic text-[#a3a3a3] text-[13px] tracking-[-0.26px]">
-                      Mobility & recovery
+            <div className="relative z-10 w-full flex flex-col items-center">
+              <div className="overflow-clip relative rounded-[20px] w-full">
+                <div
+                  className="backdrop-blur-[50px] flex gap-[20px] items-center p-[24px] relative w-full"
+                  style={{ backgroundImage: "linear-gradient(115.214deg, rgba(255, 255, 255, 0.9) 51.472%, rgba(163, 163, 163, 0.9) 114.32%)" }}
+                >
+                  <div className="flex flex-[1_0_0] flex-col gap-[16px] items-start min-w-px">
+                    <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] [word-break:break-word] font-['Druk_Wide:Medium',sans-serif] leading-[1] not-italic text-[32px] text-[#565656] tracking-[-1.6px]">
+                      {active.title}
                     </p>
-                  </div>
-                  <div className="relative z-10 w-full">
-                    <AfternoonRecommendationCard />
+                    <div className="flex gap-[10px] items-start flex-wrap">
+                      {active.chips.map((chip) => (
+                        <div key={chip} className="bg-[#ededed] flex items-center justify-center p-[7.5px] rounded-[8px]">
+                          <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] font-['MessinaSansWeb:Regular',sans-serif] text-[13px] text-black tracking-[-0.325px] whitespace-nowrap">
+                            {chip}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                    <WhyLine iconSize={18}>{active.why}</WhyLine>
                   </div>
                 </div>
-              )}
-
+              </div>
+              {/* Reservar button attached below card */}
+              <button
+                onClick={onReservar}
+                className="w-full bg-[#adff19] rounded-bl-[20px] rounded-br-[20px] mt-[-10px] pt-[26px] pb-[16px] flex items-center justify-center active:opacity-80 transition-opacity"
+              >
+                <span className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[#3d3d3d] text-[15px] tracking-[-0.3px]">
+                  Reservar clase
+                </span>
+              </button>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* ── Add to day — always shown ── */}
-      <button
-        onClick={onOpenFab}
-        className="relative z-[20] w-full rounded-[16px] border border-dashed border-[#858585] py-[16px] flex items-center justify-center gap-[8px] bg-[#ededed] active:opacity-60 transition-opacity"
-      >
-        <Plus size={16} strokeWidth={2} className="text-[#858585]" />
-        <span className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[#858585] text-[14px] tracking-[-0.28px]">
-          Agregar
-        </span>
-      </button>
+        {/* Additional scheduled activities (e.g. Running pasadas) */}
+        {activities?.map((activity, i) => (
+          <div key={i} className="flex flex-col items-start gap-[10px] w-full">
+            <div className="relative z-10 flex flex-row items-center gap-[10px]">
+              <TimePill label={activity.time} />
+            </div>
+            <div className="relative z-10 w-full">
+              <ActivityCard entry={activity} />
+            </div>
+          </div>
+        ))}
 
+        {/* Afternoon Mobility recommendation */}
+        {showAfternoon && (
+          <div className="flex flex-col items-start gap-[10px] w-full">
+            <div className="relative z-10 flex flex-row items-center gap-[10px]">
+              <TimePill label="Afternoon" />
+              <p className="font-['MessinaSansWeb:Regular',sans-serif] italic text-[#a3a3a3] text-[13px] tracking-[-0.26px]">
+                Mobility & recovery
+              </p>
+            </div>
+            <div className="relative z-10 w-full">
+              <AfternoonRecommendationCard />
+            </div>
+          </div>
+        )}
+
+        {/* Add to day */}
+        <button
+          onClick={onOpenFab}
+          className="relative z-[20] w-full rounded-[16px] border border-dashed border-[#858585] py-[16px] flex items-center justify-center gap-[8px] bg-[#ededed] active:opacity-60 transition-opacity"
+        >
+          <Plus size={16} strokeWidth={2} className="text-[#858585]" />
+          <span className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[#858585] text-[14px] tracking-[-0.28px]">
+            Agregar
+          </span>
+        </button>
+
+      </div>
     </div>
   );
 }
