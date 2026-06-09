@@ -1182,8 +1182,8 @@ function MainContent({ onReservar, onOpenFab, isToday, isFutureDay, selectedDate
   const pastData = isToday ? undefined : PAST_DAYS[dateKey];
 
   return (
-    // pt clears the fixed StickyHeader (greeting + week calendar ≈ 197px)
-    <div className="flex flex-col gap-[16px] items-center w-full px-[20px] pt-[197px]">
+    // pt clears the fixed StickyHeader (greeting + week calendar, no status bar)
+    <div className="flex flex-col gap-[16px] items-center w-full px-[20px] pt-[153px]">
 
       {/* ── Timeline ── */}
       <div className="w-full max-w-[388px] mb-[24px]">
@@ -1431,12 +1431,9 @@ function StickyHeader({ today, selectedDate, onSelectDate, scrollY }: { today: D
 
   useEffect(() => {
     if (titleRowRef.current) {
-      // StatusBar is z-50 at y=0–40. StickyHeader has pt-60, so Frame14 starts at header-y=60.
-      // With translation T: Frame14 bottom is at viewport-y = (60 + frameHeight) - T.
-      // Set Frame14 bottom ≤ 38px (just inside the status bar cover) → T = frameHeight + 22.
-      // WeekCalendar then appears at viewport-y = (110 - T) = 88 - frameHeight ≈ 50px.
+      // Collapse greeting row just past the top edge when scrolling.
       const frameHeight = titleRowRef.current.offsetHeight;
-      setMaxCollapse(frameHeight + 22);
+      setMaxCollapse(frameHeight + 4);
     }
   }, []);
 
@@ -1444,7 +1441,7 @@ function StickyHeader({ today, selectedDate, onSelectDate, scrollY }: { today: D
 
   return (
     <div
-      className="fixed backdrop-blur-[2px] bg-[rgba(255,255,255,0.8)] flex justify-center left-0 pb-[20px] pt-[60px] px-[20px] rounded-bl-[20px] rounded-br-[20px] top-0 w-screen z-40"
+      className="fixed backdrop-blur-[2px] bg-[rgba(255,255,255,0.8)] flex justify-center left-0 pb-[20px] pt-[16px] px-[20px] rounded-bl-[20px] rounded-br-[20px] top-0 w-screen z-40"
       style={{ transform: `translateY(-${translateY}px)` }}
     >
       <div aria-hidden className="absolute border border-[rgba(255,255,255,0.1)] border-solid inset-0 pointer-events-none rounded-bl-[20px] rounded-br-[20px]" />
@@ -1652,7 +1649,6 @@ export default function BiggDayScreen() {
 
       {/* Fixed overlays */}
       {activeTab === "train" && <StickyHeader today={today} selectedDate={selectedDate} onSelectDate={setSelectedDate} scrollY={headerScrollY} />}
-      <StatusBar />
       <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
       <FloatingActionButton open={fabOpen} onOpenChange={setFabOpen} onVerProgramacion={() => setProgrammingOpen(true)} />
 
