@@ -4,6 +4,14 @@
 
 ---
 
+## 2026-06-08 — BlockCard: título más grande, layout fix, Vite expuesto en red
+
+Font size del título en `BlockCard` bumpeado a `28px` (títulos cortos) / `24px` (largos). Se removió `h-full` del body container (causaba comportamiento impredecible sin altura fija en el padre) y se agregó `justify-start` explícito tanto en el container como en la columna izquierda — contenido siempre anclado arriba. Vite config actualizado con `server: { host: true }` para exponer el dev server en la red local (`192.168.68.107:5173`) y permitir preview desde mobile.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
 ## 2026-06-08 — BlockCard rediseñado para matchear el bloque de Pádel
 
 `BlockCard` en `ProgrammingSection` refactorizado para replicar el layout de `WorkoutCard` (Pádel): columna izquierda (título Druk Wide + badge de modalidad + lista de movimientos) y columna derecha con el mismo SVG decorativo del reloj (`svgPaths` importado de `BiggDay`). Se eliminó el pill de duración del footer. Se removió el badge de "BLOQUE X" del card (el row label de arriba ya lo indica). Se limpiaron las props `rowLabel` e `isWarmup` de `BlockCard` que quedaron sin uso.

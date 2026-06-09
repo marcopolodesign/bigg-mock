@@ -167,14 +167,14 @@ function BlockCard({
       )}
 
       {/* Body — left content + right clock column (same layout as WorkoutCard/Padel) */}
-      <div className="flex items-start pt-[10px] pb-[14px] px-[16px] h-full gap-[8px]">
+      <div className="flex items-start justify-start pt-[10px] pb-[14px] px-[16px] gap-[8px]">
         {/* Left column */}
-        <div className="flex flex-col gap-[10px] flex-1 min-w-0">
+        <div className="flex flex-col justify-start gap-[10px] flex-1 min-w-0">
           {/* Stimulus title */}
           <p
             className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] font-['Druk_Wide:Medium',sans-serif] leading-[normal] tracking-[-1px]"
             style={{
-              fontSize: block.stimulus.length > 12 ? "20px" : "22px",
+              fontSize: block.stimulus.length > 12 ? "24px" : "28px",
               color: selected ? "#1a3d00" : textColor,
             }}
           >
