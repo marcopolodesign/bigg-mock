@@ -41,8 +41,10 @@ const V4_BLOCKS: V4BlockDef[] = [
   { id: "v4-mid",  bigg: { stimulus: "Midline",     modality: "For Quality · 3 sets",  duration: "12'" }, away: null,                                                              exercisesAdapt: false },
 ];
 
-function FlapItem({ block, isOpen, onToggle, index, total, isAdapted = false }: { block: StimulusBlock; isOpen: boolean; onToggle: () => void; index: number; total: number; isAdapted?: boolean }) {
+function FlapItem({ block, isOpen, onToggle, index, total, displayStimulus, stimulusKey, showAdaptIcon = false }: { block: StimulusBlock; isOpen: boolean; onToggle: () => void; index: number; total: number; displayStimulus?: string; stimulusKey?: string; showAdaptIcon?: boolean }) {
   const isLast = index === total - 1;
+  const titleText = displayStimulus ?? block.stimulus;
+  const titleKey = stimulusKey ?? block.stimulus;
   return (
     <div
       className="w-full"
@@ -66,11 +68,34 @@ function FlapItem({ block, isOpen, onToggle, index, total, isAdapted = false }: 
         onClick={(e) => { e.stopPropagation(); onToggle(); }}
         className="w-full flex items-center justify-between px-[16px] py-[14px] active:opacity-70 transition-opacity"
       >
-        <p className="font-['Druk_Wide:Medium',sans-serif] text-[17px] text-[#3d3d3d] leading-none tracking-[-0.5px] uppercase">
-          {block.stimulus}
-        </p>
+        <div style={{ height: "21px", overflow: "hidden", position: "relative", flex: 1 }}>
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.p
+              key={titleKey}
+              initial={{ opacity: 0, y: 7 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -9 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              style={{ position: "absolute", lineHeight: "21px" }}
+              className="font-['Druk_Wide:Medium',sans-serif] text-[17px] text-[#3d3d3d] tracking-[-0.5px] uppercase"
+            >
+              {titleText}
+            </motion.p>
+          </AnimatePresence>
+        </div>
         <div className="flex items-center gap-[8px] shrink-0">
-          {isAdapted && <Sparkles size={13} className="text-[#2ab3cc]" strokeWidth={2} />}
+          <AnimatePresence initial={false}>
+            {showAdaptIcon && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.5 }}
+                transition={{ duration: 0.22 }}
+              >
+                <Sparkles size={13} className="text-[#2ab3cc]" strokeWidth={2} />
+              </motion.div>
+            )}
+          </AnimatePresence>
           <motion.div animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.18 }}>
             <ChevronDown size={14} className="text-[#a3a3a3]" strokeWidth={2} />
           </motion.div>
@@ -444,17 +469,24 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
                   {/* Variant 3 — accordion flaps */}
                   {cardVariant === 3 && (
                     <div className="flex flex-col w-full">
-                      {DAY_BLOCKS.map((block, i) => (
-                        <FlapItem
-                          key={block.id}
-                          block={block}
-                          isOpen={openFlapId === block.id}
-                          onToggle={() => setOpenFlapId(openFlapId === block.id ? null : block.id)}
-                          index={i}
-                          total={DAY_BLOCKS.length}
-                          isAdapted={!isBiggLocation}
-                        />
-                      ))}
+                      {DAY_BLOCKS.map((block, i) => {
+                        const vb = V4_BLOCKS[i];
+                        const current = isBiggLocation ? vb.bigg : (vb.away ?? vb.bigg);
+                        const showAdaptIcon = !isBiggLocation && vb.away === null && vb.exercisesAdapt;
+                        return (
+                          <FlapItem
+                            key={block.id}
+                            block={block}
+                            isOpen={openFlapId === block.id}
+                            onToggle={() => setOpenFlapId(openFlapId === block.id ? null : block.id)}
+                            index={i}
+                            total={DAY_BLOCKS.length}
+                            displayStimulus={current.stimulus}
+                            stimulusKey={current.stimulus}
+                            showAdaptIcon={showAdaptIcon}
+                          />
+                        );
+                      })}
                     </div>
                   )}
 
@@ -556,8 +588,8 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
                 </div>
               </div>
 
-              {/* ── CTA: dominant for v1/2/3; secondary for v4 ── */}
-              {cardVariant !== 4 ? (
+              {/* ── CTA: v1/v2 = dominant overlap; v3/v4 = secondary outline ── */}
+              {cardVariant <= 2 ? (
                 <button
                   type="button"
                   onClick={isBiggLocation ? onReservar : onOpenProgramming}
@@ -573,7 +605,6 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
                   </span>
                 </button>
               ) : (
-                /* v4: reservar is a secondary action below the card */
                 isBiggLocation && (
                   <button
                     type="button"

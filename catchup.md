@@ -4,6 +4,17 @@
 
 ---
 
+## 2026-06-10 — DailyWorkoutCard: Opción 3 — animación de bloques + CTA secundario
+
+**Source:** Claude Code — Macbook Pro
+
+**Change:** Aplicados a Opción 3 los mismos cambios de animación de Opción 4: FlapItem ahora acepta `displayStimulus/stimulusKey/showAdaptIcon` en lugar de `isAdapted`. Al cambiar ubicación, los nombres de Upper Body → Push Pull y HIIT → Cardio animan con exit upward / enter from below (`AnimatePresence mode="wait"`). FBA mantiene nombre y hace fade-in del Sparkles icon. Midline sin cambio. CTA unificado: variantes 1 y 2 conservan el overlap lime; variantes 3 y 4 usan botón outline secundario (`mt-[20px] py-[15px]`) solo visible para ubicaciones BIGG.
+
+**Files modified:**
+- `src/app/components/DailyWorkoutCard.tsx` — `FlapItem` props reemplazados (`isAdapted` → `displayStimulus/stimulusKey/showAdaptIcon`); nombre del flap en `AnimatePresence mode="wait"`; Sparkles con `AnimatePresence`; variant 3 map usa `V4_BLOCKS[i]` para computar adaptation; CTA unificado `cardVariant <= 2` = overlap, `>= 3` = outline
+
+---
+
 ## 2026-06-10 — DailyWorkoutCard: Opción 4 — animación de bloques al cambiar ubicación
 
 **Source:** Claude Code — Macbook Pro
