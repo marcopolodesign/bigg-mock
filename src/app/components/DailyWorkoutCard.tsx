@@ -27,6 +27,20 @@ const DAY_BLOCKS: StimulusBlock[] = [
 
 const FLAP_OVERLAP = 12;
 
+// ── Variant 4 block definitions ──────────────────────────────────────────────
+interface V4BlockDef {
+  id: string;
+  bigg: { stimulus: string; modality: string; duration: string };
+  away: { stimulus: string; modality: string; duration: string } | null;
+  exercisesAdapt: boolean; // exercises change but name stays — show icon
+}
+const V4_BLOCKS: V4BlockDef[] = [
+  { id: "v4-fba",  bigg: { stimulus: "FBA",        modality: "Superset · 3 sets",     duration: "15'" }, away: null,                                                              exercisesAdapt: true  },
+  { id: "v4-ub",   bigg: { stimulus: "Upper Body",  modality: "Strength · 5 sets",     duration: "20'" }, away: { stimulus: "Push Pull",  modality: "Bodyweight · 4 sets",    duration: "20'" }, exercisesAdapt: false },
+  { id: "v4-hiit", bigg: { stimulus: "HIIT",        modality: "AMRAP · 12'",           duration: "12'" }, away: { stimulus: "Cardio",     modality: "Intervalos · 3 rondas",  duration: "12'" }, exercisesAdapt: false },
+  { id: "v4-mid",  bigg: { stimulus: "Midline",     modality: "For Quality · 3 sets",  duration: "12'" }, away: null,                                                              exercisesAdapt: false },
+];
+
 function FlapItem({ block, isOpen, onToggle, index, total, isAdapted = false }: { block: StimulusBlock; isOpen: boolean; onToggle: () => void; index: number; total: number; isAdapted?: boolean }) {
   const isLast = index === total - 1;
   return (
@@ -444,10 +458,10 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
                     </div>
                   )}
 
-                  {/* Variant 4 — hierarchical block list, location outside */}
+                  {/* Variant 4 — hierarchical block list, animated on location change */}
                   {cardVariant === 4 && (
                     <div className="flex flex-col w-full">
-                      {/* Card header: class type + total duration */}
+                      {/* Card header */}
                       <div className="flex items-center justify-between pb-[14px]" style={{ borderBottom: "1px solid rgba(0,0,0,0.07)" }}>
                         <p className="font-['MessinaSansWeb:Bold',sans-serif] text-[10px] text-[#a3a3a3] tracking-[0.8px] uppercase">
                           {isBiggLocation ? "BIGG Class" : "Entrenamiento"}
@@ -457,36 +471,58 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
                         </p>
                       </div>
 
-                      {/* Block rows */}
-                      {DAY_BLOCKS.map((block, i) => (
-                        <div
-                          key={block.id}
-                          className="flex items-center justify-between py-[13px]"
-                          style={{ borderBottom: i < DAY_BLOCKS.length - 1 ? "1px solid rgba(0,0,0,0.06)" : "none" }}
-                        >
-                          <div className="flex flex-col gap-[3px]">
-                            <p className="font-['Druk_Wide:Medium',sans-serif] text-[15px] text-[#3d3d3d] leading-none tracking-[-0.4px] uppercase">
-                              {block.stimulus}
-                            </p>
-                            <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[11px] text-[#a3a3a3] tracking-[-0.22px]">
-                              {block.modality}
-                            </p>
+                      {/* Animated block rows */}
+                      {V4_BLOCKS.map((vblock, i) => {
+                        const current = isBiggLocation ? vblock.bigg : (vblock.away ?? vblock.bigg);
+                        const iconShows = !isBiggLocation && vblock.away === null && vblock.exercisesAdapt;
+                        return (
+                          <div
+                            key={vblock.id}
+                            className="flex items-center justify-between py-[13px]"
+                            style={{ borderBottom: i < V4_BLOCKS.length - 1 ? "1px solid rgba(0,0,0,0.06)" : "none" }}
+                          >
+                            <div className="flex flex-col gap-[4px] flex-1 min-w-0 pr-[8px]">
+                              {/* Name: animates out upward / in from below when key changes */}
+                              <div style={{ height: "19px", overflow: "hidden", position: "relative" }}>
+                                <AnimatePresence mode="wait" initial={false}>
+                                  <motion.p
+                                    key={current.stimulus}
+                                    initial={{ opacity: 0, y: 7 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -9 }}
+                                    transition={{ duration: 0.2, ease: "easeOut" }}
+                                    style={{ position: "absolute", width: "100%", lineHeight: "19px" }}
+                                    className="font-['Druk_Wide:Medium',sans-serif] text-[15px] text-[#3d3d3d] tracking-[-0.4px] uppercase"
+                                  >
+                                    {current.stimulus}
+                                  </motion.p>
+                                </AnimatePresence>
+                              </div>
+                              <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[11px] text-[#a3a3a3] tracking-[-0.22px]">
+                                {current.modality}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-[8px] shrink-0">
+                              {/* Icon fades in for blocks where exercises adapt but name stays */}
+                              <AnimatePresence initial={false}>
+                                {iconShows && (
+                                  <motion.div
+                                    initial={{ opacity: 0, scale: 0.5 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.5 }}
+                                    transition={{ duration: 0.22, ease: "easeOut" }}
+                                  >
+                                    <Sparkles size={12} className="text-[#2ab3cc]" strokeWidth={2} />
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
+                              <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[12px] text-[#a3a3a3] tracking-[-0.24px]">
+                                {current.duration}
+                              </p>
+                            </div>
                           </div>
-                          <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[12px] text-[#a3a3a3] tracking-[-0.24px] shrink-0">
-                            {block.duration}
-                          </p>
-                        </div>
-                      ))}
-
-                      {/* Adapted indicator for non-BIGG locations */}
-                      {!isBiggLocation && (
-                        <div className="flex items-center gap-[6px] pt-[12px]" style={{ borderTop: "1px solid rgba(0,0,0,0.06)" }}>
-                          <Sparkles size={12} className="text-[#2ab3cc]" strokeWidth={2} />
-                          <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[12px] text-[#2ab3cc] tracking-[-0.24px]">
-                            Bloques adaptados para esta ubicación
-                          </p>
-                        </div>
-                      )}
+                        );
+                      })}
                     </div>
                   )}
 
@@ -542,7 +578,7 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
                   <button
                     type="button"
                     onClick={onReservar}
-                    className="w-full mt-[10px] py-[13px] flex items-center justify-center gap-[8px] rounded-[14px] border border-[rgba(0,0,0,0.12)] active:opacity-70 transition-opacity"
+                    className="w-full mt-[20px] py-[15px] flex items-center justify-center gap-[8px] rounded-[14px] border border-[rgba(0,0,0,0.12)] active:opacity-70 transition-opacity"
                   >
                     <span className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[14px] text-[#3d3d3d] tracking-[-0.28px]">
                       Reservar clase

@@ -4,6 +4,17 @@
 
 ---
 
+## 2026-06-10 — DailyWorkoutCard: Opción 4 — animación de bloques al cambiar ubicación
+
+**Source:** Claude Code — Macbook Pro
+
+**Change:** Solo algunos bloques cambian al salir de una sede BIGG: Upper Body → Push Pull (nombre + modality) y HIIT → Cardio (nombre + modality). FBA mantiene el nombre pero muestra ícono Sparkles cyan (los ejercicios adaptan). Midline no cambia. La transición es animada: el nombre sale hacia arriba (exit: y -9, opacity 0) y el nuevo entra desde abajo (initial: y 7, opacity 0 → animate: y 0, opacity 1) via `AnimatePresence mode="wait"` con key en el stimulus. El Sparkles de FBA hace fade-in/out con escala. CTA "Reservar clase" aumentado: `mt-[20px] py-[15px]`.
+
+**Files modified:**
+- `src/app/components/DailyWorkoutCard.tsx` — `V4BlockDef` interface + `V4_BLOCKS` array (bigg/away/exercisesAdapt por bloque); variant 4 renderiza rows con `AnimatePresence mode="wait"` en el nombre y `AnimatePresence` en el Sparkles icon; CTA mt/py aumentados
+
+---
+
 ## 2026-06-10 — DailyWorkoutCard: Opción 4 — separación entrenamiento/espacio, Reservar secundario
 
 **Source:** Claude Code — Macbook Pro
