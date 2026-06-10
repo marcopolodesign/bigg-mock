@@ -1,5 +1,6 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
-import { Dumbbell, Activity, Globe, Users, User, Moon, Plus } from "lucide-react";
+import { AnimatePresence } from "motion/react";
+import { Dumbbell, Activity, Globe, Users, User, Moon, Plus, Flame, Check } from "lucide-react";
 import { Drawer } from "vaul";
 import svgPaths from "../../imports/BiggDay/svg-03sgvqmew7";
 import imgBgHome1 from "../../imports/BiggDay/ec32944a87885236431eaada4b00483f53237695.png";
@@ -13,9 +14,13 @@ import imgSocialImage3 from "../../imports/BiggDay/b292cbcf40664006c8d7417ba5e71
 import imgSocialImage4 from "../../imports/BiggDay/c7e91abf0983739fe423cb74e6d1c3b8d494aa30.png";
 import imgEllipse167 from "../../imports/BiggDay/0bdccca1063fe17c8030deb1278cb4c21c493290.png";
 import DailyWorkoutCard, { type ReservedClass, type ActivityEntry } from "../components/DailyWorkoutCard";
+import SourceChip from "../components/SourceChip";
+import WhyLine from "../components/WhyLine";
 import BottomSheet from "../components/BottomSheet";
 import ReservarSheet from "../components/ReservarSheet";
 import FloatingActionButton from "../components/FloatingActionButton";
+import ProgrammingScreen from "../components/ProgrammingScreen";
+import ClassDetailScreen from "../components/ClassDetailScreen";
 
 // ─── Today's scheduled activities ────────────────────────────────────────────
 
@@ -25,6 +30,7 @@ const TODAY_ACTIVITIES: ActivityEntry[] = [
     timeRange: "18:00hs — 19:00hs",
     title: "Running pasadas",
     gradient: "linear-gradient(115deg, rgba(255,255,255,0.9) 40%, rgba(173,255,25,0.25) 120%)",
+    why: "Sumás fondo aeróbico sin chocar con tu clase de fuerza de la mañana",
   },
 ];
 
@@ -59,6 +65,33 @@ const PAST_DAYS: Record<string, PastDayData> = {
         addable: true,
       },
     ],
+  },
+  "2026-06-02": {
+    reservedClass: {
+      time: "7:00AM",
+      location: "BIGG Palermo",
+      classType: "BIGG Class",
+      blocks: ["1. CORE", "2. PUSH", "3. CARDIO"],
+      attendeeCount: 15,
+    },
+  },
+  "2026-06-03": {
+    reservedClass: {
+      time: "8:00AM",
+      location: "BIGG Palermo",
+      classType: "BIGG Class",
+      blocks: ["1. LEGS", "2. PULL", "3. ENDURANCE"],
+      attendeeCount: 18,
+    },
+  },
+  "2026-06-04": {
+    reservedClass: {
+      time: "7:30AM",
+      location: "BIGG Tortuguitas",
+      classType: "BIGG Class",
+      blocks: ["1. FULL BODY", "2. STRENGTH", "3. CONDITIONING"],
+      attendeeCount: 12,
+    },
   },
 };
 
@@ -242,6 +275,9 @@ function SleepCard() {
           <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[rgba(255,255,255,0.55)] text-[11px] leading-[1.4] tracking-[-0.22px] shrink-0">
             Dormite temprano hoy para alcanzar tu objetivo mañana
           </p>
+          <div className="shrink-0 mt-[8px]">
+            <SourceChip source="apple-health" prefix="Datos de" onDark />
+          </div>
         </div>
       </div>
     </div>
@@ -293,6 +329,7 @@ function StepsCard() {
           <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[#585858] text-[11px] leading-[1.4] tracking-[-0.22px] shrink-0">
             Caminá 6.800 pasos más para alcanzar tu objetivo diario
           </p>
+          <SourceChip source="garmin" prefix="Datos de" />
         </div>
       </div>
     </div>
@@ -606,217 +643,178 @@ function Frame41() {
   );
 }
 
-// ─── Activity ─────────────────────────────────────────────────────────────────
+// ─── Activity streak ──────────────────────────────────────────────────────────
 
-function ActivityHeader() {
-  return (
-    <div className="[word-break:break-word] content-stretch flex font-['MessinaSansWeb:Bold',sans-serif] items-center justify-between leading-[normal] not-italic relative shrink-0 text-[#3d3d3d] w-full whitespace-nowrap" data-name="Activity Header">
-      <p className="relative shrink-0 text-[16px] tracking-[-0.48px]">Strike de actividad</p>
-      <p className="relative shrink-0 text-[13px] tracking-[-0.39px]">+ Agregar nueva</p>
-    </div>
-  );
+// Days the user selected during onboarding (0 = Sunday, 1 = Monday, …, 6 = Saturday)
+const ONBOARDING_TRAINING_DAYS: number[] = [1, 2, 3, 4, 5, 6]; // Mon – Sat
+
+const STREAK_RECORD = 9;
+
+type DayKind = "done" | "today-training" | "today-rest" | "scheduled" | "past-rest" | "future-rest";
+
+interface StreakDay {
+  letter: string;
+  kind: DayKind;
+  isTrainingDay: boolean;
 }
 
-function Ellipse() {
-  return (
-    <div className="col-1 h-[29.771px] ml-0 mt-0 relative row-1 w-[30.399px]">
-      <div className="absolute inset-[-1.8%_-1.76%]">
-        <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 31.4722 30.8436">
-          <g id="Ellipse 87">
-            <path d={svgPaths.p8517600} id="Vector" stroke="#858585" strokeWidth="1.07282" />
-          </g>
-        </svg>
-      </div>
-    </div>
-  );
+function localDateStr(d: Date): string {
+  // "YYYY-MM-DD" in local timezone — matches PAST_DAYS keys
+  return d.toLocaleDateString("sv");
 }
 
-function ActivityIcon() {
-  return (
-    <div className="col-1 grid-cols-[max-content] grid-rows-[max-content] inline-grid ml-0 mt-[0.6px] place-items-start relative row-1" data-name="Activity Icon">
-      <Ellipse />
-      <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] [word-break:break-word] col-1 font-['Messina_Sans_Trial:Regular',sans-serif] leading-[normal] ml-[12.2px] mt-[11.89px] not-italic relative row-1 text-[#858585] text-[8.583px] whitespace-nowrap">L</p>
-    </div>
-  );
+function buildWeekStrip(): { days: StreakDay[]; streakCount: number } {
+  const now = new Date();
+  const todayStr = localDateStr(now);
+
+  // Monday of the current week
+  const dow = now.getDay(); // 0 = Sun
+  const offsetToMonday = dow === 0 ? -6 : 1 - dow;
+  const monday = new Date(now);
+  monday.setDate(now.getDate() + offsetToMonday);
+  monday.setHours(0, 0, 0, 0);
+
+  const todayMidnight = new Date(now);
+  todayMidnight.setHours(0, 0, 0, 0);
+
+  const letters = ["L", "M", "M", "J", "V", "S", "D"];
+  const days: StreakDay[] = [];
+
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    const dateStr = localDateStr(d);
+    const isToday = dateStr === todayStr;
+    const isPast = d.getTime() < todayMidnight.getTime();
+    const dowJs = d.getDay();
+    const isTrainingDay = ONBOARDING_TRAINING_DAYS.includes(dowJs);
+    const trained = !!PAST_DAYS[dateStr];
+
+    let kind: DayKind;
+    if (isToday) {
+      kind = isTrainingDay ? "today-training" : "today-rest";
+    } else if (isPast) {
+      kind = trained ? "done" : "past-rest";
+    } else {
+      kind = isTrainingDay ? "scheduled" : "future-rest";
+    }
+
+    days.push({ letter: letters[i], kind, isTrainingDay });
+  }
+
+  // Streak: consecutive trained days going backwards from yesterday;
+  // rest days (not a training day) don't break the streak.
+  let streakCount = 0;
+  for (let i = days.length - 1; i >= 0; i--) {
+    const { kind, isTrainingDay: itd } = days[i];
+    if (kind === "today-training" || kind === "today-rest" || kind === "scheduled" || kind === "future-rest") continue;
+    if (kind === "done") { streakCount++; continue; }
+    if (kind === "past-rest" && !itd) continue; // genuine rest day — streak intact
+    break; // missed a scheduled training day
+  }
+
+  return { days, streakCount };
 }
 
-function Ellipse1() {
-  return (
-    <div className="col-1 h-[30.962px] ml-0 mt-0 relative row-1 w-[31.615px]">
-      <svg className="absolute block inset-0 size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 31.6154 30.9616">
-        <g id="Ellipse 87">
-          <path d={svgPaths.p30144d00} id="Vector" stroke="#858585" strokeWidth="1.07282" />
-        </g>
-      </svg>
-    </div>
-  );
-}
-
-function ActivityIcon1() {
-  return (
-    <div className="col-1 grid-cols-[max-content] grid-rows-[max-content] inline-grid ml-[51.78px] mt-0 place-items-start relative row-1" data-name="Activity Icon">
-      <Ellipse1 />
-      <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] [word-break:break-word] col-1 font-['Messina_Sans_Trial:Regular',sans-serif] leading-[normal] ml-[11.81px] mt-[12.48px] not-italic relative row-1 text-[#858585] text-[8.583px] whitespace-nowrap">M</p>
-    </div>
-  );
-}
-
-function Ellipse2() {
-  return (
-    <div className="col-1 h-[29.771px] ml-0 mt-0 relative row-1 w-[30.399px]">
-      <svg className="absolute block inset-0 size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 30.3994 29.7707">
-        <g id="Ellipse 87">
-          <path d={svgPaths.p3b6698b0} fill="#ADFF19" id="Vector" />
-        </g>
-      </svg>
-    </div>
-  );
-}
-
-function ActivityIcon2() {
-  return (
-    <div className="col-1 grid-cols-[max-content] grid-rows-[max-content] inline-grid ml-[157.15px] mt-[0.6px] place-items-start relative row-1" data-name="Activity Icon">
-      <Ellipse2 />
-      <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] [word-break:break-word] col-1 font-['Messina_Sans_Trial:Bold',sans-serif] leading-[normal] ml-[12.7px] mt-[11.89px] not-italic relative row-1 text-[#565656] text-[8.583px] whitespace-nowrap">J</p>
-    </div>
-  );
-}
-
-function Ellipse3() {
-  return (
-    <div className="col-1 h-[29.771px] ml-0 mt-0 relative row-1 w-[30.399px]">
-      <div className="absolute inset-[-1.8%_-1.76%]">
-        <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 31.4722 30.8436">
-          <g id="Ellipse 87">
-            <path d={svgPaths.p3b54ae70} id="Vector" stroke="#858585" strokeWidth="1.07282" />
-          </g>
-        </svg>
-      </div>
-    </div>
-  );
-}
-
-function ActivityIcon3() {
-  return (
-    <div className="col-1 grid-cols-[max-content] grid-rows-[max-content] inline-grid ml-[314.31px] mt-[0.6px] place-items-start relative row-1" data-name="Activity Icon">
-      <Ellipse3 />
-      <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] [word-break:break-word] col-1 font-['Messina_Sans_Trial:Regular',sans-serif] leading-[normal] ml-[11.7px] mt-[11.89px] not-italic relative row-1 text-[#858585] text-[8.583px] whitespace-nowrap">D</p>
-    </div>
-  );
-}
-
-function Ellipse6() {
-  return (
-    <div className="col-1 h-[29.771px] ml-0 mt-0 relative row-1 w-[30.399px]">
-      <svg className="absolute block inset-0 size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 30.3994 29.7707">
-        <g id="Ellipse 124">
-          <path d={svgPaths.p3b6698b0} fill="#ADFF19" id="Vector" />
-        </g>
-      </svg>
-    </div>
-  );
-}
-
-function ActivityIcon4() {
-  return (
-    <div className="col-1 grid-cols-[max-content] grid-rows-[max-content] inline-grid ml-[261.92px] mt-[0.6px] place-items-start relative row-1" data-name="Activity Icon">
-      <Ellipse6 />
-      <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] [word-break:break-word] col-1 font-['Messina_Sans_Trial:Bold',sans-serif] leading-[normal] ml-[12.2px] mt-[11.89px] not-italic relative row-1 text-[#565656] text-[8.583px] whitespace-nowrap">S</p>
-    </div>
-  );
-}
-
-function Ellipse5() {
-  return (
-    <div className="col-1 h-[29.771px] ml-0 mt-0 relative row-1 w-[30.399px]">
-      <svg className="absolute block inset-0 size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 30.3994 29.7707">
-        <g id="Ellipse 123">
-          <path d={svgPaths.p3b6698b0} fill="#ADFF19" id="Vector" />
-        </g>
-      </svg>
-    </div>
-  );
-}
-
-function ActivityIcon5() {
-  return (
-    <div className="col-1 grid-cols-[max-content] grid-rows-[max-content] inline-grid ml-[209.54px] mt-[0.6px] place-items-start relative row-1" data-name="Activity Icon">
-      <Ellipse5 />
-      <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] [word-break:break-word] col-1 font-['Messina_Sans_Trial:Bold',sans-serif] leading-[normal] ml-[12.2px] mt-[11.89px] not-italic relative row-1 text-[#565656] text-[8.583px] whitespace-nowrap">V</p>
-    </div>
-  );
-}
-
-function RepeatGrid() {
-  return (
-    <div className="col-1 grid-cols-[max-content] grid-rows-[max-content] inline-grid ml-0 mt-0 place-items-start relative row-1" data-name="Repeat Grid 14">
-      <ActivityIcon />
-      <ActivityIcon1 />
-      <ActivityIcon2 />
-      <ActivityIcon3 />
-      <ActivityIcon4 />
-      <ActivityIcon5 />
-    </div>
-  );
-}
-
-function ActivityGrid() {
-  return (
-    <div className="col-1 grid-cols-[max-content] grid-rows-[max-content] inline-grid ml-0 mt-0 place-items-start relative row-1" data-name="Activity Grid">
-      <RepeatGrid />
-    </div>
-  );
-}
-
-function Ellipse4() {
-  return (
-    <div className="col-1 h-[29.771px] ml-[104.77px] mt-[0.6px] relative row-1 w-[30.399px]">
-      <svg className="absolute block inset-0 size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 30.3994 29.7707">
-        <g id="Ellipse 122">
-          <path d={svgPaths.p37f55f80} fill="#ADFF19" id="Vector" />
-        </g>
-      </svg>
-    </div>
-  );
-}
-
-function ActivityContent() {
-  return (
-    <div className="grid-cols-[max-content] grid-rows-[max-content] inline-grid leading-[0] place-items-start relative shrink-0" data-name="Activity Content">
-      <ActivityGrid />
-      <Ellipse4 />
-      <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] [word-break:break-word] col-1 font-['Messina_Sans_Trial:Regular',sans-serif] leading-[normal] ml-[115.97px] mt-[12.48px] not-italic relative row-1 text-[#565656] text-[8.583px] whitespace-nowrap">M</p>
-      <div className="col-1 h-0 ml-[239.33px] mt-[15.48px] relative row-1 w-[22.59px]" data-name="Path 1467">
-        <div className="absolute inset-[-0.5px_0]">
-          <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 22.5902 1">
-            <path d="M0 0.5H22.5902" id="Path 1467" stroke="#ADFF19" />
-          </svg>
+function StreakDot({ kind }: { kind: DayKind }) {
+  switch (kind) {
+    case "done":
+      return (
+        <div className="flex items-center justify-center size-[28px] rounded-full bg-[#adff19]">
+          <Check size={15} strokeWidth={2.5} className="text-[#3d3d3d]" />
         </div>
-      </div>
-      <div className="col-1 h-0 ml-[187.33px] mt-[15.48px] relative row-1 w-[22.59px]" data-name="Path 1468">
-        <div className="absolute inset-[-0.5px_0]">
-          <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 22.5902 1">
-            <path d="M0 0.5H22.5902" id="Path 1467" stroke="#ADFF19" />
-          </svg>
-        </div>
-      </div>
-      <div className="col-1 h-0 ml-[134.33px] mt-[15.48px] relative row-1 w-[22.59px]" data-name="Path 1469">
-        <div className="absolute inset-[-0.5px_0]">
-          <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 22.5902 1">
-            <path d="M0 0.5H22.5902" id="Path 1467" stroke="#ADFF19" />
-          </svg>
-        </div>
-      </div>
-    </div>
-  );
+      );
+    case "today-training":
+      return <div className="size-[28px] rounded-full border-[2px] border-dashed border-[#3d3d3d]" />;
+    case "today-rest":
+      return <div className="size-[28px] rounded-full border border-solid border-[#c4c4c4]" />;
+    case "scheduled":
+      // Onboarding-selected future training day — dashed lime ring
+      return <div className="size-[28px] rounded-full" style={{ border: "1.5px dashed rgba(173,255,25,0.75)" }} />;
+    case "past-rest":
+      return <div className="size-[28px] rounded-full border border-solid border-[#d4d4d4]" />;
+    case "future-rest":
+    default:
+      return <div className="size-[28px] rounded-full border border-solid border-[#ebebeb]" />;
+  }
+}
+
+function labelColor(kind: DayKind): string {
+  if (kind === "done" || kind === "today-training") return "text-[#565656]";
+  if (kind === "scheduled") return "text-[#7ab800]";
+  return "text-[#a3a3a3]";
+}
+
+function connectorColor(left: DayKind, right: DayKind): string {
+  if (left === "done" && right === "done") return "#adff19";
+  return "#e0e0e0";
 }
 
 function ActivityContainer() {
+  const { days, streakCount } = buildWeekStrip();
+  const todayIsTraining = days.some((d) => d.kind === "today-training");
+
+  const motivational = streakCount > 0
+    ? todayIsTraining
+      ? `Llevás ${streakCount} días seguidos. Entrená hoy para no cortar la racha.`
+      : `Llevás ${streakCount} días seguidos. Hoy es día de descanso — seguís mañana.`
+    : "¡Empezá hoy tu racha de actividad!";
+
   return (
     <div className="bg-[rgba(255,255,255,0.5)] relative rounded-[8px] shrink-0 w-full" data-name="Activity Container">
-      <div className="content-stretch flex flex-col gap-[20px] items-start p-[20px] relative size-full">
-        <ActivityHeader />
-        <ActivityContent />
+      <div className="flex flex-col gap-[16px] items-start p-[20px] w-full">
+
+        {/* Header */}
+        <div className="flex items-center justify-between w-full">
+          <p className="font-['MessinaSansWeb:Bold',sans-serif] text-[#3d3d3d] text-[16px] tracking-[-0.48px] whitespace-nowrap">
+            Racha de actividad
+          </p>
+          <p className="font-['MessinaSansWeb:Bold',sans-serif] text-[#3d3d3d] text-[13px] tracking-[-0.39px] whitespace-nowrap">
+            + Agregar nueva
+          </p>
+        </div>
+
+        {/* Big streak count + record */}
+        <div className="flex items-end justify-between w-full">
+          <div className="flex items-end gap-[10px]">
+            <Flame size={30} strokeWidth={2} className="text-[#adff19] fill-[#adff19] shrink-0 mb-[2px]" />
+            <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] font-['Druk_Wide:Medium',sans-serif] text-[40px] text-[#3d3d3d] leading-[0.9] tracking-[-2px]">
+              {streakCount}
+            </p>
+            <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[#585858] text-[15px] tracking-[-0.3px] pb-[5px]">
+              días seguidos
+            </p>
+          </div>
+          <div className="bg-[#ededed] px-[10px] py-[4px] rounded-full shrink-0">
+            <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[#858585] text-[11px] tracking-[-0.22px] whitespace-nowrap">
+              Récord: {STREAK_RECORD} días
+            </p>
+          </div>
+        </div>
+
+        {/* Week strip */}
+        <div className="flex items-start w-full">
+          {days.map((d, i) => (
+            <React.Fragment key={i}>
+              {i > 0 && (
+                <div
+                  className="flex-1 h-[2px] mt-[13px] rounded-full"
+                  style={{ background: connectorColor(days[i - 1].kind, d.kind) }}
+                />
+              )}
+              <div className="flex flex-col items-center gap-[6px] shrink-0 w-[28px]">
+                <StreakDot kind={d.kind} />
+                <span className={`font-['MessinaSansWeb:Regular',sans-serif] text-[11px] tracking-[-0.22px] ${labelColor(d.kind)}`}>
+                  {d.letter}
+                </span>
+              </div>
+            </React.Fragment>
+          ))}
+        </div>
+
+        {/* Motivational why */}
+        <WhyLine>{motivational}</WhyLine>
+
       </div>
     </div>
   );
@@ -1180,34 +1178,53 @@ function SocialContainer() {
 
 // ─── Main scroll content ───────────────────────────────────────────────────────
 
-function MainContent({ onReservar, onConfirmWorkout, onOpenFab, isToday, isFutureDay, selectedDate, todayReservedClass }: { onReservar: () => void; onConfirmWorkout: (data: ReservedClass) => void; onOpenFab: () => void; isToday: boolean; isFutureDay: boolean; selectedDate: Date; todayReservedClass: ReservedClass | null }) {
+function MainContent({ onReservar, onOpenFab, onOpenDetail, onOpenProgramming, isToday, isFutureDay, selectedDate, todayReservedClass, cardVariant = 1 }: { onReservar: () => void; onOpenFab: () => void; onOpenDetail: (rc: ReservedClass) => void; onOpenProgramming: () => void; isToday: boolean; isFutureDay: boolean; selectedDate: Date; todayReservedClass: ReservedClass | null; cardVariant?: 1 | 2 | 3 }) {
   const dateKey = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}`;
   const pastData = isToday ? undefined : PAST_DAYS[dateKey];
 
   return (
-    <div className="flex flex-col gap-[16px] items-center w-full px-[20px] pt-[197px]">
+    // pt clears the fixed StickyHeader (greeting + week calendar, no status bar)
+    <div className="flex flex-col gap-[16px] items-center w-full px-[20px] pt-[153px]">
 
       {/* ── Timeline ── */}
       <div className="w-full max-w-[388px] mb-[24px]">
         {isToday ? (
           <DailyWorkoutCard
             onReservar={onReservar}
-            onConfirmWorkout={onConfirmWorkout}
             onOpenFab={onOpenFab}
+            onOpenDetail={todayReservedClass ? () => onOpenDetail(todayReservedClass) : undefined}
+            onOpenProgramming={todayReservedClass ? undefined : onOpenProgramming}
             reservedClass={todayReservedClass ?? undefined}
             activities={TODAY_ACTIVITIES}
+            cardVariant={cardVariant}
           />
         ) : pastData?.reservedClass ? (
-          <DailyWorkoutCard reservedClass={pastData.reservedClass} activities={pastData.activities} onOpenFab={onOpenFab} />
+          <DailyWorkoutCard
+            reservedClass={pastData.reservedClass}
+            activities={pastData.activities}
+            onOpenFab={onOpenFab}
+            onOpenDetail={() => onOpenDetail(pastData.reservedClass!)}
+          />
         ) : isFutureDay ? (
           selectedDate.getDay() === 4
             ? <DailyWorkoutCard onOpenFab={onOpenFab} showMorning={false} showAfternoon={true} />
-            : <DailyWorkoutCard onReservar={onReservar} onConfirmWorkout={onConfirmWorkout} onOpenFab={onOpenFab} showMorning={true} showAfternoon={false} />
+            : <DailyWorkoutCard onReservar={onReservar} onOpenFab={onOpenFab} onOpenProgramming={onOpenProgramming} showMorning={true} showAfternoon={false} />
         ) : (
-          <div className="bg-[rgba(255,255,255,0.5)] rounded-[8px] p-[20px] flex items-center justify-center min-h-[120px]">
-            <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[#a3a3a3] text-[15px] tracking-[-0.3px] text-center">
-              Sin actividad registrada
-            </p>
+          <div className="flex flex-col gap-[12px]">
+            <div className="bg-[rgba(255,255,255,0.5)] rounded-[8px] p-[20px] flex items-center justify-center min-h-[120px]">
+              <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[#a3a3a3] text-[15px] tracking-[-0.3px] text-center">
+                Sin actividad registrada
+              </p>
+            </div>
+            <button
+              onClick={onOpenFab}
+              className="w-full rounded-[16px] border border-dashed border-[#858585] py-[16px] flex items-center justify-center gap-[8px] bg-[#ededed] active:opacity-60 transition-opacity"
+            >
+              <Plus size={16} strokeWidth={2} className="text-[#858585]" />
+              <span className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[#858585] text-[14px] tracking-[-0.28px]">
+                Agregar
+              </span>
+            </button>
           </div>
         )}
       </div>
@@ -1331,12 +1348,12 @@ function Frame5() {
 
 function Frame14() {
   return (
-    <div className="content-stretch flex items-center justify-between relative shrink-0 w-full">
-      <Frame43 />
-      <div className="flex items-center justify-between gap-[16px] flex-1 pl-[12px]">
+    <div className="flex items-center justify-between relative shrink-0 w-full">
+      <div className="flex items-center gap-[12px]">
+        <Frame43 />
         <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] font-['MessinaSansWeb:Bold',sans-serif] leading-[normal] not-italic text-[#565656] text-[16px] tracking-[-0.4px] whitespace-nowrap">Hola Mateo!</p>
-        <Frame5 />
       </div>
+      <Frame5 />
     </div>
   );
 }
@@ -1434,12 +1451,9 @@ function StickyHeader({ today, selectedDate, onSelectDate, scrollY }: { today: D
 
   useEffect(() => {
     if (titleRowRef.current) {
-      // StatusBar is z-50 at y=0–40. StickyHeader has pt-60, so Frame14 starts at header-y=60.
-      // With translation T: Frame14 bottom is at viewport-y = (60 + frameHeight) - T.
-      // Set Frame14 bottom ≤ 38px (just inside the status bar cover) → T = frameHeight + 22.
-      // WeekCalendar then appears at viewport-y = (110 - T) = 88 - frameHeight ≈ 50px.
+      // Collapse greeting row just past the top edge when scrolling.
       const frameHeight = titleRowRef.current.offsetHeight;
-      setMaxCollapse(frameHeight + 22);
+      setMaxCollapse(frameHeight + 4);
     }
   }, []);
 
@@ -1447,13 +1461,13 @@ function StickyHeader({ today, selectedDate, onSelectDate, scrollY }: { today: D
 
   return (
     <div
-      className="fixed backdrop-blur-[2px] bg-[rgba(255,255,255,0.8)] flex justify-center left-0 pb-[20px] pt-[60px] px-[20px] rounded-bl-[20px] rounded-br-[20px] top-0 w-screen z-40"
+      className="fixed backdrop-blur-[2px] bg-[rgba(255,255,255,0.8)] flex justify-center left-0 pb-[20px] pt-[16px] px-[20px] rounded-bl-[20px] rounded-br-[20px] top-0 w-screen z-40"
       style={{ transform: `translateY(-${translateY}px)` }}
     >
       <div aria-hidden className="absolute border border-[rgba(255,255,255,0.1)] border-solid inset-0 pointer-events-none rounded-bl-[20px] rounded-br-[20px]" />
       <div className="w-full max-w-[388px]">
         <div className="content-stretch flex flex-col gap-[12px] items-start relative shrink-0 w-full">
-          <div ref={titleRowRef}>
+          <div ref={titleRowRef} className="w-full">
             <Frame14 />
           </div>
           <WeekCalendar today={today} selectedDate={selectedDate} onSelectDate={onSelectDate} />
@@ -1519,8 +1533,8 @@ type BottomTabId = "train" | "activity" | "world" | "community" | "perfil";
 
 const BOTTOM_TABS: { id: BottomTabId; label: string; Icon: React.ElementType }[] = [
   { id: "train", label: "Train", Icon: Dumbbell },
-  { id: "activity", label: "Actividad", Icon: Activity },
-  { id: "world", label: "BIGG World", Icon: Globe },
+  { id: "activity", label: "Opción 2", Icon: Activity },
+  { id: "world", label: "Opción 3", Icon: Globe },
   { id: "community", label: "Comunidad", Icon: Users },
   { id: "perfil", label: "Perfil", Icon: User },
 ];
@@ -1563,6 +1577,9 @@ export default function BiggDayScreen() {
   const [activeTab, setActiveTab] = useState<BottomTabId>("train");
   const [reservarOpen, setReservarOpen] = useState(false);
   const [fabOpen, setFabOpen] = useState(false);
+  const [programmingOpen, setProgrammingOpen] = useState(false);
+  const [classDetailOpen, setClassDetailOpen] = useState(false);
+  const [detailClass, setDetailClass] = useState<ReservedClass | null>(null);
   const [todayReservedClass, setTodayReservedClass] = useState<ReservedClass | null>(null);
   const [headerScrollY, setHeaderScrollY] = useState(0);
   const [today] = useState(() => {
@@ -1635,29 +1652,28 @@ export default function BiggDayScreen() {
       </div>
 
       {/* Tab content */}
-      {activeTab === "train" && (
+      {(activeTab === "train" || activeTab === "activity" || activeTab === "world") && (
         <div className="pb-[93px]">
           <MainContent
             onReservar={() => setReservarOpen(true)}
-            onConfirmWorkout={(data) => setTodayReservedClass(data)}
             onOpenFab={() => setFabOpen(true)}
+            onOpenDetail={(rc) => { setDetailClass(rc); setClassDetailOpen(true); }}
+            onOpenProgramming={() => setProgrammingOpen(true)}
             isToday={isToday}
             isFutureDay={isFutureDay}
             selectedDate={selectedDate}
             todayReservedClass={todayReservedClass}
+            cardVariant={activeTab === "train" ? 1 : activeTab === "activity" ? 2 : 3}
           />
         </div>
       )}
-      {activeTab === "activity" && <PlaceholderTabContent label="Actividad — próximamente" />}
-      {activeTab === "world" && <PlaceholderTabContent label="BIGG World Map — próximamente" />}
       {activeTab === "community" && <CommunityTabContent />}
       {activeTab === "perfil" && <PlaceholderTabContent label="Perfil — próximamente" />}
 
       {/* Fixed overlays */}
-      {activeTab === "train" && <StickyHeader today={today} selectedDate={selectedDate} onSelectDate={setSelectedDate} scrollY={headerScrollY} />}
-      <StatusBar />
+      {(activeTab === "train" || activeTab === "activity" || activeTab === "world") && <StickyHeader today={today} selectedDate={selectedDate} onSelectDate={setSelectedDate} scrollY={headerScrollY} />}
       <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
-      <FloatingActionButton open={fabOpen} onOpenChange={setFabOpen} />
+      <FloatingActionButton open={fabOpen} onOpenChange={setFabOpen} onVerProgramacion={() => setProgrammingOpen(true)} />
 
       {/* Reservar sheet — triggered by BIGG Class Reservar button */}
       <BottomSheet
@@ -1678,6 +1694,28 @@ export default function BiggDayScreen() {
           }}
         />
       </BottomSheet>
+
+      {/* Programación screen — triggered by FAB "Ver programación" or unreserved workout card */}
+      <AnimatePresence>
+        {programmingOpen && (
+          <ProgrammingScreen
+            onBack={() => setProgrammingOpen(false)}
+            onReservar={() => { setProgrammingOpen(false); setReservarOpen(true); }}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Class detail screen — triggered by tapping a ReservedClassCard */}
+      <AnimatePresence>
+        {classDetailOpen && detailClass && (
+          <ClassDetailScreen
+            reservedClass={detailClass}
+            onBack={() => setClassDetailOpen(false)}
+            onOpenProgramming={() => { setClassDetailOpen(false); setProgrammingOpen(true); }}
+          />
+        )}
+      </AnimatePresence>
+
     </div>
   );
 }

@@ -1,57 +1,104 @@
 import { useState } from "react";
-import { Plus, Check, Sparkles, Pencil } from "lucide-react";
+import { ChevronDown, MapPin, Plus, Check, Pencil, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import svgPaths from "../../imports/BiggDay/svg-03sgvqmew7";
+import SourceChip, { type DataSource } from "./SourceChip";
+import WhyLine from "./WhyLine";
+import LocationSheet from "./LocationSheet";
+import AddLocationScreen from "./AddLocationScreen";
+import { BlockCard, type StimulusBlock } from "./ProgrammingSection";
 
-type TabId = "bigg-class" | "home-gym" | "outdoors";
+const BASE_CHIPS = ["FBA", "Upper Body", "HIIT", "Midline"];
+const BIGG_LOCATIONS = new Set(["BIGG Recoleta", "BIGG Tortuguitas"]);
 
-interface TabData {
-  id: TabId;
-  label: string;
-  title: string;
-  chips: string[];
-}
-
-const TABS: TabData[] = [
-  { id: "bigg-class", label: "BIGG Class", title: "BIGG Class", chips: ["10:00AM", "BIGG Recoleta"] },
-  { id: "home-gym", label: "Home/Gym", title: "Bigg Workout", chips: ["Flexible", "En casa"] },
-  { id: "outdoors", label: "Outdoors", title: "Bigg Outdoor Workout", chips: ["07:30AM", "Palermo"] },
+const DAY_BLOCKS: StimulusBlock[] = [
+  { id: "day-fba", stimulus: "FBA", modality: "Superset · 3 sets", duration: "15'",
+    movements: ["SA DB Press 3 × 10 c/lado", "Nordic Curl 3 × 8", "Copenhagen Plank 3 × 30''", "Bulgarian Split 3 × 10 c/lado"],
+    gradient: "linear-gradient(135deg, #f9f9f9 0%, #e0fff5 100%)" },
+  { id: "day-ub", stimulus: "Upper Body", modality: "Strength · 5 sets", duration: "20'",
+    movements: ["Bench Press 4 × 5 @80%", "Weighted Pull-up 3 × 6", "DB Row 3 × 10 c/lado", "Face Pull 2 × 15"],
+    gradient: "linear-gradient(135deg, #f9f9f9 0%, #e8eeff 100%)" },
+  { id: "day-hi", stimulus: "HIIT", modality: "AMRAP · 12'", duration: "12'",
+    movements: ["Thruster × 10", "Box Jump × 10", "KB Swing × 15", "Burpee × 8"],
+    gradient: "linear-gradient(135deg, #f9f9f9 0%, #fff0e0 100%)" },
+  { id: "day-mid", stimulus: "Midline", modality: "For Quality · 3 sets", duration: "12'",
+    movements: ["Hollow Hold 3 × 30''", "V-Up 3 × 15", "Pallof Press 3 × 12 c/lado", "Dead Bug 3 × 10"],
+    gradient: "linear-gradient(135deg, #f9f9f9 0%, #f5f0ff 100%)" },
 ];
 
-function BiggClassIcon() {
+const FLAP_OVERLAP = 12;
+
+function FlapItem({ block, isOpen, onToggle, index, total, isAdapted = false }: { block: StimulusBlock; isOpen: boolean; onToggle: () => void; index: number; total: number; isAdapted?: boolean }) {
+  const isLast = index === total - 1;
   return (
-    <div className="relative shrink-0 size-[24px]">
-      <svg className="absolute block inset-0 size-full" fill="none" viewBox="0 0 24 24">
-        <path d={svgPaths.p23dee300} stroke="white" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-      </svg>
+    <div
+      className="w-full"
+      style={{
+        borderTop: "1px solid rgba(0,0,0,0.09)",
+        borderLeft: "1px solid rgba(0,0,0,0.09)",
+        borderRight: "1px solid rgba(0,0,0,0.09)",
+        borderBottom: isLast ? "1px solid rgba(0,0,0,0.09)" : "none",
+        borderTopLeftRadius: "14px",
+        borderTopRightRadius: "14px",
+        borderBottomLeftRadius: isLast ? "14px" : 0,
+        borderBottomRightRadius: isLast ? "14px" : 0,
+        paddingBottom: isLast ? 0 : FLAP_OVERLAP,
+        marginTop: index > 0 ? -FLAP_OVERLAP : 0,
+        position: "relative",
+        zIndex: total - index,
+      }}
+    >
+      <button
+        type="button"
+        onClick={(e) => { e.stopPropagation(); onToggle(); }}
+        className="w-full flex items-center justify-between px-[16px] py-[14px] active:opacity-70 transition-opacity"
+      >
+        <p className="font-['Druk_Wide:Medium',sans-serif] text-[17px] text-[#3d3d3d] leading-none tracking-[-0.5px] uppercase">
+          {block.stimulus}
+        </p>
+        <div className="flex items-center gap-[8px] shrink-0">
+          {isAdapted && <Sparkles size={13} className="text-[#2ab3cc]" strokeWidth={2} />}
+          <motion.div animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.18 }}>
+            <ChevronDown size={14} className="text-[#a3a3a3]" strokeWidth={2} />
+          </motion.div>
+        </div>
+      </button>
+      <AnimatePresence initial={false}>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 380, damping: 38 }}
+            style={{ overflow: "hidden" }}
+          >
+            <div className="px-[16px] pb-[16px] flex flex-col gap-[10px]">
+              <p className="font-['MessinaSansWeb:Bold',sans-serif] text-[10px] text-[#a3a3a3] tracking-[0.6px] uppercase">
+                {block.modality}
+              </p>
+              <div className="flex flex-col gap-[6px]">
+                {block.movements.map((mv, i) => (
+                  <p key={i} className="font-['MessinaSansWeb:Regular',sans-serif] text-[13px] text-[#3d3d3d] leading-[1.35]">
+                    {mv}
+                  </p>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
 
-function HomeGymIcon() {
+// Dark time pill used as the timeline node label (e.g. "10AM", "18:00hs").
+function TimePill({ label }: { label: string }) {
   return (
-    <div className="h-[24.889px] relative shrink-0 w-[24px]">
-      <svg className="absolute block inset-0 size-full" fill="none" viewBox="0 0 24 24.8889">
-        <path d={svgPaths.p1fab3c00} stroke="white" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-      </svg>
+    <div className="bg-[#3d3d3d] rounded-full px-[12px] py-[6px] flex items-center justify-center">
+      <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-white text-[13px] whitespace-nowrap tracking-[-0.26px] leading-[1.2]">
+        {label}
+      </p>
     </div>
   );
-}
-
-function OutdoorsIcon() {
-  return (
-    <div className="h-[24px] relative shrink-0 w-[23.996px]">
-      <svg className="absolute block inset-0 size-full" fill="none" viewBox="0 0 23.996 24">
-        <path d={svgPaths.pbbc2500} fill="white" />
-      </svg>
-    </div>
-  );
-}
-
-function TabIcon({ id }: { id: TabId }) {
-  if (id === "bigg-class") return <BiggClassIcon />;
-  if (id === "home-gym") return <HomeGymIcon />;
-  return <OutdoorsIcon />;
 }
 
 function AfternoonRecommendationCard() {
@@ -78,13 +125,13 @@ function AfternoonRecommendationCard() {
         animate={{ opacity: added ? 1 : 0.55 }}
         transition={{ duration: 0.5 }}
       >
-        {/* Top: gradient section */}
+        {/* Single gradient section — WhyLine inline (running pasadas pattern) */}
         <div
-          className="backdrop-blur-[50px] content-stretch flex gap-[20px] items-start mb-[-34px] p-[20px] relative rounded-bl-[20px] rounded-br-[20px] shrink-0 w-full z-[2]"
+          className="backdrop-blur-[50px] content-stretch flex gap-[20px] items-start p-[20px] relative rounded-[20px] shrink-0 w-full"
           style={{ backgroundImage: "linear-gradient(112.876deg, rgba(255,255,255,0.9) 37.068%, rgba(42,179,204,0.9) 114.32%)" }}
         >
-          {/* Left: title + chip */}
-          <div className="content-stretch flex flex-[1_0_0] flex-col gap-[20px] items-start min-w-px relative">
+          {/* Left: title + chip + why */}
+          <div className="content-stretch flex flex-[1_0_0] flex-col gap-[16px] items-start min-w-px relative">
             <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] font-['Druk_Wide:Medium',sans-serif] text-[26px] text-[#565656] tracking-[-1.3px] whitespace-nowrap">
               Mobility
             </p>
@@ -93,6 +140,7 @@ function AfternoonRecommendationCard() {
                 BIGG Soft Life
               </p>
             </div>
+            <WhyLine>Cooldown recomendado por tu entrenamiento de la mañana en BIGG Recoleta</WhyLine>
           </div>
 
           {/* Right: Agregar / Agregado button */}
@@ -132,14 +180,6 @@ function AfternoonRecommendationCard() {
             </motion.p>
           </button>
         </div>
-
-        {/* Bottom: AI recommendation */}
-        <div className="bg-[rgba(255,255,255,0.8)] content-stretch flex gap-[10px] items-center pb-[15px] pt-[45px] px-[10px] relative shrink-0 w-full z-[1]">
-          <Sparkles size={18} strokeWidth={1.5} className="text-[#2ab3cc] shrink-0" />
-          <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] flex-[1_0_0] font-['MessinaSansWeb:Regular',sans-serif] text-[#2ab3cc] text-[13px] tracking-[-0.13px] leading-[1.13] min-w-px">
-            Cooldown recomendado por tu entrenamiento de la mañana en BIGG Recoleta
-          </p>
-        </div>
       </motion.div>
     </div>
   );
@@ -178,10 +218,11 @@ function AttendeeAvatars({ total = 20 }: { total?: number }) {
   );
 }
 
-function ReservedClassCard({ data }: { data: ReservedClass }) {
+function ReservedClassCard({ data, onTap }: { data: ReservedClass; onTap?: () => void }) {
   return (
-    <div
-      className="backdrop-blur-[50px] border border-[#a3a3a3] border-solid flex gap-[20px] items-start p-[20px] relative rounded-[20px] w-full"
+    <button
+      onClick={onTap}
+      className="backdrop-blur-[50px] border border-[#a3a3a3] border-solid flex gap-[20px] items-start p-[20px] relative rounded-[20px] w-full text-left active:opacity-80 transition-opacity"
       style={{ backgroundImage: "linear-gradient(105.33deg, rgba(255,255,255,0.9) 37%, rgba(222,255,163,0.9) 114%)" }}
     >
       <div className="flex flex-1 flex-col gap-[16px] items-start min-w-0">
@@ -200,7 +241,7 @@ function ReservedClassCard({ data }: { data: ReservedClass }) {
         </div>
       </div>
       <Pencil size={16} className="text-[#565656] opacity-40 shrink-0 mt-[2px]" />
-    </div>
+    </button>
   );
 }
 
@@ -209,7 +250,8 @@ export interface ActivityEntry {
   timeRange?: string;
   title: string;
   gradient?: string;
-  source?: "strava";
+  source?: DataSource;
+  why?: string;
   addable?: boolean;
 }
 
@@ -231,14 +273,8 @@ function ActivityCard({ entry }: { entry: ActivityEntry }) {
         <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] font-['Druk_Wide:Medium',sans-serif] text-[26px] text-[#565656] tracking-[-1.3px] whitespace-nowrap">
           {entry.title}
         </p>
-        {entry.source === "strava" && (
-          <div className="flex items-center gap-[6px] bg-[rgba(252,76,2,0.1)] px-[10px] py-[5px] rounded-full">
-            <div className="size-[7px] rounded-full bg-[#fc4c02]" />
-            <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[#fc4c02] text-[12px] tracking-[-0.24px] whitespace-nowrap">
-              Tomado desde Strava
-            </p>
-          </div>
-        )}
+        {entry.source && <SourceChip source={entry.source} prefix="Tomado desde" />}
+        {entry.why && <WhyLine>{entry.why}</WhyLine>}
         {entry.addable && (
           <button
             onClick={() => setAdded(true)}
@@ -263,27 +299,24 @@ function ActivityCard({ entry }: { entry: ActivityEntry }) {
 
 interface DailyWorkoutCardProps {
   onReservar?: () => void;
-  onConfirmWorkout?: (data: ReservedClass) => void;
   onOpenFab?: () => void;
+  onOpenDetail?: () => void;
+  onOpenProgramming?: () => void;
   reservedClass?: ReservedClass;
   activities?: ActivityEntry[];
   showMorning?: boolean;
   showAfternoon?: boolean;
+  cardVariant?: 1 | 2 | 3;
 }
 
-function buildReservedClass(tab: TabData): ReservedClass {
-  return {
-    time: tab.chips[0],
-    location: tab.chips[1] ?? "",
-    classType: tab.title,
-    blocks: ["1. UPPER BODY", "2. STRENGTH", "3. FBA", "4. MIDLINE"],
-    attendeeCount: tab.id === "bigg-class" ? 26 : 0,
-  };
-}
-
-export default function DailyWorkoutCard({ onReservar, onConfirmWorkout, onOpenFab, reservedClass, activities, showMorning = true, showAfternoon = true }: DailyWorkoutCardProps) {
-  const [activeTab, setActiveTab] = useState<TabId>("bigg-class");
-  const active = TABS.find((t) => t.id === activeTab)!;
+export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, onOpenProgramming, reservedClass, activities, showMorning = true, showAfternoon = true, cardVariant = 1 }: DailyWorkoutCardProps) {
+  const [selectedLocation, setSelectedLocation] = useState("BIGG Recoleta");
+  const [showLocationSheet, setShowLocationSheet] = useState(false);
+  const [showAddLocation, setShowAddLocation] = useState(false);
+  const [customLocations, setCustomLocations] = useState<string[]>([]);
+  const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
+  const [openFlapId, setOpenFlapId] = useState<string | null>(null);
+  const isBiggLocation = BIGG_LOCATIONS.has(selectedLocation);
 
   if (reservedClass) {
     return (
@@ -292,28 +325,20 @@ export default function DailyWorkoutCard({ onReservar, onConfirmWorkout, onOpenF
         <div className="flex flex-col items-start gap-[24px]">
           <div className="flex flex-col items-start gap-[10px] w-full">
             <div className="relative z-10 flex flex-row items-center gap-[10px]">
-              <div className="bg-[#3d3d3d] rounded-full px-[12px] py-[6px] flex items-center justify-center">
-                <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-white text-[13px] whitespace-nowrap tracking-[-0.26px] leading-[1.2]">
-                  {reservedClass.time}
-                </p>
-              </div>
+              <TimePill label={reservedClass.time} />
               <p className="font-['MessinaSansWeb:Regular',sans-serif] italic text-[#a3a3a3] text-[13px] tracking-[-0.26px]">
                 {reservedClass.location}
               </p>
             </div>
             <div className="relative z-10 w-full">
-              <ReservedClassCard data={reservedClass} />
+              <ReservedClassCard data={reservedClass} onTap={onOpenDetail} />
             </div>
           </div>
           {/* Additional activity entries */}
           {activities?.map((activity, i) => (
             <div key={i} className="flex flex-col items-start gap-[10px] w-full">
               <div className="relative z-10 flex flex-row items-center gap-[10px]">
-                <div className="bg-[#3d3d3d] rounded-full px-[12px] py-[6px] flex items-center justify-center">
-                  <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-white text-[13px] whitespace-nowrap tracking-[-0.26px] leading-[1.2]">
-                    {activity.time}
-                  </p>
-                </div>
+                <TimePill label={activity.time} />
               </div>
               <div className="relative z-10 w-full">
                 <ActivityCard entry={activity} />
@@ -335,151 +360,178 @@ export default function DailyWorkoutCard({ onReservar, onConfirmWorkout, onOpenF
     );
   }
 
-  const isClassReservation = activeTab === "bigg-class";
-
+  // ── Single unified timeline (recommendation state) ──
   return (
-    <div className="flex flex-col gap-[15px] items-start relative shrink-0 w-full">
-      {/* Section title */}
-      <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] font-['MessinaSansWeb:Bold',sans-serif] text-[18px] text-[#3d3d3d] tracking-[-0.45px]">
-        Tu BIGG day recomendado
-      </p>
+    <>
+    <div className="relative w-full">
+      <div className="absolute left-[22px] top-0 bottom-0 w-[1px] bg-[#c4c4c4]" />
+      <div className="flex flex-col items-start gap-[24px]">
 
-      {/* Timeline: both entries stacked, vertical line runs behind all */}
-      <div className="relative w-full">
-        {/* Vertical line spanning both entries + tail below */}
-        <div className="absolute left-[22px] top-0 bottom-0 w-[1px] bg-[#c4c4c4]" />
-
-        <div className="flex flex-col items-start gap-[24px]">
-
-          {/* ── Entry 1: 10AM ── */}
-          {showMorning && <div className="flex flex-col items-start gap-[10px] w-full">
+        {/* BIGG Class at 10AM */}
+        {showMorning && (
+          <div className="flex flex-col items-start gap-[10px] w-full">
             <div className="relative z-10 flex flex-row items-center gap-[10px]">
-              <div className="bg-[#3d3d3d] rounded-full px-[12px] py-[6px] flex items-center justify-center">
-                <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-white text-[13px] whitespace-nowrap tracking-[-0.26px] leading-[1.2]">
-                  10AM
-                </p>
-              </div>
-              <p className="font-['MessinaSansWeb:Regular',sans-serif] italic text-[#a3a3a3] text-[13px] tracking-[-0.26px]">
-                Tu entrenamiento del día
-              </p>
+              <TimePill label="Entrenamiento del día" />
             </div>
             <div className="relative z-10 w-full flex flex-col items-center">
-              <div className="overflow-clip relative rounded-[20px] w-full">
-                {/* Diamond indicator */}
+              <div className="relative w-full flex flex-col">
+                {/* ── Content area ── */}
                 <div
-                  className="absolute z-10 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center size-[20px]"
+                  className={`backdrop-blur-[50px] flex flex-col gap-[16px] relative z-[2] w-full rounded-[20px] ${cardVariant === 3 ? "pb-[20px]" : "p-[20px]"} ${cardVariant === 1 ? "cursor-pointer active:opacity-90 transition-opacity" : ""}`}
                   style={{
-                    top: "49px",
-                    left: activeTab === "bigg-class" ? "16%" : activeTab === "home-gym" ? "50%" : "84%",
-                    transition: "left 0.2s ease-in-out",
+                    backgroundImage: cardVariant === 1
+                      ? "linear-gradient(115.214deg, rgba(255, 255, 255, 0.9) 51.472%, rgba(163, 163, 163, 0.9) 114.32%)"
+                      : "linear-gradient(135deg, rgba(255,255,255,0.97) 0%, rgba(245,245,245,0.97) 100%)",
                   }}
+                  onClick={cardVariant === 1 ? onOpenProgramming : undefined}
                 >
-                  <div className="-rotate-45">
-                    <div className="bg-[#3d3d3d] relative rounded-[1.5px] size-[14px]" />
-                  </div>
-                </div>
-                {/* Tab selector */}
-                <div className="bg-[#3d3d3d] content-stretch flex items-center justify-between mb-[-34px] pb-[45px] pt-[15px] px-[20px] relative rounded-[20px] shrink-0 w-full">
-                  {TABS.map((tab) => (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
-                      className={`content-stretch cursor-pointer flex gap-[10px] items-center relative shrink-0 transition-opacity duration-200 ${activeTab === tab.id ? "opacity-100" : "opacity-40"}`}
-                    >
-                      <TabIcon id={tab.id} />
-                      <p
-                        className={`[text-decoration-skip-ink:none] [text-underline-position:from-font] [word-break:break-word] decoration-from-font decoration-solid leading-[1.13] not-italic relative shrink-0 text-white text-[13px] text-left tracking-[-0.13px] whitespace-nowrap ${
-                          activeTab === tab.id
-                            ? "font-['MessinaSansWeb:SemiBold',sans-serif] underline"
-                            : "font-['MessinaSansWeb:Regular',sans-serif]"
-                        }`}
-                      >
-                        {tab.label}
-                      </p>
-                    </button>
-                  ))}
-                </div>
-                {/* Content area */}
-                <div
-                  className="backdrop-blur-[50px] content-stretch flex gap-[20px] items-center p-[20px] relative rounded-bl-[20px] rounded-br-[20px] rounded-tl-[8px] rounded-tr-[20px] shrink-0 w-full"
-                  style={{ backgroundImage: "linear-gradient(115.214deg, rgba(255, 255, 255, 0.9) 51.472%, rgba(163, 163, 163, 0.9) 114.32%)" }}
-                >
-                  <div className="content-stretch flex flex-[1_0_0] flex-col items-start min-w-px relative">
-                    <div className="content-stretch flex flex-col gap-[15px] items-start relative shrink-0">
-                      <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] [word-break:break-word] font-['Druk_Wide:Medium',sans-serif] leading-[27px] not-italic relative shrink-0 text-[26px] text-[#565656] tracking-[-1.3px]">
-                        {active.title}
-                      </p>
-                      <div className="content-stretch flex gap-[15px] items-start relative shrink-0">
-                        {active.chips.map((chip) => (
-                          <div key={chip} className="bg-[#ededed] content-stretch flex items-center justify-center p-[7.5px] relative rounded-[8px] shrink-0">
-                            <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] [word-break:break-word] font-['MessinaSansWeb:Regular',sans-serif] leading-[normal] not-italic relative shrink-0 text-[13px] text-black tracking-[-0.325px] whitespace-nowrap">
-                              {chip}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
+                  {/* Variant 1 — 2×2 chip grid */}
+                  {cardVariant === 1 && (
+                    <div className="grid grid-cols-2 gap-[6px] w-full">
+                      {BASE_CHIPS.map((chip) => (
+                        <div key={chip} className="flex items-center justify-center px-[12px] py-[10px] rounded-[8px] bg-[#ededed]">
+                          <p className="font-['MessinaSansWeb:Bold',sans-serif] text-[15px] text-[#3d3d3d] tracking-[-0.3px] whitespace-nowrap">
+                            {chip}
+                          </p>
+                        </div>
+                      ))}
                     </div>
+                  )}
+
+                  {/* Variant 2 — stacked full-width BlockCards */}
+                  {cardVariant === 2 && (
+                    <div className="flex flex-col gap-[10px] w-full">
+                      {DAY_BLOCKS.map((block) => (
+                        <BlockCard
+                          key={block.id}
+                          block={block}
+                          selected={selectedBlockId === block.id}
+                          onSelect={() => setSelectedBlockId(selectedBlockId === block.id ? null : block.id)}
+                          fullWidth
+                        />
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Variant 3 — accordion flaps */}
+                  {cardVariant === 3 && (
+                    <div className="flex flex-col w-full">
+                      {DAY_BLOCKS.map((block, i) => (
+                        <FlapItem
+                          key={block.id}
+                          block={block}
+                          isOpen={openFlapId === block.id}
+                          onToggle={() => setOpenFlapId(openFlapId === block.id ? null : block.id)}
+                          index={i}
+                          total={DAY_BLOCKS.length}
+                          isAdapted={!isBiggLocation}
+                        />
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Footer: WhyLine + location — padded in for variant 3 */}
+                  <div className={`flex flex-col gap-[16px] ${cardVariant === 3 ? "px-[20px]" : ""}`}>
+                    {!isBiggLocation && cardVariant !== 3 && (
+                      <WhyLine iconSize={18}>Bloques adaptados para entrenar en este espacio</WhyLine>
+                    )}
+                    {!isBiggLocation && cardVariant === 3 && (
+                      <div className="flex items-center gap-[6px]">
+                        <Sparkles size={13} className="text-[#2ab3cc]" strokeWidth={2} />
+                        <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[13px] text-[#2ab3cc] tracking-[-0.26px]">
+                          Bloque cambiado para esta ubicación
+                        </p>
+                      </div>
+                    )}
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); setShowLocationSheet(true); }}
+                      className="flex items-center gap-[6px] active:opacity-70 transition-opacity self-start"
+                    >
+                      <MapPin size={20} className="text-[#565656]" strokeWidth={1.75} />
+                      <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[14px] text-[#565656] tracking-[-0.28px]">
+                        {selectedLocation}
+                      </p>
+                      <ChevronDown size={14} className="text-[#565656]" strokeWidth={2} />
+                    </button>
                   </div>
                 </div>
               </div>
-              {/* Reservar clase / Entrenar button */}
+
+              {/* ── CTA ── translateY overlaps card bottom */}
               <button
-                onClick={isClassReservation ? onReservar : () => onConfirmWorkout?.(buildReservedClass(active))}
-                className="w-full bg-[#adff19] rounded-bl-[20px] rounded-br-[20px] mt-[-10px] pt-[26px] pb-[16px] flex items-center justify-center active:opacity-80 transition-opacity"
+                type="button"
+                onClick={isBiggLocation ? onReservar : onOpenProgramming}
+                className="relative z-[1] w-full rounded-b-[16px] pt-[56px] pb-[16px] flex items-center justify-center active:opacity-80 transition-opacity mb-[-56px]"
+                style={{
+                  background: isBiggLocation ? "#adff19" : "#3d3d3d",
+                  transform: "translateY(-56px)",
+                  transition: "background 0.3s ease-in-out, opacity 0.2s",
+                }}
               >
-                <span className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[#3d3d3d] text-[15px] tracking-[-0.3px]">
-                  {isClassReservation ? "Reservar clase" : "Entrenar"}
+                <span className={`font-['MessinaSansWeb:SemiBold',sans-serif] text-[15px] tracking-[-0.3px] ${isBiggLocation ? "text-[#3d3d3d]" : "text-white"}`}>
+                  {isBiggLocation ? "Reservar clase" : "Iniciar entrenamiento"}
                 </span>
               </button>
             </div>
-          </div>}
+          </div>
+        )}
 
-          {/* ── Additional activity entries (non-reserved state) ── */}
-          {activities?.map((activity, i) => (
-            <div key={i} className="flex flex-col items-start gap-[10px] w-full">
-              <div className="relative z-10 flex flex-row items-center gap-[10px]">
-                <div className="bg-[#3d3d3d] rounded-full px-[12px] py-[6px] flex items-center justify-center">
-                  <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-white text-[13px] whitespace-nowrap tracking-[-0.26px] leading-[1.2]">
-                    {activity.time}
-                  </p>
-                </div>
-              </div>
-              <div className="relative z-10 w-full">
-                <ActivityCard entry={activity} />
-              </div>
-            </div>
-          ))}
-
-          {/* ── Entry 2: Afternoon recommendation ── */}
-          {showAfternoon && <div className="flex flex-col items-start gap-[10px] w-full">
+        {/* Additional scheduled activities (e.g. Running pasadas) */}
+        {activities?.map((activity, i) => (
+          <div key={i} className="flex flex-col items-start gap-[10px] w-full">
             <div className="relative z-10 flex flex-row items-center gap-[10px]">
-              <div className="bg-[#3d3d3d] rounded-full px-[12px] py-[6px] flex items-center justify-center">
-                <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-white text-[13px] whitespace-nowrap tracking-[-0.26px] leading-[1.2]">
-                  Afternoon
-                </p>
-              </div>
-              <p className="font-['MessinaSansWeb:Regular',sans-serif] italic text-[#a3a3a3] text-[13px] tracking-[-0.26px]">
-                Mobility & recovery
-              </p>
+              <TimePill label="Entrenamiento complementario" />
+            </div>
+            <div className="relative z-10 w-full">
+              <ActivityCard entry={activity} />
+            </div>
+          </div>
+        ))}
+
+        {/* Afternoon Mobility recommendation */}
+        {showAfternoon && (
+          <div className="flex flex-col items-start gap-[10px] w-full">
+            <div className="relative z-10 flex flex-row items-center gap-[10px]">
+              <TimePill label="Mobility & recovery" />
             </div>
             <div className="relative z-10 w-full">
               <AfternoonRecommendationCard />
             </div>
-          </div>}
+          </div>
+        )}
 
-          {/* ── Add to day — always shown ── */}
-          <button
-            onClick={onOpenFab}
-            className="relative z-[20] w-full rounded-[16px] border border-dashed border-[#858585] py-[16px] flex items-center justify-center gap-[8px] bg-[#ededed] active:opacity-60 transition-opacity"
-          >
-            <Plus size={16} strokeWidth={2} className="text-[#858585]" />
-            <span className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[#858585] text-[14px] tracking-[-0.28px]">
-              Agregar
-            </span>
-          </button>
+        {/* Add to day */}
+        <button
+          onClick={onOpenFab}
+          className="relative z-[20] w-full rounded-[16px] border border-dashed border-[#858585] py-[16px] flex items-center justify-center gap-[8px] bg-[#ededed] active:opacity-60 transition-opacity"
+        >
+          <Plus size={16} strokeWidth={2} className="text-[#858585]" />
+          <span className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[#858585] text-[14px] tracking-[-0.28px]">
+            Agregar
+          </span>
+        </button>
 
-        </div>
       </div>
     </div>
+
+    <LocationSheet
+      open={showLocationSheet}
+      onClose={() => setShowLocationSheet(false)}
+      selected={selectedLocation}
+      onSelect={(loc) => { setSelectedLocation(loc); setShowLocationSheet(false); }}
+      customLocations={customLocations}
+      onAddLocation={() => { setShowLocationSheet(false); setShowAddLocation(true); }}
+    />
+    <AddLocationScreen
+      open={showAddLocation}
+      onClose={() => setShowAddLocation(false)}
+      onSave={(name) => {
+        setCustomLocations((prev) => [...prev, name]);
+        setSelectedLocation(name);
+        setShowAddLocation(false);
+      }}
+    />
+    </>
   );
 }
