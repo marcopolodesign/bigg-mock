@@ -306,7 +306,7 @@ interface DailyWorkoutCardProps {
   activities?: ActivityEntry[];
   showMorning?: boolean;
   showAfternoon?: boolean;
-  cardVariant?: 1 | 2 | 3;
+  cardVariant?: 1 | 2 | 3 | 4;
 }
 
 export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, onOpenProgramming, reservedClass, activities, showMorning = true, showAfternoon = true, cardVariant = 1 }: DailyWorkoutCardProps) {
@@ -370,8 +370,22 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
         {/* BIGG Class at 10AM */}
         {showMorning && (
           <div className="flex flex-col items-start gap-[10px] w-full">
-            <div className="relative z-10 flex flex-row items-center gap-[10px]">
+            <div className="relative z-10 flex flex-row items-center justify-between w-full">
               <TimePill label="Entrenamiento del día" />
+              {/* v4: location lives here, outside the card */}
+              {cardVariant === 4 && (
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); setShowLocationSheet(true); }}
+                  className="flex items-center gap-[5px] active:opacity-70 transition-opacity"
+                >
+                  <MapPin size={14} className="text-[#565656]" strokeWidth={1.75} />
+                  <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[12px] text-[#565656] tracking-[-0.24px]">
+                    {selectedLocation}
+                  </p>
+                  <ChevronDown size={11} className="text-[#565656]" strokeWidth={2} />
+                </button>
+              )}
             </div>
             <div className="relative z-10 w-full flex flex-col items-center">
               <div className="relative w-full flex flex-col">
@@ -430,49 +444,113 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
                     </div>
                   )}
 
-                  {/* Footer: WhyLine + location — padded in for variant 3 */}
-                  <div className={`flex flex-col gap-[16px] ${cardVariant === 3 ? "px-[20px]" : ""}`}>
-                    {!isBiggLocation && cardVariant !== 3 && (
-                      <WhyLine iconSize={18}>Bloques adaptados para entrenar en este espacio</WhyLine>
-                    )}
-                    {!isBiggLocation && cardVariant === 3 && (
-                      <div className="flex items-center gap-[6px]">
-                        <Sparkles size={13} className="text-[#2ab3cc]" strokeWidth={2} />
-                        <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[13px] text-[#2ab3cc] tracking-[-0.26px]">
-                          Bloque cambiado para esta ubicación
+                  {/* Variant 4 — hierarchical block list, location outside */}
+                  {cardVariant === 4 && (
+                    <div className="flex flex-col w-full">
+                      {/* Card header: class type + total duration */}
+                      <div className="flex items-center justify-between pb-[14px]" style={{ borderBottom: "1px solid rgba(0,0,0,0.07)" }}>
+                        <p className="font-['MessinaSansWeb:Bold',sans-serif] text-[10px] text-[#a3a3a3] tracking-[0.8px] uppercase">
+                          {isBiggLocation ? "BIGG Class" : "Entrenamiento"}
+                        </p>
+                        <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[12px] text-[#a3a3a3] tracking-[-0.24px]">
+                          4 bloques · 59'
                         </p>
                       </div>
-                    )}
-                    <button
-                      type="button"
-                      onClick={(e) => { e.stopPropagation(); setShowLocationSheet(true); }}
-                      className="flex items-center gap-[6px] active:opacity-70 transition-opacity self-start"
-                    >
-                      <MapPin size={20} className="text-[#565656]" strokeWidth={1.75} />
-                      <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[14px] text-[#565656] tracking-[-0.28px]">
-                        {selectedLocation}
-                      </p>
-                      <ChevronDown size={14} className="text-[#565656]" strokeWidth={2} />
-                    </button>
-                  </div>
+
+                      {/* Block rows */}
+                      {DAY_BLOCKS.map((block, i) => (
+                        <div
+                          key={block.id}
+                          className="flex items-center justify-between py-[13px]"
+                          style={{ borderBottom: i < DAY_BLOCKS.length - 1 ? "1px solid rgba(0,0,0,0.06)" : "none" }}
+                        >
+                          <div className="flex flex-col gap-[3px]">
+                            <p className="font-['Druk_Wide:Medium',sans-serif] text-[15px] text-[#3d3d3d] leading-none tracking-[-0.4px] uppercase">
+                              {block.stimulus}
+                            </p>
+                            <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[11px] text-[#a3a3a3] tracking-[-0.22px]">
+                              {block.modality}
+                            </p>
+                          </div>
+                          <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[12px] text-[#a3a3a3] tracking-[-0.24px] shrink-0">
+                            {block.duration}
+                          </p>
+                        </div>
+                      ))}
+
+                      {/* Adapted indicator for non-BIGG locations */}
+                      {!isBiggLocation && (
+                        <div className="flex items-center gap-[6px] pt-[12px]" style={{ borderTop: "1px solid rgba(0,0,0,0.06)" }}>
+                          <Sparkles size={12} className="text-[#2ab3cc]" strokeWidth={2} />
+                          <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[12px] text-[#2ab3cc] tracking-[-0.24px]">
+                            Bloques adaptados para esta ubicación
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Footer: WhyLine + location — only for variants 1, 2, 3 */}
+                  {cardVariant !== 4 && (
+                    <div className={`flex flex-col gap-[16px] ${cardVariant === 3 ? "px-[20px]" : ""}`}>
+                      {!isBiggLocation && cardVariant !== 3 && (
+                        <WhyLine iconSize={18}>Bloques adaptados para entrenar en este espacio</WhyLine>
+                      )}
+                      {!isBiggLocation && cardVariant === 3 && (
+                        <div className="flex items-center gap-[6px]">
+                          <Sparkles size={13} className="text-[#2ab3cc]" strokeWidth={2} />
+                          <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[13px] text-[#2ab3cc] tracking-[-0.26px]">
+                            Bloque cambiado para esta ubicación
+                          </p>
+                        </div>
+                      )}
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); setShowLocationSheet(true); }}
+                        className="flex items-center gap-[6px] active:opacity-70 transition-opacity self-start"
+                      >
+                        <MapPin size={20} className="text-[#565656]" strokeWidth={1.75} />
+                        <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[14px] text-[#565656] tracking-[-0.28px]">
+                          {selectedLocation}
+                        </p>
+                        <ChevronDown size={14} className="text-[#565656]" strokeWidth={2} />
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
 
-              {/* ── CTA ── translateY overlaps card bottom */}
-              <button
-                type="button"
-                onClick={isBiggLocation ? onReservar : onOpenProgramming}
-                className="relative z-[1] w-full rounded-b-[16px] pt-[56px] pb-[16px] flex items-center justify-center active:opacity-80 transition-opacity mb-[-56px]"
-                style={{
-                  background: isBiggLocation ? "#adff19" : "#3d3d3d",
-                  transform: "translateY(-56px)",
-                  transition: "background 0.3s ease-in-out, opacity 0.2s",
-                }}
-              >
-                <span className={`font-['MessinaSansWeb:SemiBold',sans-serif] text-[15px] tracking-[-0.3px] ${isBiggLocation ? "text-[#3d3d3d]" : "text-white"}`}>
-                  {isBiggLocation ? "Reservar clase" : "Iniciar entrenamiento"}
-                </span>
-              </button>
+              {/* ── CTA: dominant for v1/2/3; secondary for v4 ── */}
+              {cardVariant !== 4 ? (
+                <button
+                  type="button"
+                  onClick={isBiggLocation ? onReservar : onOpenProgramming}
+                  className="relative z-[1] w-full rounded-b-[16px] pt-[56px] pb-[16px] flex items-center justify-center active:opacity-80 transition-opacity mb-[-56px]"
+                  style={{
+                    background: isBiggLocation ? "#adff19" : "#3d3d3d",
+                    transform: "translateY(-56px)",
+                    transition: "background 0.3s ease-in-out, opacity 0.2s",
+                  }}
+                >
+                  <span className={`font-['MessinaSansWeb:SemiBold',sans-serif] text-[15px] tracking-[-0.3px] ${isBiggLocation ? "text-[#3d3d3d]" : "text-white"}`}>
+                    {isBiggLocation ? "Reservar clase" : "Iniciar entrenamiento"}
+                  </span>
+                </button>
+              ) : (
+                /* v4: reservar is a secondary action below the card */
+                isBiggLocation && (
+                  <button
+                    type="button"
+                    onClick={onReservar}
+                    className="w-full mt-[10px] py-[13px] flex items-center justify-center gap-[8px] rounded-[14px] border border-[rgba(0,0,0,0.12)] active:opacity-70 transition-opacity"
+                  >
+                    <span className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[14px] text-[#3d3d3d] tracking-[-0.28px]">
+                      Reservar clase
+                    </span>
+                    <ChevronDown size={13} className="text-[#a3a3a3] -rotate-90" strokeWidth={2} />
+                  </button>
+                )
+              )}
             </div>
           </div>
         )}

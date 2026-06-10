@@ -1178,7 +1178,7 @@ function SocialContainer() {
 
 // ─── Main scroll content ───────────────────────────────────────────────────────
 
-function MainContent({ onReservar, onOpenFab, onOpenDetail, onOpenProgramming, isToday, isFutureDay, selectedDate, todayReservedClass, cardVariant = 1 }: { onReservar: () => void; onOpenFab: () => void; onOpenDetail: (rc: ReservedClass) => void; onOpenProgramming: () => void; isToday: boolean; isFutureDay: boolean; selectedDate: Date; todayReservedClass: ReservedClass | null; cardVariant?: 1 | 2 | 3 }) {
+function MainContent({ onReservar, onOpenFab, onOpenDetail, onOpenProgramming, isToday, isFutureDay, selectedDate, todayReservedClass, cardVariant = 1 }: { onReservar: () => void; onOpenFab: () => void; onOpenDetail: (rc: ReservedClass) => void; onOpenProgramming: () => void; isToday: boolean; isFutureDay: boolean; selectedDate: Date; todayReservedClass: ReservedClass | null; cardVariant?: 1 | 2 | 3 | 4 }) {
   const dateKey = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}`;
   const pastData = isToday ? undefined : PAST_DAYS[dateKey];
 
@@ -1532,11 +1532,11 @@ function PlaceholderTabContent({ label }: { label: string }) {
 type BottomTabId = "train" | "activity" | "world" | "community" | "perfil";
 
 const BOTTOM_TABS: { id: BottomTabId; label: string; Icon: React.ElementType }[] = [
-  { id: "train", label: "Train", Icon: Dumbbell },
+  { id: "train", label: "Opción 1", Icon: Dumbbell },
   { id: "activity", label: "Opción 2", Icon: Activity },
   { id: "world", label: "Opción 3", Icon: Globe },
   { id: "community", label: "Comunidad", Icon: Users },
-  { id: "perfil", label: "Perfil", Icon: User },
+  { id: "perfil", label: "Opción 4", Icon: User },
 ];
 
 function BottomNav({ activeTab, onTabChange }: { activeTab: BottomTabId; onTabChange: (id: BottomTabId) => void }) {
@@ -1598,7 +1598,7 @@ export default function BiggDayScreen() {
   }, [activeTab]);
 
   const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
-    if (activeTab !== "train") return;
+    if (activeTab === "community") return;
     setHeaderScrollY(e.currentTarget.scrollTop);
   }, [activeTab]);
 
@@ -1652,7 +1652,7 @@ export default function BiggDayScreen() {
       </div>
 
       {/* Tab content */}
-      {(activeTab === "train" || activeTab === "activity" || activeTab === "world") && (
+      {(activeTab === "train" || activeTab === "activity" || activeTab === "world" || activeTab === "perfil") && (
         <div className="pb-[93px]">
           <MainContent
             onReservar={() => setReservarOpen(true)}
@@ -1663,15 +1663,14 @@ export default function BiggDayScreen() {
             isFutureDay={isFutureDay}
             selectedDate={selectedDate}
             todayReservedClass={todayReservedClass}
-            cardVariant={activeTab === "train" ? 1 : activeTab === "activity" ? 2 : 3}
+            cardVariant={activeTab === "train" ? 1 : activeTab === "activity" ? 2 : activeTab === "world" ? 3 : 4}
           />
         </div>
       )}
       {activeTab === "community" && <CommunityTabContent />}
-      {activeTab === "perfil" && <PlaceholderTabContent label="Perfil — próximamente" />}
 
       {/* Fixed overlays */}
-      {(activeTab === "train" || activeTab === "activity" || activeTab === "world") && <StickyHeader today={today} selectedDate={selectedDate} onSelectDate={setSelectedDate} scrollY={headerScrollY} />}
+      {(activeTab === "train" || activeTab === "activity" || activeTab === "world" || activeTab === "perfil") && <StickyHeader today={today} selectedDate={selectedDate} onSelectDate={setSelectedDate} scrollY={headerScrollY} />}
       <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
       <FloatingActionButton open={fabOpen} onOpenChange={setFabOpen} onVerProgramacion={() => setProgrammingOpen(true)} />
 

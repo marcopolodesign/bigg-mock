@@ -4,6 +4,18 @@
 
 ---
 
+## 2026-06-10 — DailyWorkoutCard: Opción 4 — separación entrenamiento/espacio, Reservar secundario
+
+**Source:** Claude Code — Macbook Pro
+
+**Change:** Nuevo `cardVariant={4}` que implementa el feedback de Gigio: (1) la ubicación sale del card y se muestra en la fila del header junto al "Entrenamiento del día" pill — MapPin pequeño + nombre + ChevronDown; (2) el card muestra los bloques como lista jerárquica (Druk Wide nombre + modality text + duración right-aligned, dividers sutiles) — sin tabs, sin chips, sin selección — se siente como un "plan" no un menú; (3) "Reservar clase" es un botón secundario outline debajo del card con flecha, no el CTA dominante verde. Tab "Perfil" renombrado a "Opción 4" en el bottom nav. "Train" renombrado a "Opción 1" para consistencia.
+
+**Files modified:**
+- `src/app/components/DailyWorkoutCard.tsx` — `cardVariant` type extendido a `1 | 2 | 3 | 4`; bloque variant 4 con lista jerárquica + location en header row + CTA secundario outline; footer de variantes 1/2/3 condicionado a `cardVariant !== 4`
+- `src/app/screens/BiggDayScreen.tsx` — `cardVariant` prop de MainContent extendido a incluir 4; tab "perfil" incluido en lista de tabs que renderizan MainContent; `handleScroll` corregido; tab labels actualizados (Opción 1–4)
+
+---
+
 ## 2026-06-10 — DailyWorkoutCard: Opción 3 — location icon + adapted-block Sparkles + legend
 
 **Source:** Claude Code — Macbook Pro
