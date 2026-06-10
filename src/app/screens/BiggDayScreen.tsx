@@ -20,6 +20,7 @@ import BottomSheet from "../components/BottomSheet";
 import ReservarSheet from "../components/ReservarSheet";
 import FloatingActionButton from "../components/FloatingActionButton";
 import ProgrammingScreen from "../components/ProgrammingScreen";
+import ClassDetailScreen from "../components/ClassDetailScreen";
 
 // ─── Today's scheduled activities ────────────────────────────────────────────
 
@@ -1177,7 +1178,7 @@ function SocialContainer() {
 
 // ─── Main scroll content ───────────────────────────────────────────────────────
 
-function MainContent({ onReservar, onOpenFab, isToday, isFutureDay, selectedDate, todayReservedClass }: { onReservar: () => void; onOpenFab: () => void; isToday: boolean; isFutureDay: boolean; selectedDate: Date; todayReservedClass: ReservedClass | null }) {
+function MainContent({ onReservar, onOpenFab, onOpenDetail, onOpenProgramming, isToday, isFutureDay, selectedDate, todayReservedClass }: { onReservar: () => void; onOpenFab: () => void; onOpenDetail: (rc: ReservedClass) => void; onOpenProgramming: () => void; isToday: boolean; isFutureDay: boolean; selectedDate: Date; todayReservedClass: ReservedClass | null }) {
   const dateKey = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}`;
   const pastData = isToday ? undefined : PAST_DAYS[dateKey];
 
@@ -1191,20 +1192,38 @@ function MainContent({ onReservar, onOpenFab, isToday, isFutureDay, selectedDate
           <DailyWorkoutCard
             onReservar={onReservar}
             onOpenFab={onOpenFab}
+            onOpenDetail={todayReservedClass ? () => onOpenDetail(todayReservedClass) : undefined}
+            onOpenProgramming={todayReservedClass ? undefined : onOpenProgramming}
             reservedClass={todayReservedClass ?? undefined}
             activities={TODAY_ACTIVITIES}
           />
         ) : pastData?.reservedClass ? (
-          <DailyWorkoutCard reservedClass={pastData.reservedClass} activities={pastData.activities} onOpenFab={onOpenFab} />
+          <DailyWorkoutCard
+            reservedClass={pastData.reservedClass}
+            activities={pastData.activities}
+            onOpenFab={onOpenFab}
+            onOpenDetail={() => onOpenDetail(pastData.reservedClass!)}
+          />
         ) : isFutureDay ? (
           selectedDate.getDay() === 4
             ? <DailyWorkoutCard onOpenFab={onOpenFab} showMorning={false} showAfternoon={true} />
-            : <DailyWorkoutCard onReservar={onReservar} onOpenFab={onOpenFab} showMorning={true} showAfternoon={false} />
+            : <DailyWorkoutCard onReservar={onReservar} onOpenFab={onOpenFab} onOpenProgramming={onOpenProgramming} showMorning={true} showAfternoon={false} />
         ) : (
-          <div className="bg-[rgba(255,255,255,0.5)] rounded-[8px] p-[20px] flex items-center justify-center min-h-[120px]">
-            <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[#a3a3a3] text-[15px] tracking-[-0.3px] text-center">
-              Sin actividad registrada
-            </p>
+          <div className="flex flex-col gap-[12px]">
+            <div className="bg-[rgba(255,255,255,0.5)] rounded-[8px] p-[20px] flex items-center justify-center min-h-[120px]">
+              <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[#a3a3a3] text-[15px] tracking-[-0.3px] text-center">
+                Sin actividad registrada
+              </p>
+            </div>
+            <button
+              onClick={onOpenFab}
+              className="w-full rounded-[16px] border border-dashed border-[#858585] py-[16px] flex items-center justify-center gap-[8px] bg-[#ededed] active:opacity-60 transition-opacity"
+            >
+              <Plus size={16} strokeWidth={2} className="text-[#858585]" />
+              <span className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[#858585] text-[14px] tracking-[-0.28px]">
+                Agregar
+              </span>
+            </button>
           </div>
         )}
       </div>
@@ -1328,12 +1347,12 @@ function Frame5() {
 
 function Frame14() {
   return (
-    <div className="content-stretch flex items-center justify-between relative shrink-0 w-full">
-      <Frame43 />
-      <div className="flex items-center justify-between gap-[16px] flex-1 pl-[12px]">
+    <div className="flex items-center justify-between relative shrink-0 w-full">
+      <div className="flex items-center gap-[12px]">
+        <Frame43 />
         <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] font-['MessinaSansWeb:Bold',sans-serif] leading-[normal] not-italic text-[#565656] text-[16px] tracking-[-0.4px] whitespace-nowrap">Hola Mateo!</p>
-        <Frame5 />
       </div>
+      <Frame5 />
     </div>
   );
 }
@@ -1447,7 +1466,7 @@ function StickyHeader({ today, selectedDate, onSelectDate, scrollY }: { today: D
       <div aria-hidden className="absolute border border-[rgba(255,255,255,0.1)] border-solid inset-0 pointer-events-none rounded-bl-[20px] rounded-br-[20px]" />
       <div className="w-full max-w-[388px]">
         <div className="content-stretch flex flex-col gap-[12px] items-start relative shrink-0 w-full">
-          <div ref={titleRowRef}>
+          <div ref={titleRowRef} className="w-full">
             <Frame14 />
           </div>
           <WeekCalendar today={today} selectedDate={selectedDate} onSelectDate={onSelectDate} />
@@ -1558,6 +1577,8 @@ export default function BiggDayScreen() {
   const [reservarOpen, setReservarOpen] = useState(false);
   const [fabOpen, setFabOpen] = useState(false);
   const [programmingOpen, setProgrammingOpen] = useState(false);
+  const [classDetailOpen, setClassDetailOpen] = useState(false);
+  const [detailClass, setDetailClass] = useState<ReservedClass | null>(null);
   const [todayReservedClass, setTodayReservedClass] = useState<ReservedClass | null>(null);
   const [headerScrollY, setHeaderScrollY] = useState(0);
   const [today] = useState(() => {
@@ -1635,6 +1656,8 @@ export default function BiggDayScreen() {
           <MainContent
             onReservar={() => setReservarOpen(true)}
             onOpenFab={() => setFabOpen(true)}
+            onOpenDetail={(rc) => { setDetailClass(rc); setClassDetailOpen(true); }}
+            onOpenProgramming={() => setProgrammingOpen(true)}
             isToday={isToday}
             isFutureDay={isFutureDay}
             selectedDate={selectedDate}
@@ -1672,10 +1695,24 @@ export default function BiggDayScreen() {
         />
       </BottomSheet>
 
-      {/* Programación screen — triggered by FAB "Ver programación" */}
+      {/* Programación screen — triggered by FAB "Ver programación" or unreserved workout card */}
       <AnimatePresence>
         {programmingOpen && (
-          <ProgrammingScreen onBack={() => setProgrammingOpen(false)} />
+          <ProgrammingScreen
+            onBack={() => setProgrammingOpen(false)}
+            onReservar={() => { setProgrammingOpen(false); setReservarOpen(true); }}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Class detail screen — triggered by tapping a ReservedClassCard */}
+      <AnimatePresence>
+        {classDetailOpen && detailClass && (
+          <ClassDetailScreen
+            reservedClass={detailClass}
+            onBack={() => setClassDetailOpen(false)}
+            onOpenProgramming={() => { setClassDetailOpen(false); setProgrammingOpen(true); }}
+          />
         )}
       </AnimatePresence>
 

@@ -118,4 +118,12 @@ All components from the shadcn/ui library are present. Key ones in active use:
 **Data shape:** `ProgrammingRow[]` → `StimulusBlock[]` (id, stimulus, modality, duration, movements, gradient). All mock data lives inside the file.
 **Used by:** `BiggDayScreen` (injected after the DailyWorkoutCard timeline, before Recommendations).
 
+### `ClassDetailScreen`
+**File:** `src/app/components/ClassDetailScreen.tsx`
+**Props:** `reservedClass: ReservedClass`, `onBack: () => void`
+**Purpose:** Full-screen slide-in detail view for a reserved class. Adapts the biggapp Figma header (node `20114:16150`) to the BIGG Mock light color system. Shows: Volver back nav, gradient header card (white→lime, same as `ReservedClassCard`) with class name + time + location, dark attendee strip with avatar row + people icon, "Editar" (lime) + "Cancelar" (red) action buttons, and a scrollable list of block detail cards keyed off `reservedClass.blocks`.
+**Block data:** `BLOCK_DATA` maps block names (e.g. `"UPPER BODY"`, `"FBA"`, `"MIDLINE"`) to gradient, modality badge, and movements list. Blocks are parsed from strings like `"1. UPPER BODY"` via `parseBlock()`.
+**Animation:** slides in from the right (spring, same as `ProgrammingScreen`). z-index 65 (above ProgrammingScreen at 60).
+**Triggered by:** tapping `ReservedClassCard` (which now calls `onTap`). Wired in `BiggDayScreen` via `classDetailOpen` + `detailClass` state.
+
 <!-- Add new custom components below as they are created -->

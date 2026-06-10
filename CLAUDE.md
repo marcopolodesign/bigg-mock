@@ -98,6 +98,9 @@ pnpm build      # Production build
 - **2026-06-08:** `BlockCard` rediseñado para matchear Pádel — layout columna izq (Druk title + badge modalidad + movimientos) + columna der (SVG reloj de `svgPaths`). Removido pill de duración y badge "BLOQUE X" del card.
 - **2026-06-05:** Racha de actividad real-time — `buildWeekStrip()` desde `new Date()`; `ONBOARDING_TRAINING_DAYS` muestra dashed-lime en días futuros programados; V (hoy) con ring negro punteado; racha y texto motivacional dinámicos.
 - **2026-06-05:** Timeline unificado — se eliminó "Para completar tu día"; un solo timeline (10AM BIGG Class → 18:00hs Running pasadas → Afternoon Mobility); `WhyLine` estandarizado inline en todas las cards.
+- **2026-06-09:** `ProgrammingSection` bloques como flaps acordeón — cada fila colapsa en strip; tap expande cards con spring; header muestra pip lime + estímulo seleccionado cuando está cerrado.
+- **2026-06-09:** `ProgrammingScreen` chip strip filters — tap chip to show only matching blocks, tap again to reset. Block names aligned to chip labels.
+- **2026-06-09:** `ProgrammingScreen` header Figma `23238:6722` — BIGG TRAIN + filtro toggle + pills BIGG Class/3 Materiales + chip strip; todos SVGs inline.
 - **2026-06-08:** `ProgrammingScreen` — pantalla completa slide-in (spring) desde FAB → "Ver programación"; back arrow regresa al home. Sin warmup, 4 bloques, tap-to-select lime-green + CTA "Agregar".
 - **2026-06-04:** Se quitaron las acciones rápidas del header (Reservar/Coach/Cargar) — no pegaban con el header; siguen accesibles desde el hero y el FAB. Header vuelve a saludo + calendario.
 - **2026-06-03:** "Racha de actividad" rediseñada (antes "Strike de actividad") — número de racha + 🔥, récord, strip semanal data-driven con "hoy", línea motivacional; se eliminó el andamiaje de posiciones absolutas.

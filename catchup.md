@@ -4,6 +4,233 @@
 
 ---
 
+## 2026-06-10 — ProgrammingScreen: lighter header bg, no gap at chip/bloque seam
+
+Header wrapped in `bg-[#f5f5f5] relative z-10 pb-[20px]`; scroll area gets matching `bg-[#f5f5f5] -mt-[20px]` so content slides up under the header bg, eliminating the visible color-shift gap. Status bar spacer reduced 40px → 12px.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-10 — ProgrammingScreen: two-pill filter row + BIGG Class and Materiales bottom sheets
+
+Replaced the mode-tabs row with two bordered pill selectors (BIGG Class ↓ / Materiales ↓) + search icon, matching Figma 23223:6967. BIGG Class pill opens a vaul bottom sheet with 4 options in a 2×2 grid (BIGG Class, BIGG Gym, Outside BIGG, BIGG Outdoors) — selected option highlighted lime + dark border, updates CTA. Materiales pill opens a sheet with "¿Qué equipamiento tenés?", 3-col equipment grid (8 items, tap-to-select lime bg) and a "Configurar qué elementos tengo en casa" decorative button. Pill label shows selected class name; Materiales pill shows count when any items selected.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-10 — DailyWorkoutCard: tab selector (BIGG Class / Libre / Outdoors) + animaciones + fix lag
+
+**Source:** Claude Code — Macbook Pro
+
+**Change:** El workout card ahora tiene un selector de modo en el fondo (dark bar) con 3 tabs y un indicador diamond animado. Se invirtió el orden (contenido arriba, selector en el medio, CTA abajo). Las animaciones se optimizaron para ser 100% GPU-composited (sin lag).
+
+**Files modified:**
+- `src/app/components/DailyWorkoutCard.tsx` — completo rediseño del card de recomendación:
+  - Añadidos `WorkoutTabId`, `WorkoutTabData`, `WORKOUT_TABS`, `BASE_CHIPS` + iconos SVG por tab (BiggClassIcon, HomeGymIcon, OutdoorsIcon)
+  - Layout invertido: bloque de contenido → selector de modo → CTA
+  - Grilla 2×2 de bloques (`MessinaSansWeb:Bold` 15px); bloques cambiados se tintean lime
+  - Fila de equipamiento condicional (solo tab "Libre")
+  - Why line dinámica: "Cambiamos N bloques porque no tenés el equipamiento" en tabs non-BIGG
+  - `"Home/Gym"` renombrado a `"Libre"` (más corto, más brand)
+  - Indicador diamond: `motion.div layoutId="workout-tab-diamond"` inside botón activo → anima vía `transform` puro (GPU only, spring stiffness 500)
+  - Content crossfade: `AnimatePresence mode="wait"` + variantes — exit 0.1s, luego height anima vía `layout="size"` spring, luego fade-in con `delay: 0.18s` (secuencia: fade-out → height → fade-in)
+  - CTA background: CSS transition (`background 0.3s ease-in-out`) sin Framer Motion JS
+  - **Fix lag**: se removió `motion.div layout` inicial (causaba layout recalculation) y `animate={{ left }}` del diamond (no GPU-composited). `layout="size"` es más liviano que `layout` — solo trackea dimensiones, no posición
+
+**Key notes:**
+- `layoutId` en Framer Motion anima entre posiciones usando `transform: translate()` — completamente GPU. No usar `animate={{ left/top }}` para sliders.
+- Las esquinas redondeadas se manejan per-child (`rounded-t-[20px]` en content, `rounded-b-[20px]` en selector bar) en lugar de `overflow-clip` en el wrapper — permite que el diamond protruya hacia arriba.
+- `"Libre"` cubre el concepto "afuera de BIGG, entrenás solo" — alternativas consideradas: "Por mi cuenta", "Tu gym", "Sin sede".
+
+---
+
+## 2026-06-10 — ProgrammingSection: ícono, chevron y label del flap mismo color (#3d3d3d)
+
+"BLOQUE N", bookmark icon y chevron ahora son todos `#3d3d3d`. Ícono usa `filter: brightness(0) invert(1) brightness(0.24)` (0.24 ≈ 61/255 = `#3d3d3d`). Chevron usa `stroke="#3d3d3d"`. Verificado visualmente: los tres elementos son el mismo color.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-10 — "Sin actividad registrada": botón Agregar siempre visible
+
+Los días pasados sin actividad ahora muestran el botón dashed "Agregar" debajo del estado vacío — mismo estilo que el botón al final del timeline (borde punteado, `+` icon, texto gris). Al tapearlo abre el FAB.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-10 — Timeline pills: se eliminó la referencia horaria
+
+Los tres pills del timeline (`TimePill`) ya no muestran la hora — muestran directamente el nombre de la actividad: "Entrenamiento del día", "Entrenamiento complementario", "Mobility & recovery". Se eliminó el texto flotante a la derecha de cada pill (era redundante).
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-09 — ProgrammingSection flap headers: font MessinaSans + sin separador
+
+Label "BLOQUE N" cambiado de `Druk_Wide:Medium` a `MessinaSansWeb:Bold` uppercase — consistente con el botón "Reservar clase". Removida la línea divisora de 1px entre el header y el área de cards.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-09 — ProgrammingScreen: 3 mode tabs + bottom CTA + unreserved card → Programming flow
+
+**Source:** Claude Code — Macbook Pro
+
+**Change:** Tapping the unreserved workout card body now opens ProgrammingScreen (instead of the reservation sheet directly). ProgrammingScreen gains 3 mutually exclusive mode tabs (BIGG Class, At Home/Gym, Outdoors) replacing the old 2-pill filter. A fixed bottom CTA shows "Reservar clase" (lime) in BIGG Class mode and "Iniciar entrenamiento" (dark) in the other modes. "Reservar clase" in ProgrammingScreen closes the screen and opens the reservation sheet.
+
+**Files modified:**
+- `src/app/components/ProgrammingScreen.tsx` — added `ProgrammingMode` type + `MODES` array; replaced 2-pill row with 3 mode tabs; added `activeMode` state; added `onReservar` prop; added fixed bottom CTA
+- `src/app/components/DailyWorkoutCard.tsx` — added `onOpenProgramming` prop; unreserved card body div is now clickable (`cursor-pointer`, `onClick={onOpenProgramming}`)
+- `src/app/screens/BiggDayScreen.tsx` — passes `onOpenProgramming={() => setProgrammingOpen(true)}` to MainContent + DailyWorkoutCard; passes `onReservar={() => { setProgrammingOpen(false); setReservarOpen(true); }}` to ProgrammingScreen
+
+**Key notes:**
+- The "Reservar clase" button on the card (below the card body) keeps its own `onReservar` → still goes directly to the reservation sheet
+- Only the card BODY (above the button) triggers ProgrammingScreen via `onOpenProgramming`
+- Mode tabs use dark (#3d3d3d) active state with white text; inactive uses transparent + border
+
+---
+
+## 2026-06-09 — ClassDetailScreen: slide-in detail for reserved classes
+
+**Source:** Claude Code — Macbook Pro
+
+**Change:** Created `ClassDetailScreen` — slides in from the right (z-65, spring animation) when tapping a `ReservedClassCard`. Adapts the biggapp Figma header (node 20114:16150) to the light Mock theme. Shows title-case block names via `BlockCard` (fullWidth), a "Ver todos" link that navigates to ProgrammingScreen, and a fixed "Iniciar clase" lime CTA at the bottom.
+
+**Files created:**
+- `src/app/components/ClassDetailScreen.tsx` — full screen with header card (white→lime gradient), attendee strip, Editar/Cancelar actions, block list, fixed bottom CTA
+
+**Files modified:**
+- `src/app/components/ProgrammingSection.tsx` — exported `StimulusBlock` interface and `BlockCard` component; added `fullWidth` prop to BlockCard
+- `src/app/components/DailyWorkoutCard.tsx` — `ReservedClassCard` changed from div → button with `onTap` prop; added `onOpenDetail` to DailyWorkoutCardProps
+- `src/app/screens/BiggDayScreen.tsx` — imported ClassDetailScreen; added `classDetailOpen` + `detailClass` state; AnimatePresence renders ClassDetailScreen with `onOpenProgramming` → close+open programming
+
+---
+
+## 2026-06-09 — ProgrammingSection flap headers: sin nombres ni conteo, ícono Figma + chevron
+
+Headers simplificados: se quitaron subtítulo de estímulos y contador "N opciones". Lado derecho: ícono vectorial (Figma 22253:30055) + chevron rotativo. `borderBottom` removido — el `borderTop` redondeado de la siguiente fila actúa como separador natural.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-09 — ProgrammingSection: flaps con top rounded, cards sin color y reloj al borde
+
+Flaps: `borderTop` redondeado (`border-radius: 14px` en esquinas superiores) en cada fila + `borderBottom` divisor. Cards: fondo `#f9f9f9` en lugar de gradientes de color; `pr-0` en el body y reloj SVG simplificado a `shrink-0` sin wrapper de ancho fijo — queda flush al borde derecho. Scroll container con `pl-[16px] pr-0` para alinear inicio de cards con eje de "BLOQUE 1".
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-09 — ProgrammingSection: filas siempre expandidas
+
+`FlapRow` inicia con `isOpen = true` — los 4 bloques se muestran expandidos por defecto y el filtro de chips no los colapsa.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-09 — ProgrammingSection: 8 estímulos por bloque
+
+Cada uno de los 4 BLOQUEs ahora tiene 8 cards — una por cada chip: `Lower Body`, `Upper Body`, `Full Body`, `HIIT`, `Cardio`, `Strenght`, `FBA`, `Hypertrophy`. Antes cada bloque tenía sólo 2-3 estímulos, lo que hacía que filtrar por "FBA" sólo mostrara 1 fila. Ahora cualquier chip muestra "1 opción" en los 4 BLOQUEs. Cada card tiene movimientos y modalidades propios del contexto de cada bloque (ej: Lower Body en BLOQUE 1 = Strength, en BLOQUE 4 = Mobility).
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-09 — ProgrammingSection flaps: full-screen, sin backgrounds ni sombras
+
+Flaps van edge-to-edge (sin `mx`), sin background en header ni en área de cards, sin box-shadow ni border. Separadores como `border-bottom` 1px. El padding horizontal del filtro alineado a `px-[16px]` para coincidir con el inicio del label "BLOQUE 1".
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-09 — ProgrammingScreen: bloques como flaps acordeón
+
+Cada fila de bloques (BLOQUE 1–4) ahora colapsa en un strip tipo "flap" que muestra label + lista de estímulos disponibles. Tap expande con animación spring revelando el scroll horizontal de cards. Header persistente: cuando un bloque está seleccionado, el flap colapsado muestra un pip lime + el estímulo y modalidad elegidos. Fondo del header usa el gradiente del primer card de esa fila. CTA "Agregar" aparece al pie solo cuando hay selección.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-09 — ClassDetailScreen: BlockCard reutilizado, título natural, CTA Iniciar clase
+
+**Source:** Claude Code — Macbook Pro
+
+**Change:** `ClassDetailScreen` refactorizado para reutilizar el componente `BlockCard` de `ProgrammingSection` (consistencia visual). Los títulos de bloque pasan a minúsculas ("upper body", "fba", "midline"). Título del header reformateado como oración natural. Agregados CTA fijo "Iniciar clase" (verde lima) y link "Ver todos" → `ProgrammingScreen`.
+
+**Files modified:**
+- `src/app/components/ProgrammingSection.tsx` — `StimulusBlock` y `BlockCard` exportados; prop `fullWidth?: boolean` agregada a `BlockCard` para uso en layout vertical (sin la anchura fija del scroll horizontal).
+- `src/app/components/ClassDetailScreen.tsx` — Reemplazada `BlockDetailCard` propia por `BlockCard` importado con `fullWidth`. Stimulus names en lowercase via `.toLowerCase()`. Título reescrito como `"Clase de las {time} hoy en {location}"` (strip de "BIGG " del location). CTA "Iniciar clase" en barra fija `shrink-0` al pie. Link "Ver todos" junto al header de sección. Nueva prop `onOpenProgramming?: () => void`.
+- `src/app/screens/BiggDayScreen.tsx` — `ClassDetailScreen` recibe `onOpenProgramming` que cierra el detalle y abre `ProgrammingScreen`.
+
+**Key notes:**
+- `fullWidth` en `BlockCard` sólo sobreescribe el `width`/`maxWidth` — el resto del layout (clock SVG, gradientes, selección) queda intacto.
+- "Ver todos" cierra `ClassDetailScreen` antes de abrir `ProgrammingScreen` para evitar z-index stacking (65 + 60).
+- Stimulus names en title case: `"UPPER BODY"` → `"Upper Body"` via `split(" ").map(capitalize).join(" ")`. "FBA" → "Fba" por ser 3 letras sin separador — aceptable en Druk Wide.
+
+---
+
+## 2026-06-09 — ClassDetailScreen: vista detalle de clase reservada
+
+**Source:** Claude Code — Macbook Pro
+
+**Change:** Nueva pantalla de detalle que se abre al tocar una `ReservedClassCard` (el estado post-reserva con bloques). Adapta el header de biggapp (Figma `20114:16150`) al sistema de colores claro del Mock. Muestra el header de la clase con el gradiente blanco→lima, fila de asistentes en fondo oscuro `#3d3d3d`, botones Editar (lima) y Cancelar (rojo), y una lista de block cards con movimientos por bloque.
+
+**Files created:**
+- `src/app/components/ClassDetailScreen.tsx` — Screen completo con header adaptado de Figma, `BlockDetailCard` con gradientes y movimientos por tipo de bloque (UPPER BODY, STRENGTH, FBA, MIDLINE, etc.), `BLOCK_DATA` map, animación spring slide-in desde la derecha. z-index 65 (sobre ProgrammingScreen).
+
+**Files modified:**
+- `src/app/components/DailyWorkoutCard.tsx` — `ReservedClassCard` convertida de `div` a `button` con prop `onTap?: () => void`. Agregada prop `onOpenDetail?` a `DailyWorkoutCardProps`, pasada a `ReservedClassCard`.
+- `src/app/screens/BiggDayScreen.tsx` — Importado `ClassDetailScreen`. Agregados estados `classDetailOpen` y `detailClass`. `MainContent` recibe `onOpenDetail: (rc: ReservedClass) => void` y lo pasa a ambas instancias de `DailyWorkoutCard` (today + past days). `AnimatePresence` renderiza `ClassDetailScreen` cuando `classDetailOpen && detailClass`.
+- `components.md` — Entrada agregada para `ClassDetailScreen`.
+
+**Key notes:**
+- Los bloques se parsean de strings como `"1. UPPER BODY"` → `{ num: 1, name: "UPPER BODY" }` via `parseBlock()`. `BLOCK_DATA` cubre los 12 tipos más comunes; fallback genérico para desconocidos.
+- La `ReservedClassCard` ahora es un `button` completo (active:opacity-80) — mantiene el lápiz como indicador visual pero el tap abre el detalle, no edición directa.
+- El SVG del reloj decorativo se reutiliza de `svgPaths` de `BiggDay` (mismo que en `BlockCard` de `ProgrammingSection`).
+
+---
+
+## 2026-06-09 — ProgrammingScreen: chip filters
+
+`ProgrammingSection` — block stimulus names renamed to match chip labels exactly: `Lower Body`, `Upper Body`, `Full Body`, `HIIT`, `Cardio`, `Strenght`, `FBA`, `Hypertrophy`. Added `activeFilter?: string | null` prop; rows with no matching blocks are hidden when a filter is active. `ProgrammingScreen` now holds `activeFilter` state — tapping a chip activates it (lime highlight, dark green text), tapping again deselects back to all blocks.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-09 — Timeline: labels de tipo de entrenamiento
+
+`DailyWorkoutCard` — el pill "10AM" ahora muestra "Entrenamiento del día" (no itálica) y el pill "18:00hs" muestra "Entrenamiento complementario". Se quitó la itálica del label anterior ("BIGG Recoleta").
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-09 — ProgrammingScreen: header Figma (BIGG TRAIN + filtros) con SVGs inline
+
+`ProgrammingScreen` actualizado con el header exacto del nodo Figma `23238:6722`. Nav bar: flecha `←` (SVG inline) + "BIGG TRAIN" centrado (Druk_Wide:Medium 16px) + toggle de filtro (píldora oscura `#222` con ícono equalizer SVG). Sección de filtros: pills "BIGG Class" (pin SVG) y "3 Materiales" (barbell SVG) con chevron, lupa SVG. Strip horizontal de chips (FBA, Strenght, Upper Body, Lower Body, Hypertrophy, Cardio, HIIT, Full Body). Todos los íconos son SVG inline — sin imágenes externas.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-09 — Header: profile + greeting agrupados, logos justified
+
+`Frame14` reestructurado: profile pic y "Hola Mateo!" en un mismo flex div (izquierda), logos en su propio div (derecha). Se agregó `w-full` al wrapper `ref={titleRowRef}` para que `justify-between` tenga espacio real contra el que trabajar.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
 ## 2026-06-08 — BlockCard: título más grande, layout fix, Vite expuesto en red
 
 Font size del título en `BlockCard` bumpeado a `28px` (títulos cortos) / `24px` (largos). Se removió `h-full` del body container (causaba comportamiento impredecible sin altura fija en el padre) y se agregó `justify-start` explícito tanto en el container como en la columna izquierda — contenido siempre anclado arriba. Vite config actualizado con `server: { host: true }` para exponer el dev server en la red local (`192.168.68.107:5173`) y permitir preview desde mobile.

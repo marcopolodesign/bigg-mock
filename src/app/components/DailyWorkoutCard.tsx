@@ -3,6 +3,7 @@ import { Plus, Check, Pencil } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import SourceChip, { type DataSource } from "./SourceChip";
 import WhyLine from "./WhyLine";
+import svgPaths from "../../imports/BiggDay/svg-03sgvqmew7";
 
 // Dark time pill used as the timeline node label (e.g. "10AM", "18:00hs").
 function TimePill({ label }: { label: string }) {
@@ -14,17 +15,63 @@ function TimePill({ label }: { label: string }) {
     </div>
   );
 }
-interface ClassData {
+
+// ─── Mode tab selector ────────────────────────────────────────────────────────
+
+type WorkoutTabId = "bigg-class" | "home-gym" | "outdoors";
+
+interface WorkoutTabData {
+  id: WorkoutTabId;
+  label: string;
   title: string;
   chips: string[];
   why: string;
+  equipment?: string[];
 }
 
-const MORNING_CLASS: ClassData = {
-  title: "BIGG Class",
-  chips: ["10:00AM", "BIGG Recoleta"],
-  why: "Recomendado: llevás 2 días sin entrenar fuerza",
-};
+const BASE_CHIPS = ["FBA", "Upper Body", "HIIT", "Midline"];
+
+const WORKOUT_TABS: WorkoutTabData[] = [
+  { id: "bigg-class", label: "BIGG Class", title: "Entrenamiento recomendado", chips: BASE_CHIPS, why: "Recomendado: llevás 2 días sin entrenar fuerza" },
+  { id: "home-gym", label: "Freeride", title: "Entrenamiento recomendado", chips: ["Upper Body", "Core", "HIIT", "Mobility"], why: "", equipment: ["Mancuernas", "Mat", "Banda elástica"] },
+  { id: "outdoors", label: "BIGG Outdoors", title: "Entrenamiento recomendado", chips: ["Running", "Upper Body", "HIIT", "Stretching"], why: "" },
+];
+
+function BiggClassIcon() {
+  return (
+    <div className="relative shrink-0 size-[18px]">
+      <svg className="absolute block inset-0 size-full" fill="none" viewBox="0 0 24 24">
+        <path d={svgPaths.p23dee300} stroke="white" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+      </svg>
+    </div>
+  );
+}
+
+function HomeGymIcon() {
+  return (
+    <div className="h-[18px] relative shrink-0 w-[18px]">
+      <svg className="absolute block inset-0 size-full" fill="none" viewBox="0 0 24 24.8889">
+        <path d={svgPaths.p1fab3c00} stroke="white" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+      </svg>
+    </div>
+  );
+}
+
+function OutdoorsIcon() {
+  return (
+    <div className="h-[18px] relative shrink-0 w-[18px]">
+      <svg className="absolute block inset-0 size-full" fill="none" viewBox="0 0 23.996 24">
+        <path d={svgPaths.pbbc2500} fill="white" />
+      </svg>
+    </div>
+  );
+}
+
+function WorkoutTabIcon({ id }: { id: WorkoutTabId }) {
+  if (id === "bigg-class") return <BiggClassIcon />;
+  if (id === "home-gym") return <HomeGymIcon />;
+  return <OutdoorsIcon />;
+}
 
 function AfternoonRecommendationCard() {
   const [added, setAdded] = useState(false);
@@ -143,10 +190,11 @@ function AttendeeAvatars({ total = 20 }: { total?: number }) {
   );
 }
 
-function ReservedClassCard({ data }: { data: ReservedClass }) {
+function ReservedClassCard({ data, onTap }: { data: ReservedClass; onTap?: () => void }) {
   return (
-    <div
-      className="backdrop-blur-[50px] border border-[#a3a3a3] border-solid flex gap-[20px] items-start p-[20px] relative rounded-[20px] w-full"
+    <button
+      onClick={onTap}
+      className="backdrop-blur-[50px] border border-[#a3a3a3] border-solid flex gap-[20px] items-start p-[20px] relative rounded-[20px] w-full text-left active:opacity-80 transition-opacity"
       style={{ backgroundImage: "linear-gradient(105.33deg, rgba(255,255,255,0.9) 37%, rgba(222,255,163,0.9) 114%)" }}
     >
       <div className="flex flex-1 flex-col gap-[16px] items-start min-w-0">
@@ -165,7 +213,7 @@ function ReservedClassCard({ data }: { data: ReservedClass }) {
         </div>
       </div>
       <Pencil size={16} className="text-[#565656] opacity-40 shrink-0 mt-[2px]" />
-    </div>
+    </button>
   );
 }
 
@@ -224,14 +272,17 @@ function ActivityCard({ entry }: { entry: ActivityEntry }) {
 interface DailyWorkoutCardProps {
   onReservar?: () => void;
   onOpenFab?: () => void;
+  onOpenDetail?: () => void;
+  onOpenProgramming?: () => void;
   reservedClass?: ReservedClass;
   activities?: ActivityEntry[];
   showMorning?: boolean;
   showAfternoon?: boolean;
 }
 
-export default function DailyWorkoutCard({ onReservar, onOpenFab, reservedClass, activities, showMorning = true, showAfternoon = true }: DailyWorkoutCardProps) {
-  const active = MORNING_CLASS;
+export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, onOpenProgramming, reservedClass, activities, showMorning = true, showAfternoon = true }: DailyWorkoutCardProps) {
+  const [activeWorkoutTab, setActiveWorkoutTab] = useState<WorkoutTabId>("bigg-class");
+  const active = WORKOUT_TABS.find((t) => t.id === activeWorkoutTab)!;
 
   if (reservedClass) {
     return (
@@ -246,7 +297,7 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, reservedClass,
               </p>
             </div>
             <div className="relative z-10 w-full">
-              <ReservedClassCard data={reservedClass} />
+              <ReservedClassCard data={reservedClass} onTap={onOpenDetail} />
             </div>
           </div>
           {/* Additional activity entries */}
@@ -285,42 +336,139 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, reservedClass,
         {showMorning && (
           <div className="flex flex-col items-start gap-[10px] w-full">
             <div className="relative z-10 flex flex-row items-center gap-[10px]">
-              <TimePill label="10AM" />
-              <p className="font-['MessinaSansWeb:Regular',sans-serif] italic text-[#a3a3a3] text-[13px] tracking-[-0.26px]">
-                BIGG Recoleta
-              </p>
+              <TimePill label="Entrenamiento del día" />
             </div>
             <div className="relative z-10 w-full flex flex-col items-center">
-              <div className="overflow-clip relative rounded-[20px] w-full">
-                <div
-                  className="backdrop-blur-[50px] flex gap-[20px] items-center p-[24px] relative w-full"
+              {/* Inner card: children own their rounded corners so the indicator can protrude */}
+              <div className="relative w-full flex flex-col">
+                {/* ── Content area — FIRST ── */}
+                <motion.div
+                  layout="size"
+                  className="backdrop-blur-[50px] flex flex-col gap-[16px] p-[20px] relative w-full cursor-pointer active:opacity-90 transition-opacity rounded-t-[20px]"
                   style={{ backgroundImage: "linear-gradient(115.214deg, rgba(255, 255, 255, 0.9) 51.472%, rgba(163, 163, 163, 0.9) 114.32%)" }}
+                  onClick={onOpenProgramming}
+                  transition={{ type: "spring", stiffness: 380, damping: 38 }}
                 >
-                  <div className="flex flex-[1_0_0] flex-col gap-[16px] items-start min-w-px">
-                    <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] [word-break:break-word] font-['Druk_Wide:Medium',sans-serif] leading-[1] not-italic text-[32px] text-[#565656] tracking-[-1.6px]">
-                      {active.title}
-                    </p>
-                    <div className="flex gap-[10px] items-start flex-wrap">
-                      {active.chips.map((chip) => (
-                        <div key={chip} className="bg-[#ededed] flex items-center justify-center p-[7.5px] rounded-[8px]">
-                          <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] font-['MessinaSansWeb:Regular',sans-serif] text-[13px] text-black tracking-[-0.325px] whitespace-nowrap">
-                            {chip}
-                          </p>
-                        </div>
-                      ))}
+                  <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] font-['Druk_Wide:Medium',sans-serif] leading-[1.1] text-[16px] text-[#565656] tracking-[-0.3px]">
+                    {active.title}
+                  </p>
+                  {/* mode="wait": exit first → height animates → new content fades in with delay */}
+                  <AnimatePresence mode="wait" initial={false}>
+                    <motion.div
+                      key={activeWorkoutTab}
+                      className="flex flex-col gap-[16px] w-full"
+                      initial="entering"
+                      animate="visible"
+                      exit="exiting"
+                      variants={{
+                        entering: { opacity: 0 },
+                        visible: { opacity: 1, transition: { duration: 0.18, delay: 0.18 } },
+                        exiting: { opacity: 0, transition: { duration: 0.1 } },
+                      }}
+                    >
+                    {/* Big 2×2 block grid */}
+                    <div className="grid grid-cols-2 gap-[6px] w-full">
+                      {active.chips.map((chip) => {
+                        const changed = activeWorkoutTab !== "bigg-class" && !BASE_CHIPS.includes(chip);
+                        return (
+                          <div
+                            key={chip}
+                            className="flex items-center justify-center px-[12px] py-[10px] rounded-[8px]"
+                            style={{ background: changed ? "rgba(173,255,25,0.18)" : "#ededed" }}
+                          >
+                            <p
+                              className="font-['MessinaSansWeb:Bold',sans-serif] text-[15px] tracking-[-0.3px] whitespace-nowrap"
+                              style={{ color: changed ? "#3d6b00" : "#3d3d3d" }}
+                            >
+                              {chip}
+                            </p>
+                          </div>
+                        );
+                      })}
                     </div>
-                    <WhyLine iconSize={18}>{active.why}</WhyLine>
-                  </div>
+                    {/* Equipment row (home-gym only) */}
+                    {active.equipment && (
+                      <div className="flex flex-col gap-[5px]">
+                        <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[10px] text-[#a3a3a3] tracking-[-0.2px] uppercase">
+                          Equipamiento
+                        </p>
+                        <div className="flex gap-[6px] flex-wrap">
+                          {active.equipment.map((item) => (
+                            <div key={item} className="border border-[#c4c4c4] px-[8px] py-[4px] rounded-[6px]">
+                              <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[11px] text-[#565656] tracking-[-0.22px] whitespace-nowrap">
+                                {item}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {/* Dynamic why line */}
+                    {(() => {
+                      if (activeWorkoutTab === "bigg-class") return <WhyLine iconSize={18}>{active.why}</WhyLine>;
+                      const n = active.chips.filter(c => !BASE_CHIPS.includes(c)).length;
+                      const msg = n > 0
+                        ? `Cambiamos ${n} bloque${n !== 1 ? "s" : ""} porque no tenés el equipamiento`
+                        : "Mismos bloques adaptados para este formato";
+                      return <WhyLine iconSize={18}>{msg}</WhyLine>;
+                    })()}
+                    </motion.div>
+                  </AnimatePresence>
+                </motion.div>
+
+                {/* ── Mode selector — SECOND ── */}
+                <div className="bg-[#3d3d3d] flex items-center justify-between px-[20px] py-[14px] w-full relative rounded-b-[20px]">
+                  {WORKOUT_TABS.map((tab) => (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => setActiveWorkoutTab(tab.id)}
+                      className={`relative cursor-pointer flex gap-[8px] items-center transition-opacity duration-200 ${activeWorkoutTab === tab.id ? "opacity-100" : "opacity-40"}`}
+                    >
+                      {/* Diamond indicator — layoutId animates via transform (GPU only) */}
+                      {activeWorkoutTab === tab.id && (
+                        <motion.div
+                          layoutId="workout-tab-diamond"
+                          className="absolute w-[12px] h-[12px] bg-[#3d3d3d] z-10"
+                          style={{ rotate: 45, left: "50%", top: -8, translateX: "-50%", translateY: "-50%" }}
+                          transition={{ type: "spring", stiffness: 500, damping: 35 }}
+                        />
+                      )}
+                      <WorkoutTabIcon id={tab.id} />
+                      <p className={`leading-[1.13] text-white text-[13px] tracking-[-0.13px] whitespace-nowrap ${
+                        activeWorkoutTab === tab.id
+                          ? "font-['MessinaSansWeb:SemiBold',sans-serif] underline underline-offset-2"
+                          : "font-['MessinaSansWeb:Regular',sans-serif]"
+                      }`}>
+                        {tab.label}
+                      </p>
+                    </button>
+                  ))}
                 </div>
               </div>
-              {/* Reservar button attached below card */}
+
+              {/* ── CTA — THIRD ── CSS transition handles background, no JS animation */}
               <button
-                onClick={onReservar}
-                className="w-full bg-[#adff19] rounded-bl-[20px] rounded-br-[20px] mt-[-10px] pt-[26px] pb-[16px] flex items-center justify-center active:opacity-80 transition-opacity"
+                type="button"
+                onClick={activeWorkoutTab === "bigg-class" ? onReservar : onOpenProgramming}
+                className="w-full rounded-bl-[20px] rounded-br-[20px] mt-[-10px] pt-[26px] pb-[16px] flex items-center justify-center active:opacity-80 transition-opacity"
+                style={{
+                  background: activeWorkoutTab === "bigg-class" ? "#adff19" : "#3d3d3d",
+                  transition: "background 0.3s ease-in-out, opacity 0.2s",
+                }}
               >
-                <span className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[#3d3d3d] text-[15px] tracking-[-0.3px]">
-                  Reservar clase
-                </span>
+                <AnimatePresence mode="wait" initial={false}>
+                  <motion.span
+                    key={activeWorkoutTab === "bigg-class" ? "reservar" : "iniciar"}
+                    className={`font-['MessinaSansWeb:SemiBold',sans-serif] text-[15px] tracking-[-0.3px] ${activeWorkoutTab === "bigg-class" ? "text-[#3d3d3d]" : "text-white"}`}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.15 }}
+                  >
+                    {activeWorkoutTab === "bigg-class" ? "Reservar clase" : "Iniciar entrenamiento"}
+                  </motion.span>
+                </AnimatePresence>
               </button>
             </div>
           </div>
@@ -330,7 +478,7 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, reservedClass,
         {activities?.map((activity, i) => (
           <div key={i} className="flex flex-col items-start gap-[10px] w-full">
             <div className="relative z-10 flex flex-row items-center gap-[10px]">
-              <TimePill label={activity.time} />
+              <TimePill label="Entrenamiento complementario" />
             </div>
             <div className="relative z-10 w-full">
               <ActivityCard entry={activity} />
@@ -342,10 +490,7 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, reservedClass,
         {showAfternoon && (
           <div className="flex flex-col items-start gap-[10px] w-full">
             <div className="relative z-10 flex flex-row items-center gap-[10px]">
-              <TimePill label="Afternoon" />
-              <p className="font-['MessinaSansWeb:Regular',sans-serif] italic text-[#a3a3a3] text-[13px] tracking-[-0.26px]">
-                Mobility & recovery
-              </p>
+              <TimePill label="Mobility & recovery" />
             </div>
             <div className="relative z-10 w-full">
               <AfternoonRecommendationCard />
