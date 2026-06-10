@@ -94,11 +94,13 @@ export function BlockCard({
   selected,
   onSelect,
   fullWidth = false,
+  hideTitle = false,
 }: {
   block: StimulusBlock;
   selected: boolean;
   onSelect: () => void;
   fullWidth?: boolean;
+  hideTitle?: boolean;
 }) {
   const textColor = block.textColor ?? "#3d3d3d";
 
@@ -109,7 +111,7 @@ export function BlockCard({
       className="relative rounded-[16px] shrink-0 text-left overflow-hidden"
       style={{
         width: fullWidth ? "100%" : "248px",
-        minHeight: "210px",
+        minHeight: hideTitle ? "auto" : "210px",
         background: selected
           ? "linear-gradient(135deg, #adff19 0%, #7acc00 100%)"
           : "#f9f9f9",
@@ -141,15 +143,17 @@ export function BlockCard({
       <div className="flex items-start justify-start pt-[10px] pb-[14px] pl-[16px] pr-0 gap-[8px]">
         {/* Left column */}
         <div className="flex flex-col justify-start gap-[10px] flex-1 min-w-0">
-          <p
-            className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] font-['Druk_Wide:Medium',sans-serif] leading-[normal] tracking-[-1px]"
-            style={{
-              fontSize: block.stimulus.length > 12 ? "22px" : "26px",
-              color: selected ? "#1a3d00" : textColor,
-            }}
-          >
-            {block.stimulus}
-          </p>
+          {!hideTitle && (
+            <p
+              className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] font-['Druk_Wide:Medium',sans-serif] leading-[normal] tracking-[-1px]"
+              style={{
+                fontSize: block.stimulus.length > 12 ? "22px" : "26px",
+                color: selected ? "#1a3d00" : textColor,
+              }}
+            >
+              {block.stimulus}
+            </p>
+          )}
 
           <div
             className="backdrop-blur-[100px] flex items-center h-[18px] px-[6px] py-[3px] rounded-[3px] self-start"

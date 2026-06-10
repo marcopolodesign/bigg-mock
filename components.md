@@ -67,15 +67,21 @@ All components from the shadcn/ui library are present. Key ones in active use:
 **Usage:** `<BottomSheet open={...} onClose={...} title="Reservar clase"><ReservarSheet /></BottomSheet>`
 
 
+### `LocationSheet`
+**File:** `src/app/components/LocationSheet.tsx`
+**Props:** `open`, `onClose`, `selected: string`, `onSelect: (location: string) => void`, `customLocations?: string[]`, `onAddLocation: () => void`
+**Purpose:** vaul BottomSheet listing all training locations grouped by type. Rows: BIGG Recoleta, BIGG Tortuguitas, Seleccionar BIGG (chevron, calls onClose) / BIGG Outdoors / En mi casa + customLocations / + Agregar ubicación. Active location gets a `Check` icon. Used by `DailyWorkoutCard`.
+
+### `AddLocationScreen`
+**File:** `src/app/components/AddLocationScreen.tsx`
+**Props:** `open: boolean`, `onClose: () => void`, `onSave: (name: string, equipment: string[]) => void`
+**Purpose:** Full-screen slide-up modal (z-80, spring stiffness 320) for adding a custom training location. Name text input + 12 equipment chips (lime when selected). "Guardar ubicación" button disabled until name is non-empty. Resets state on cancel/save.
+
 ### `DailyWorkoutCard`
 **File:** `src/app/components/DailyWorkoutCard.tsx`
-**Props:** `onReservar?`, `onConfirmWorkout?`, `onOpenFab?`, `reservedClass?`, `activities?: ActivityEntry[]`, `showMorning?`, `showAfternoon?`
-**Layout (recommended/non-reserved view):** two stacked sections, no space filters.
-  - **Hero — "Tu entrenamiento de hoy" / "Tu recomendación principal":** the day's main class as the visual anchor. White→grey gradient card with Druk_Wide 32px title (`MORNING_CLASS`), info chips, an always-visible *why* band (`Sparkles` + cyan `#2ab3cc` text), and the lime `#adff19` "Reservar clase" CTA tucked under the card.
-  - **Complements — "Para completar tu día":** secondary recommendations (`activities` + the Mobility/`AfternoonRecommendationCard`) in their own timeline (vertical line + time pills), subordinate to the hero.
-**The "why":** every recommendation shows a justification. `ClassData.why` for the hero class; `ActivityEntry.why?` (optional) for activities; the Mobility card has its own cooldown rationale. All rendered with `Sparkles` in cyan `#2ab3cc` — the unified "why" language across the app.
+**Props:** `onReservar?`, `onOpenFab?`, `onOpenDetail?`, `onOpenProgramming?`, `reservedClass?`, `activities?: ActivityEntry[]`, `showMorning?`, `showAfternoon?`
+**Location header (recommendation state):** `MapPin + selectedLocation + ChevronDown` — tapping opens `LocationSheet`. Defaults to "BIGG Recoleta". CTA switches between lime "Reservar clase" (BIGG locations: Recoleta, Tortuguitas) and dark "Iniciar entrenamiento" (all others). Static `BASE_CHIPS` (FBA, Upper Body, HIIT, Midline) always shown. Custom locations added via `AddLocationScreen` are persisted in local state.
 **Reserved view:** when `reservedClass` is set, fades into a timeline with `ReservedClassCard` (blocks + attendee avatars) followed by any `activities` and the Agregar button.
-**Note:** the space-selection tabs (BIGG Class / Home/Gym / Outdoors) were removed — the home recommends *what* to train; the location is resolved later in the programming/reservation screen.
 
 ---
 

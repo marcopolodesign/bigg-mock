@@ -1,9 +1,94 @@
 import { useState } from "react";
-import { Plus, Check, Pencil } from "lucide-react";
+import { ChevronDown, MapPin, Plus, Check, Pencil, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import SourceChip, { type DataSource } from "./SourceChip";
 import WhyLine from "./WhyLine";
-import svgPaths from "../../imports/BiggDay/svg-03sgvqmew7";
+import LocationSheet from "./LocationSheet";
+import AddLocationScreen from "./AddLocationScreen";
+import { BlockCard, type StimulusBlock } from "./ProgrammingSection";
+
+const BASE_CHIPS = ["FBA", "Upper Body", "HIIT", "Midline"];
+const BIGG_LOCATIONS = new Set(["BIGG Recoleta", "BIGG Tortuguitas"]);
+
+const DAY_BLOCKS: StimulusBlock[] = [
+  { id: "day-fba", stimulus: "FBA", modality: "Superset · 3 sets", duration: "15'",
+    movements: ["SA DB Press 3 × 10 c/lado", "Nordic Curl 3 × 8", "Copenhagen Plank 3 × 30''", "Bulgarian Split 3 × 10 c/lado"],
+    gradient: "linear-gradient(135deg, #f9f9f9 0%, #e0fff5 100%)" },
+  { id: "day-ub", stimulus: "Upper Body", modality: "Strength · 5 sets", duration: "20'",
+    movements: ["Bench Press 4 × 5 @80%", "Weighted Pull-up 3 × 6", "DB Row 3 × 10 c/lado", "Face Pull 2 × 15"],
+    gradient: "linear-gradient(135deg, #f9f9f9 0%, #e8eeff 100%)" },
+  { id: "day-hi", stimulus: "HIIT", modality: "AMRAP · 12'", duration: "12'",
+    movements: ["Thruster × 10", "Box Jump × 10", "KB Swing × 15", "Burpee × 8"],
+    gradient: "linear-gradient(135deg, #f9f9f9 0%, #fff0e0 100%)" },
+  { id: "day-mid", stimulus: "Midline", modality: "For Quality · 3 sets", duration: "12'",
+    movements: ["Hollow Hold 3 × 30''", "V-Up 3 × 15", "Pallof Press 3 × 12 c/lado", "Dead Bug 3 × 10"],
+    gradient: "linear-gradient(135deg, #f9f9f9 0%, #f5f0ff 100%)" },
+];
+
+const FLAP_OVERLAP = 12;
+
+function FlapItem({ block, isOpen, onToggle, index, total, isAdapted = false }: { block: StimulusBlock; isOpen: boolean; onToggle: () => void; index: number; total: number; isAdapted?: boolean }) {
+  const isLast = index === total - 1;
+  return (
+    <div
+      className="w-full"
+      style={{
+        borderTop: "1px solid rgba(0,0,0,0.09)",
+        borderLeft: "1px solid rgba(0,0,0,0.09)",
+        borderRight: "1px solid rgba(0,0,0,0.09)",
+        borderBottom: isLast ? "1px solid rgba(0,0,0,0.09)" : "none",
+        borderTopLeftRadius: "14px",
+        borderTopRightRadius: "14px",
+        borderBottomLeftRadius: isLast ? "14px" : 0,
+        borderBottomRightRadius: isLast ? "14px" : 0,
+        paddingBottom: isLast ? 0 : FLAP_OVERLAP,
+        marginTop: index > 0 ? -FLAP_OVERLAP : 0,
+        position: "relative",
+        zIndex: total - index,
+      }}
+    >
+      <button
+        type="button"
+        onClick={(e) => { e.stopPropagation(); onToggle(); }}
+        className="w-full flex items-center justify-between px-[16px] py-[14px] active:opacity-70 transition-opacity"
+      >
+        <p className="font-['Druk_Wide:Medium',sans-serif] text-[17px] text-[#3d3d3d] leading-none tracking-[-0.5px] uppercase">
+          {block.stimulus}
+        </p>
+        <div className="flex items-center gap-[8px] shrink-0">
+          {isAdapted && <Sparkles size={13} className="text-[#2ab3cc]" strokeWidth={2} />}
+          <motion.div animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.18 }}>
+            <ChevronDown size={14} className="text-[#a3a3a3]" strokeWidth={2} />
+          </motion.div>
+        </div>
+      </button>
+      <AnimatePresence initial={false}>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 380, damping: 38 }}
+            style={{ overflow: "hidden" }}
+          >
+            <div className="px-[16px] pb-[16px] flex flex-col gap-[10px]">
+              <p className="font-['MessinaSansWeb:Bold',sans-serif] text-[10px] text-[#a3a3a3] tracking-[0.6px] uppercase">
+                {block.modality}
+              </p>
+              <div className="flex flex-col gap-[6px]">
+                {block.movements.map((mv, i) => (
+                  <p key={i} className="font-['MessinaSansWeb:Regular',sans-serif] text-[13px] text-[#3d3d3d] leading-[1.35]">
+                    {mv}
+                  </p>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
 
 // Dark time pill used as the timeline node label (e.g. "10AM", "18:00hs").
 function TimePill({ label }: { label: string }) {
@@ -14,63 +99,6 @@ function TimePill({ label }: { label: string }) {
       </p>
     </div>
   );
-}
-
-// ─── Mode tab selector ────────────────────────────────────────────────────────
-
-type WorkoutTabId = "bigg-class" | "home-gym" | "outdoors";
-
-interface WorkoutTabData {
-  id: WorkoutTabId;
-  label: string;
-  title: string;
-  chips: string[];
-  why: string;
-  equipment?: string[];
-}
-
-const BASE_CHIPS = ["FBA", "Upper Body", "HIIT", "Midline"];
-
-const WORKOUT_TABS: WorkoutTabData[] = [
-  { id: "bigg-class", label: "BIGG Class", title: "Entrenamiento recomendado", chips: BASE_CHIPS, why: "Recomendado: llevás 2 días sin entrenar fuerza" },
-  { id: "home-gym", label: "Freeride", title: "Entrenamiento recomendado", chips: ["Upper Body", "Core", "HIIT", "Mobility"], why: "", equipment: ["Mancuernas", "Mat", "Banda elástica"] },
-  { id: "outdoors", label: "BIGG Outdoors", title: "Entrenamiento recomendado", chips: ["Running", "Upper Body", "HIIT", "Stretching"], why: "" },
-];
-
-function BiggClassIcon() {
-  return (
-    <div className="relative shrink-0 size-[18px]">
-      <svg className="absolute block inset-0 size-full" fill="none" viewBox="0 0 24 24">
-        <path d={svgPaths.p23dee300} stroke="white" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-      </svg>
-    </div>
-  );
-}
-
-function HomeGymIcon() {
-  return (
-    <div className="h-[18px] relative shrink-0 w-[18px]">
-      <svg className="absolute block inset-0 size-full" fill="none" viewBox="0 0 24 24.8889">
-        <path d={svgPaths.p1fab3c00} stroke="white" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-      </svg>
-    </div>
-  );
-}
-
-function OutdoorsIcon() {
-  return (
-    <div className="h-[18px] relative shrink-0 w-[18px]">
-      <svg className="absolute block inset-0 size-full" fill="none" viewBox="0 0 23.996 24">
-        <path d={svgPaths.pbbc2500} fill="white" />
-      </svg>
-    </div>
-  );
-}
-
-function WorkoutTabIcon({ id }: { id: WorkoutTabId }) {
-  if (id === "bigg-class") return <BiggClassIcon />;
-  if (id === "home-gym") return <HomeGymIcon />;
-  return <OutdoorsIcon />;
 }
 
 function AfternoonRecommendationCard() {
@@ -278,11 +306,17 @@ interface DailyWorkoutCardProps {
   activities?: ActivityEntry[];
   showMorning?: boolean;
   showAfternoon?: boolean;
+  cardVariant?: 1 | 2 | 3;
 }
 
-export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, onOpenProgramming, reservedClass, activities, showMorning = true, showAfternoon = true }: DailyWorkoutCardProps) {
-  const [activeWorkoutTab, setActiveWorkoutTab] = useState<WorkoutTabId>("bigg-class");
-  const active = WORKOUT_TABS.find((t) => t.id === activeWorkoutTab)!;
+export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, onOpenProgramming, reservedClass, activities, showMorning = true, showAfternoon = true, cardVariant = 1 }: DailyWorkoutCardProps) {
+  const [selectedLocation, setSelectedLocation] = useState("BIGG Recoleta");
+  const [showLocationSheet, setShowLocationSheet] = useState(false);
+  const [showAddLocation, setShowAddLocation] = useState(false);
+  const [customLocations, setCustomLocations] = useState<string[]>([]);
+  const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
+  const [openFlapId, setOpenFlapId] = useState<string | null>(null);
+  const isBiggLocation = BIGG_LOCATIONS.has(selectedLocation);
 
   if (reservedClass) {
     return (
@@ -328,6 +362,7 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
 
   // ── Single unified timeline (recommendation state) ──
   return (
+    <>
     <div className="relative w-full">
       <div className="absolute left-[22px] top-0 bottom-0 w-[1px] bg-[#c4c4c4]" />
       <div className="flex flex-col items-start gap-[24px]">
@@ -339,136 +374,104 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
               <TimePill label="Entrenamiento del día" />
             </div>
             <div className="relative z-10 w-full flex flex-col items-center">
-              {/* Inner card: children own their rounded corners so the indicator can protrude */}
               <div className="relative w-full flex flex-col">
-                {/* ── Content area — FIRST ── */}
-                <motion.div
-                  layout="size"
-                  className="backdrop-blur-[50px] flex flex-col gap-[16px] p-[20px] relative w-full cursor-pointer active:opacity-90 transition-opacity rounded-t-[20px]"
-                  style={{ backgroundImage: "linear-gradient(115.214deg, rgba(255, 255, 255, 0.9) 51.472%, rgba(163, 163, 163, 0.9) 114.32%)" }}
-                  onClick={onOpenProgramming}
-                  transition={{ type: "spring", stiffness: 380, damping: 38 }}
+                {/* ── Content area ── */}
+                <div
+                  className={`backdrop-blur-[50px] flex flex-col gap-[16px] relative z-[2] w-full rounded-[20px] ${cardVariant === 3 ? "pb-[20px]" : "p-[20px]"} ${cardVariant === 1 ? "cursor-pointer active:opacity-90 transition-opacity" : ""}`}
+                  style={{
+                    backgroundImage: cardVariant === 1
+                      ? "linear-gradient(115.214deg, rgba(255, 255, 255, 0.9) 51.472%, rgba(163, 163, 163, 0.9) 114.32%)"
+                      : "linear-gradient(135deg, rgba(255,255,255,0.97) 0%, rgba(245,245,245,0.97) 100%)",
+                  }}
+                  onClick={cardVariant === 1 ? onOpenProgramming : undefined}
                 >
-                  <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] font-['Druk_Wide:Medium',sans-serif] leading-[1.1] text-[16px] text-[#565656] tracking-[-0.3px]">
-                    {active.title}
-                  </p>
-                  {/* mode="wait": exit first → height animates → new content fades in with delay */}
-                  <AnimatePresence mode="wait" initial={false}>
-                    <motion.div
-                      key={activeWorkoutTab}
-                      className="flex flex-col gap-[16px] w-full"
-                      initial="entering"
-                      animate="visible"
-                      exit="exiting"
-                      variants={{
-                        entering: { opacity: 0 },
-                        visible: { opacity: 1, transition: { duration: 0.18, delay: 0.18 } },
-                        exiting: { opacity: 0, transition: { duration: 0.1 } },
-                      }}
-                    >
-                    {/* Big 2×2 block grid */}
+                  {/* Variant 1 — 2×2 chip grid */}
+                  {cardVariant === 1 && (
                     <div className="grid grid-cols-2 gap-[6px] w-full">
-                      {active.chips.map((chip) => {
-                        const changed = activeWorkoutTab !== "bigg-class" && !BASE_CHIPS.includes(chip);
-                        return (
-                          <div
-                            key={chip}
-                            className="flex items-center justify-center px-[12px] py-[10px] rounded-[8px]"
-                            style={{ background: changed ? "rgba(173,255,25,0.18)" : "#ededed" }}
-                          >
-                            <p
-                              className="font-['MessinaSansWeb:Bold',sans-serif] text-[15px] tracking-[-0.3px] whitespace-nowrap"
-                              style={{ color: changed ? "#3d6b00" : "#3d3d3d" }}
-                            >
-                              {chip}
-                            </p>
-                          </div>
-                        );
-                      })}
-                    </div>
-                    {/* Equipment row (home-gym only) */}
-                    {active.equipment && (
-                      <div className="flex flex-col gap-[5px]">
-                        <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[10px] text-[#a3a3a3] tracking-[-0.2px] uppercase">
-                          Equipamiento
-                        </p>
-                        <div className="flex gap-[6px] flex-wrap">
-                          {active.equipment.map((item) => (
-                            <div key={item} className="border border-[#c4c4c4] px-[8px] py-[4px] rounded-[6px]">
-                              <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[11px] text-[#565656] tracking-[-0.22px] whitespace-nowrap">
-                                {item}
-                              </p>
-                            </div>
-                          ))}
+                      {BASE_CHIPS.map((chip) => (
+                        <div key={chip} className="flex items-center justify-center px-[12px] py-[10px] rounded-[8px] bg-[#ededed]">
+                          <p className="font-['MessinaSansWeb:Bold',sans-serif] text-[15px] text-[#3d3d3d] tracking-[-0.3px] whitespace-nowrap">
+                            {chip}
+                          </p>
                         </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Variant 2 — stacked full-width BlockCards */}
+                  {cardVariant === 2 && (
+                    <div className="flex flex-col gap-[10px] w-full">
+                      {DAY_BLOCKS.map((block) => (
+                        <BlockCard
+                          key={block.id}
+                          block={block}
+                          selected={selectedBlockId === block.id}
+                          onSelect={() => setSelectedBlockId(selectedBlockId === block.id ? null : block.id)}
+                          fullWidth
+                        />
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Variant 3 — accordion flaps */}
+                  {cardVariant === 3 && (
+                    <div className="flex flex-col w-full">
+                      {DAY_BLOCKS.map((block, i) => (
+                        <FlapItem
+                          key={block.id}
+                          block={block}
+                          isOpen={openFlapId === block.id}
+                          onToggle={() => setOpenFlapId(openFlapId === block.id ? null : block.id)}
+                          index={i}
+                          total={DAY_BLOCKS.length}
+                          isAdapted={!isBiggLocation}
+                        />
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Footer: WhyLine + location — padded in for variant 3 */}
+                  <div className={`flex flex-col gap-[16px] ${cardVariant === 3 ? "px-[20px]" : ""}`}>
+                    {!isBiggLocation && cardVariant !== 3 && (
+                      <WhyLine iconSize={18}>Bloques adaptados para entrenar en este espacio</WhyLine>
+                    )}
+                    {!isBiggLocation && cardVariant === 3 && (
+                      <div className="flex items-center gap-[6px]">
+                        <Sparkles size={13} className="text-[#2ab3cc]" strokeWidth={2} />
+                        <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[13px] text-[#2ab3cc] tracking-[-0.26px]">
+                          Bloque cambiado para esta ubicación
+                        </p>
                       </div>
                     )}
-                    {/* Dynamic why line */}
-                    {(() => {
-                      if (activeWorkoutTab === "bigg-class") return <WhyLine iconSize={18}>{active.why}</WhyLine>;
-                      const n = active.chips.filter(c => !BASE_CHIPS.includes(c)).length;
-                      const msg = n > 0
-                        ? `Cambiamos ${n} bloque${n !== 1 ? "s" : ""} porque no tenés el equipamiento`
-                        : "Mismos bloques adaptados para este formato";
-                      return <WhyLine iconSize={18}>{msg}</WhyLine>;
-                    })()}
-                    </motion.div>
-                  </AnimatePresence>
-                </motion.div>
-
-                {/* ── Mode selector — SECOND ── */}
-                <div className="bg-[#3d3d3d] flex items-center justify-between px-[20px] py-[14px] w-full relative rounded-b-[20px]">
-                  {WORKOUT_TABS.map((tab) => (
                     <button
-                      key={tab.id}
                       type="button"
-                      onClick={() => setActiveWorkoutTab(tab.id)}
-                      className={`relative cursor-pointer flex gap-[8px] items-center transition-opacity duration-200 ${activeWorkoutTab === tab.id ? "opacity-100" : "opacity-40"}`}
+                      onClick={(e) => { e.stopPropagation(); setShowLocationSheet(true); }}
+                      className="flex items-center gap-[6px] active:opacity-70 transition-opacity self-start"
                     >
-                      {/* Diamond indicator — layoutId animates via transform (GPU only) */}
-                      {activeWorkoutTab === tab.id && (
-                        <motion.div
-                          layoutId="workout-tab-diamond"
-                          className="absolute w-[12px] h-[12px] bg-[#3d3d3d] z-10"
-                          style={{ rotate: 45, left: "50%", top: -8, translateX: "-50%", translateY: "-50%" }}
-                          transition={{ type: "spring", stiffness: 500, damping: 35 }}
-                        />
-                      )}
-                      <WorkoutTabIcon id={tab.id} />
-                      <p className={`leading-[1.13] text-white text-[13px] tracking-[-0.13px] whitespace-nowrap ${
-                        activeWorkoutTab === tab.id
-                          ? "font-['MessinaSansWeb:SemiBold',sans-serif] underline underline-offset-2"
-                          : "font-['MessinaSansWeb:Regular',sans-serif]"
-                      }`}>
-                        {tab.label}
+                      <MapPin size={20} className="text-[#565656]" strokeWidth={1.75} />
+                      <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[14px] text-[#565656] tracking-[-0.28px]">
+                        {selectedLocation}
                       </p>
+                      <ChevronDown size={14} className="text-[#565656]" strokeWidth={2} />
                     </button>
-                  ))}
+                  </div>
                 </div>
               </div>
 
-              {/* ── CTA — THIRD ── CSS transition handles background, no JS animation */}
+              {/* ── CTA ── translateY overlaps card bottom */}
               <button
                 type="button"
-                onClick={activeWorkoutTab === "bigg-class" ? onReservar : onOpenProgramming}
-                className="w-full rounded-bl-[20px] rounded-br-[20px] mt-[-10px] pt-[26px] pb-[16px] flex items-center justify-center active:opacity-80 transition-opacity"
+                onClick={isBiggLocation ? onReservar : onOpenProgramming}
+                className="relative z-[1] w-full rounded-b-[16px] pt-[56px] pb-[16px] flex items-center justify-center active:opacity-80 transition-opacity mb-[-56px]"
                 style={{
-                  background: activeWorkoutTab === "bigg-class" ? "#adff19" : "#3d3d3d",
+                  background: isBiggLocation ? "#adff19" : "#3d3d3d",
+                  transform: "translateY(-56px)",
                   transition: "background 0.3s ease-in-out, opacity 0.2s",
                 }}
               >
-                <AnimatePresence mode="wait" initial={false}>
-                  <motion.span
-                    key={activeWorkoutTab === "bigg-class" ? "reservar" : "iniciar"}
-                    className={`font-['MessinaSansWeb:SemiBold',sans-serif] text-[15px] tracking-[-0.3px] ${activeWorkoutTab === "bigg-class" ? "text-[#3d3d3d]" : "text-white"}`}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.15 }}
-                  >
-                    {activeWorkoutTab === "bigg-class" ? "Reservar clase" : "Iniciar entrenamiento"}
-                  </motion.span>
-                </AnimatePresence>
+                <span className={`font-['MessinaSansWeb:SemiBold',sans-serif] text-[15px] tracking-[-0.3px] ${isBiggLocation ? "text-[#3d3d3d]" : "text-white"}`}>
+                  {isBiggLocation ? "Reservar clase" : "Iniciar entrenamiento"}
+                </span>
               </button>
             </div>
           </div>
@@ -511,5 +514,24 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
 
       </div>
     </div>
+
+    <LocationSheet
+      open={showLocationSheet}
+      onClose={() => setShowLocationSheet(false)}
+      selected={selectedLocation}
+      onSelect={(loc) => { setSelectedLocation(loc); setShowLocationSheet(false); }}
+      customLocations={customLocations}
+      onAddLocation={() => { setShowLocationSheet(false); setShowAddLocation(true); }}
+    />
+    <AddLocationScreen
+      open={showAddLocation}
+      onClose={() => setShowAddLocation(false)}
+      onSave={(name) => {
+        setCustomLocations((prev) => [...prev, name]);
+        setSelectedLocation(name);
+        setShowAddLocation(false);
+      }}
+    />
+    </>
   );
 }

@@ -1178,7 +1178,7 @@ function SocialContainer() {
 
 // ─── Main scroll content ───────────────────────────────────────────────────────
 
-function MainContent({ onReservar, onOpenFab, onOpenDetail, onOpenProgramming, isToday, isFutureDay, selectedDate, todayReservedClass }: { onReservar: () => void; onOpenFab: () => void; onOpenDetail: (rc: ReservedClass) => void; onOpenProgramming: () => void; isToday: boolean; isFutureDay: boolean; selectedDate: Date; todayReservedClass: ReservedClass | null }) {
+function MainContent({ onReservar, onOpenFab, onOpenDetail, onOpenProgramming, isToday, isFutureDay, selectedDate, todayReservedClass, cardVariant = 1 }: { onReservar: () => void; onOpenFab: () => void; onOpenDetail: (rc: ReservedClass) => void; onOpenProgramming: () => void; isToday: boolean; isFutureDay: boolean; selectedDate: Date; todayReservedClass: ReservedClass | null; cardVariant?: 1 | 2 | 3 }) {
   const dateKey = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}`;
   const pastData = isToday ? undefined : PAST_DAYS[dateKey];
 
@@ -1196,6 +1196,7 @@ function MainContent({ onReservar, onOpenFab, onOpenDetail, onOpenProgramming, i
             onOpenProgramming={todayReservedClass ? undefined : onOpenProgramming}
             reservedClass={todayReservedClass ?? undefined}
             activities={TODAY_ACTIVITIES}
+            cardVariant={cardVariant}
           />
         ) : pastData?.reservedClass ? (
           <DailyWorkoutCard
@@ -1532,8 +1533,8 @@ type BottomTabId = "train" | "activity" | "world" | "community" | "perfil";
 
 const BOTTOM_TABS: { id: BottomTabId; label: string; Icon: React.ElementType }[] = [
   { id: "train", label: "Train", Icon: Dumbbell },
-  { id: "activity", label: "Actividad", Icon: Activity },
-  { id: "world", label: "BIGG World", Icon: Globe },
+  { id: "activity", label: "Opción 2", Icon: Activity },
+  { id: "world", label: "Opción 3", Icon: Globe },
   { id: "community", label: "Comunidad", Icon: Users },
   { id: "perfil", label: "Perfil", Icon: User },
 ];
@@ -1651,7 +1652,7 @@ export default function BiggDayScreen() {
       </div>
 
       {/* Tab content */}
-      {activeTab === "train" && (
+      {(activeTab === "train" || activeTab === "activity" || activeTab === "world") && (
         <div className="pb-[93px]">
           <MainContent
             onReservar={() => setReservarOpen(true)}
@@ -1662,16 +1663,15 @@ export default function BiggDayScreen() {
             isFutureDay={isFutureDay}
             selectedDate={selectedDate}
             todayReservedClass={todayReservedClass}
+            cardVariant={activeTab === "train" ? 1 : activeTab === "activity" ? 2 : 3}
           />
         </div>
       )}
-      {activeTab === "activity" && <PlaceholderTabContent label="Actividad — próximamente" />}
-      {activeTab === "world" && <PlaceholderTabContent label="BIGG World Map — próximamente" />}
       {activeTab === "community" && <CommunityTabContent />}
       {activeTab === "perfil" && <PlaceholderTabContent label="Perfil — próximamente" />}
 
       {/* Fixed overlays */}
-      {activeTab === "train" && <StickyHeader today={today} selectedDate={selectedDate} onSelectDate={setSelectedDate} scrollY={headerScrollY} />}
+      {(activeTab === "train" || activeTab === "activity" || activeTab === "world") && <StickyHeader today={today} selectedDate={selectedDate} onSelectDate={setSelectedDate} scrollY={headerScrollY} />}
       <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
       <FloatingActionButton open={fabOpen} onOpenChange={setFabOpen} onVerProgramacion={() => setProgrammingOpen(true)} />
 

@@ -4,6 +4,133 @@
 
 ---
 
+## 2026-06-10 — DailyWorkoutCard: Opción 3 — location icon + adapted-block Sparkles + legend
+
+**Source:** Claude Code — Macbook Pro
+
+**Change:** Ubicación icon escalado de 16px a 20px. Los flaps de bloques adaptados (cuando la ubicación no es BIGG) muestran un ícono `Sparkles` cyan junto al ChevronDown en el header. El footer muestra una leyenda "Bloque cambiado para esta ubicación" con el mismo ícono cuando el variante es 3 y la ubicación no es BIGG — reemplaza el `WhyLine` genérico del footer. Los flaps BIGG (Reservar) no muestran ningun indicador de adaptación.
+
+**Files modified:**
+- `src/app/components/DailyWorkoutCard.tsx` — `MapPin size={20}`; `FlapItem` acepta `isAdapted?: boolean` y muestra `<Sparkles size={13} className="text-[#2ab3cc]">` en el header row; footer v3 muestra leyenda cyan en lugar de WhyLine cuando `!isBiggLocation`
+
+---
+
+## 2026-06-10 — DailyWorkoutCard: CTA — paddingTop 56px (más overlap)
+
+**Source:** Claude Code — Macbook Pro
+
+**Change:** CTA `pt-[40px]` → `pt-[56px]`, `translateY(-40px)` → `translateY(-56px)`, `mb-[-40px]` → `mb-[-56px]`. El botón emerge aún más profundo desde bajo el card.
+
+**Files modified:**
+- `src/app/components/DailyWorkoutCard.tsx` — CTA padding/translate/mb actualizados a 56px
+
+---
+
+## 2026-06-10 — DailyWorkoutCard: Opción 3 — flaps full-width, no top/horizontal padding on card
+
+**Source:** Claude Code — Macbook Pro
+
+**Change:** Para el variante 3, el content div del card usa solo `pb-[20px]` (sin top ni horizontal padding) para que los flaps lleguen hasta los bordes. WhyLine y location button quedan envueltos en un div con `px-[20px]` para mantener la sangría. Variantes 1 y 2 no cambian.
+
+**Files modified:**
+- `src/app/components/DailyWorkoutCard.tsx` — padding condicional en content div: `p-[20px]` para v1/v2, `pb-[20px]` para v3; footer (WhyLine + location) en wrapper `px-[20px]` solo para v3
+
+---
+
+## 2026-06-10 — DailyWorkoutCard: Opción 3 — hide block title inside flap, remove green dot
+
+**Source:** Claude Code — Macbook Pro
+
+**Change:** En los flaps del variante 3, el `BlockCard` ya no repite el título (se muestra en el header del flap). También se quitó el punto verde del header. El `minHeight: 210px` del `BlockCard` se desactiva con `hideTitle` para que el card colapsado no tenga espacio vacío.
+
+**Files modified:**
+- `src/app/components/ProgrammingSection.tsx` — `BlockCard` acepta `hideTitle?: boolean`; envuelve el `<p>` del título en `{!hideTitle && ...}`; `minHeight` = `"auto"` cuando `hideTitle`
+- `src/app/components/DailyWorkoutCard.tsx` — `FlapItem` elimina el dot verde; pasa `hideTitle` al `BlockCard` interno
+
+---
+
+## 2026-06-10 — DailyWorkoutCard: CTA — flat top, more overlap
+
+**Source:** Claude Code — Macbook Pro
+
+**Change:** CTA button: quitadas las esquinas superiores (`rounded-[16px]` → `rounded-b-[16px]`), `pt-[28px]` → `pt-[40px]`, `translateY(-16px)` → `translateY(-40px)`, `mb-[-16px]` → `mb-[-40px]`. El botón emerge del card sin borde superior redondeado y con todo el paddingTop oculto bajo el card.
+
+**Files modified:**
+- `src/app/components/DailyWorkoutCard.tsx` — CTA `rounded-b-[16px]`, `pt-[40px]`, `translateY(-40px)`, `mb-[-40px]`
+
+---
+
+## 2026-06-10 — DailyWorkoutCard: Opción 3 — overlap + custom content, borders restored
+
+**Source:** Claude Code — Macbook Pro
+
+**Change:** Reescrito `FlapItem` desde cero: sin `background: white` (transparente), sin `BlockCard` interno. Contenido expandido custom: modality badge (10px gris uppercase) + lista de movimientos (MessinaSans Regular 13px). Overlap via `paddingBottom/marginTop: 12px` + `position: relative` + `zIndex: total - index`. Último flap (isLast) cierra con `borderBottom` + `borderBottomRadius: 14px`. Borde 3 lados en todos; borde completo + rounding inferior solo en el último.
+
+**Files modified:**
+- `src/app/components/DailyWorkoutCard.tsx` — `FlapItem` reescrito; `FLAP_OVERLAP = 12`; `isLast` prop para border/radius inferior; sin `BlockCard` ni `background`
+
+---
+
+## 2026-06-10 — DailyWorkoutCard: Opción 3 flap styling — Druk Wide titles + ProgrammingSection borders
+
+**Source:** Claude Code — Macbook Pro
+
+**Change:** Refinados los flaps del card variante 3 para que coincidan visualmente con los flaps de ProgrammingScreen: cada flap tiene `borderTop + borderTopLeftRadius/Right: 14px` propio (en lugar del flat divider anterior), el font del título cambiado a `Druk_Wide:Medium` a 17px con tracking -0.5px, padding del botón aumentado a `py-[14px]`. Se agregó prop `isFirst` para omitir el borderTop en el primer ítem (los inline styles tienen mayor especificidad que `first:border-t-0`). Container del variante 3 simplificado a `flex flex-col w-full` sin borde ni overflow-hidden externo.
+
+**Files modified:**
+- `src/app/components/DailyWorkoutCard.tsx` — `FlapItem` wrapper con inline `borderTop/borderTopLeftRadius/Right`; `isFirst?: boolean` prop para saltar el top border; título → `Druk_Wide:Medium text-[17px] tracking-[-0.5px]`; contenedor variante 3 sin `rounded overflow-hidden border bg-white`; `.map` con índice para pasar `isFirst={i === 0}`
+
+---
+
+## 2026-06-10 — DailyWorkoutCard: 3-variant comparison system (chips / BlockCards / accordion flaps)
+
+**Source:** Claude Code — Macbook Pro
+
+**Change:** Agregado sistema temporal de comparación de 3 propuestas del card "Entrenamiento del día". Los tabs Opción 2 y Opción 3 reemplazan Actividad y BIGG World en la barra de navegación (iconos iguales, labels cambiados). Cada tab renderiza `MainContent` con `cardVariant={1|2|3}`. Variante 1 = chips 2×2 (actual). Variante 2 = `BlockCard` completos apilados verticalmente (reutiliza el componente de ProgrammingSection con `fullWidth`). Variante 3 = lista de flaps acordeón (nombre + chevron que rota; tap expande `BlockCard` con spring animation). `StickyHeader` visible en los 3 tabs.
+
+**Files modified:**
+- `src/app/components/DailyWorkoutCard.tsx` — prop `cardVariant?: 1 | 2 | 3`; constante `DAY_BLOCKS: StimulusBlock[]` con FBA/Upper Body/HIIT/Midline y sus movimientos; componente interno `FlapItem` (accordion row: lime dot + chevron rotatable + `AnimatePresence` height 0→auto); estado `selectedBlockId` (v2) y `openFlapId` (v3); content area renderiza según variante
+- `src/app/screens/BiggDayScreen.tsx` — tabs "Actividad" → "Opción 2" / "BIGG World" → "Opción 3"; `MainContent` acepta `cardVariant`; los 3 tabs train comparten `<MainContent>` con `cardVariant` derivado del tab activo
+
+**Key notes:**
+- `DAY_BLOCKS` importa `BlockCard` y `StimulusBlock` de `ProgrammingSection.tsx` — sin duplicación
+- Variante 2 usa `BlockCard fullWidth`; variante 3 envuelve `BlockCard` dentro de `FlapItem` con `overflow:hidden` en el `motion.div`
+- Sistema es temporal para presentar propuestas al cliente; una vez elegida la variante, se eliminarán los otros tabs y se restaurarán los originales
+
+---
+
+## 2026-06-10 — DailyWorkoutCard: location header moved to bottom, conditional WhyLine, CTA translateY
+
+**Source:** Claude Code — Macbook Pro
+
+**Change:** Reorganized the recommendation card: chips grid at top, location selector moved to bottom of content area, WhyLine now only shown when location is non-BIGG (blocks adapted). Content area gets full `rounded-[20px]` and `pb-[24px]`. CTA button uses `translateY(-16px) + mb-[-16px]` instead of negative margin for the floating overlap effect, fully rounded (`rounded-[16px]`).
+
+**Files modified:**
+- `src/app/components/DailyWorkoutCard.tsx` — removed location button from top, added it at bottom of content div; WhyLine conditional on `!isBiggLocation`; content area `rounded-[20px]` + `pb-[24px]`; CTA `rounded-[16px]` with `transform: translateY(-16px)` + `mb-[-16px]`
+
+---
+
+## 2026-06-10 — DailyWorkoutCard: dynamic location picker (LocationSheet + AddLocationScreen)
+
+**Source:** Claude Code — Macbook Pro
+
+**Change:** Reemplazado el selector de tabs (BIGG Class / Freeride / BIGG Outdoors) por un header de ubicación interactivo. Tocar la ubicación abre un BottomSheet con todas las opciones; "Agregar ubicación" abre una pantalla full-screen para agregar lugares custom con equipamiento.
+
+**Files created:**
+- `src/app/components/LocationSheet.tsx` — vaul BottomSheet con filas de ubicación agrupadas (BIGG / Outdoors / Casa / Custom + Agregar), checkmark en activa, chevron en "Seleccionar BIGG"
+- `src/app/components/AddLocationScreen.tsx` — pantalla slide-up (spring stiffness 320) con input de nombre + 12 chips de equipamiento + botones Cancelar / Guardar ubicación (disabled si sin nombre)
+
+**Files modified:**
+- `src/app/components/DailyWorkoutCard.tsx` — removido todo el código de tab selector (WorkoutTabId, WORKOUT_TABS, BiggClassIcon/HomeGymIcon/OutdoorsIcon, selector bar, diamond indicator, layout="size", AnimatePresence por tab); reemplazado por header `MapPin + selectedLocation + ChevronDown`; CTA cambia entre "Reservar clase" (lime, BIGG locations) e "Iniciar entrenamiento" (dark, resto); estado: selectedLocation, showLocationSheet, showAddLocation, customLocations
+
+**Key notes:**
+- `BIGG_LOCATIONS = new Set(["BIGG Recoleta", "BIGG Tortuguitas"])` controla cuándo mostrar el CTA de reserva
+- LocationSheet y AddLocationScreen se renderizan al final del return, fuera del layout del card (portales/fixed)
+- "Seleccionar BIGG" tiene chevron y cierra el sheet (placeholder para navegación futura)
+- Custom locations guardadas en estado local; seleccionadas inmediatamente al guardar
+
+---
+
 ## 2026-06-10 — ProgrammingScreen: lighter header bg, no gap at chip/bloque seam
 
 Header wrapped in `bg-[#f5f5f5] relative z-10 pb-[20px]`; scroll area gets matching `bg-[#f5f5f5] -mt-[20px]` so content slides up under the header bg, eliminating the visible color-shift gap. Status bar spacer reduced 40px → 12px.
