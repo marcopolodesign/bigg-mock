@@ -99,7 +99,7 @@ export default function FloatingActionButton({ open: controlledOpen, onOpenChang
 
       {/* FAB button */}
       <motion.button
-        className="fixed right-[20px] z-[55] size-[58px] bg-[#adff19] rounded-full flex items-center justify-center shadow-[0_6px_24px_rgba(0,0,0,0.18)] border border-[#3d3d3d]/40"
+        className="fixed right-[20px] z-[55] size-[46px] bg-[#adff19] rounded-full flex items-center justify-center shadow-[0_6px_24px_rgba(0,0,0,0.18)] border border-[#3d3d3d]/40"
         style={{ bottom: "calc(93px + 16px)" }}
         onClick={() => setOpen((v) => !v)}
         whileTap={{ scale: 0.88 }}
@@ -109,7 +109,7 @@ export default function FloatingActionButton({ open: controlledOpen, onOpenChang
           animate={{ rotate: open ? 45 : 0 }}
           transition={{ duration: 0.22, ease: "easeInOut" }}
         >
-          <Plus size={26} color="#3d3d3d" strokeWidth={2.5} />
+          <Plus size={20} color="#3d3d3d" strokeWidth={2.5} />
         </motion.div>
       </motion.button>
     </>

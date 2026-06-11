@@ -4,6 +4,18 @@
 
 ---
 
+## 2026-06-11 — FAB más pequeño + Op4 CTA simplificado a location selector
+
+**Source:** Claude Code — Macbook Pro
+
+**Change:** FAB reducido de `size-[58px]` a `size-[46px]` con icono `Plus` 26→20px. CTA de Opción 4 simplificado: eliminado el botón de dos filas (Reservar clase + location), reemplazado por un único botón dark gray que muestra solo `[MapPin] Donde vas a entrenar? BIGG Recoleta [ChevronDown]` — con location y chevron en blanco underlined — y abre el location sheet al tocar.
+
+**Files modified:**
+- `src/app/components/FloatingActionButton.tsx` — `size-[58px]` → `size-[46px]`, icono `Plus` 26 → 20px
+- `src/app/components/DailyWorkoutCard.tsx` — Op4 CTA: botón único de location (`Donde vas a entrenar?` + `{selectedLocation}` underlined + chevron); eliminada fila "Reservar clase"
+
+---
+
 ## 2026-06-11 — Refactor menú + CTAs Op3/Op4 + documento comparativo interactivo
 
 **Source:** Claude Code — Macbook Pro

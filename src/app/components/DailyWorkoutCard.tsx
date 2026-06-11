@@ -606,26 +606,18 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
               ) : cardVariant === 4 ? (
                 <button
                   type="button"
-                  onClick={isBiggLocation ? onReservar : onOpenProgramming}
-                  className="w-full mt-[20px] py-[16px] px-[20px] flex flex-col items-center gap-[8px] rounded-[14px] active:opacity-80 transition-opacity"
+                  onClick={(e) => { e.stopPropagation(); setShowLocationSheet(true); }}
+                  className="w-full mt-[20px] py-[16px] px-[20px] flex items-center justify-center gap-[6px] rounded-[14px] active:opacity-80 transition-opacity"
                   style={{ background: "#3d3d3d", transition: "opacity 0.2s" }}
                 >
-                  <span className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[15px] text-white tracking-[-0.3px]">
-                    {isBiggLocation ? "Reservar clase" : "Iniciar entrenamiento"}
+                  <MapPin size={13} className="text-[rgba(255,255,255,0.55)]" strokeWidth={1.75} />
+                  <span className="font-['MessinaSansWeb:Regular',sans-serif] text-[13px] text-[rgba(255,255,255,0.6)] tracking-[-0.26px]">
+                    Donde vas a entrenar?
                   </span>
-                  <div
-                    className="flex items-center gap-[5px]"
-                    onClick={(e) => { e.stopPropagation(); setShowLocationSheet(true); }}
-                  >
-                    <MapPin size={13} className="text-[rgba(255,255,255,0.55)]" strokeWidth={1.75} />
-                    <span className="font-['MessinaSansWeb:Regular',sans-serif] text-[12px] text-[rgba(255,255,255,0.55)] tracking-[-0.24px]">
-                      Donde vas a entrenar?
-                    </span>
-                    <span className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[12px] text-white underline tracking-[-0.24px]">
-                      {selectedLocation}
-                    </span>
-                    <ChevronDown size={10} className="text-white" strokeWidth={2} />
-                  </div>
+                  <span className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[13px] text-white underline tracking-[-0.26px]">
+                    {selectedLocation}
+                  </span>
+                  <ChevronDown size={11} className="text-white underline" strokeWidth={2} />
                 </button>
               ) : null}
             </div>
