@@ -4,6 +4,34 @@
 
 ---
 
+## 2026-06-11 — Refactor menú + CTAs Op3/Op4 + documento comparativo interactivo
+
+**Source:** Claude Code — Macbook Pro
+
+**Change:** Cinco cambios en un solo ciclo. (1) Opción 1 eliminada del menú — `BottomTabId` pasa de 5 a 4 tabs; (2) Reordenamiento: Op3 → pos 1 (default), Op4 → pos 2, Op2 → pos 3, Comunidad → pos 4; (3) Opción 3 CTA: botón lime integrado dentro del card con flujo natural (sin `translateY` overlap), adentro del footer div con `px-[20px]`; (4) Opción 4 CTA: botón dark gray (`#3d3d3d`/blanco) que unifica Reservar + selector de location en dos filas — `Reservar clase` + `[MapPin] Donde vas a entrenar? BIGG Recoleta` underlined con tap separado que abre el location sheet; location del header row de v4 eliminada. (5) Documento comparativo `comparacion-opciones.html`: dark theme, tres phone-frames interactivos en paralelo con iframes `/?tab=op3|op4|op2` (requiere support de `?tab=` param en `BiggDayScreen`), más análisis de ventajas/trade-offs de cada opción.
+
+**Files created:**
+- `comparacion-opciones.html` — Documento comparativo dark, 3 iframes interactivos + análisis
+- `public/comparacion/op2.png`, `op3.png`, `op4.png` — Screenshots de referencia (no usados en doc final)
+
+**Files modified:**
+- `src/app/components/DailyWorkoutCard.tsx` — Refactor CTA: v3 inline lime, v4 dark+location unificada; eliminado location selector de header de v4
+- `src/app/screens/BiggDayScreen.tsx` — Eliminado `"train"` tab, nuevo orden BOTTOM_TABS, default `"world"`, `getInitialTab()` lee `?tab=` URL param
+
+**Key notes:**
+- `getInitialTab()` permite acceder a `/?tab=op3|op4|op2|community` para preseleccionar variante — usado en los iframes del doc comparativo
+- La lógica del CTA de v4 mantiene el sub-tap con `stopPropagation` para el location sheet
+
+---
+
+## 2026-06-10 — UX Research doc: "¿Qué entreno hoy?" — referencias F45, Equinox, Barry's, Runna
+
+**Source:** Claude Code — Macbook Pro
+
+Reconstruido `training-ux-research.html` desde cero con las referencias correctas (F45, Equinox+, Barry's, Runna). Foco en recomendación del workout diario, no en booking. Screenshots reales descargados de App Store CDN a `/public/refero/`. Estructura: 5 secciones — El problema (3 confusiones de BIGG), Referencias reales (ref cards flex-row con screenshots), Comparativa (tabla scrollable), Patrones clave (grid 2col), Propuesta para BIGG (flow steps con tags NUEVO/REFACTORIZAR/MOVER).
+
+---
+
 ## 2026-06-10 — DailyWorkoutCard: Opción 3 — animación de bloques + CTA secundario
 
 **Source:** Claude Code — Macbook Pro

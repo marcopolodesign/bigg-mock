@@ -411,20 +411,6 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
           <div className="flex flex-col items-start gap-[10px] w-full">
             <div className="relative z-10 flex flex-row items-center justify-between w-full">
               <TimePill label="Entrenamiento del día" />
-              {/* v4: location lives here, outside the card */}
-              {cardVariant === 4 && (
-                <button
-                  type="button"
-                  onClick={(e) => { e.stopPropagation(); setShowLocationSheet(true); }}
-                  className="flex items-center gap-[5px] active:opacity-70 transition-opacity"
-                >
-                  <MapPin size={14} className="text-[#565656]" strokeWidth={1.75} />
-                  <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[12px] text-[#565656] tracking-[-0.24px]">
-                    {selectedLocation}
-                  </p>
-                  <ChevronDown size={11} className="text-[#565656]" strokeWidth={2} />
-                </button>
-              )}
             </div>
             <div className="relative z-10 w-full flex flex-col items-center">
               <div className="relative w-full flex flex-col">
@@ -583,12 +569,25 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
                         </p>
                         <ChevronDown size={14} className="text-[#565656]" strokeWidth={2} />
                       </button>
+                      {/* v3: lime CTA lives inside the card, no overlap geometry */}
+                      {cardVariant === 3 && (
+                        <button
+                          type="button"
+                          onClick={isBiggLocation ? onReservar : onOpenProgramming}
+                          className="w-full py-[16px] flex items-center justify-center rounded-[14px] active:opacity-80 transition-opacity"
+                          style={{ background: isBiggLocation ? "#adff19" : "#3d3d3d", transition: "background 0.3s ease-in-out, opacity 0.2s" }}
+                        >
+                          <span className={`font-['MessinaSansWeb:SemiBold',sans-serif] text-[15px] tracking-[-0.3px] ${isBiggLocation ? "text-[#3d3d3d]" : "text-white"}`}>
+                            {isBiggLocation ? "Reservar clase" : "Iniciar entrenamiento"}
+                          </span>
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>
               </div>
 
-              {/* ── CTA: v1/v2 = dominant overlap; v3/v4 = secondary outline ── */}
+              {/* ── CTA: v1/v2 = dominant overlap; v3 = inside card; v4 = dark unified with location ── */}
               {cardVariant <= 2 ? (
                 <button
                   type="button"
@@ -604,20 +603,31 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
                     {isBiggLocation ? "Reservar clase" : "Iniciar entrenamiento"}
                   </span>
                 </button>
-              ) : (
-                isBiggLocation && (
-                  <button
-                    type="button"
-                    onClick={onReservar}
-                    className="w-full mt-[20px] py-[15px] flex items-center justify-center gap-[8px] rounded-[14px] border border-[rgba(0,0,0,0.12)] active:opacity-70 transition-opacity"
+              ) : cardVariant === 4 ? (
+                <button
+                  type="button"
+                  onClick={isBiggLocation ? onReservar : onOpenProgramming}
+                  className="w-full mt-[20px] py-[16px] px-[20px] flex flex-col items-center gap-[8px] rounded-[14px] active:opacity-80 transition-opacity"
+                  style={{ background: "#3d3d3d", transition: "opacity 0.2s" }}
+                >
+                  <span className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[15px] text-white tracking-[-0.3px]">
+                    {isBiggLocation ? "Reservar clase" : "Iniciar entrenamiento"}
+                  </span>
+                  <div
+                    className="flex items-center gap-[5px]"
+                    onClick={(e) => { e.stopPropagation(); setShowLocationSheet(true); }}
                   >
-                    <span className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[14px] text-[#3d3d3d] tracking-[-0.28px]">
-                      Reservar clase
+                    <MapPin size={13} className="text-[rgba(255,255,255,0.55)]" strokeWidth={1.75} />
+                    <span className="font-['MessinaSansWeb:Regular',sans-serif] text-[12px] text-[rgba(255,255,255,0.55)] tracking-[-0.24px]">
+                      Donde vas a entrenar?
                     </span>
-                    <ChevronDown size={13} className="text-[#a3a3a3] -rotate-90" strokeWidth={2} />
-                  </button>
-                )
-              )}
+                    <span className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[12px] text-white underline tracking-[-0.24px]">
+                      {selectedLocation}
+                    </span>
+                    <ChevronDown size={10} className="text-white" strokeWidth={2} />
+                  </div>
+                </button>
+              ) : null}
             </div>
           </div>
         )}

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
 import { AnimatePresence } from "motion/react";
-import { Dumbbell, Activity, Globe, Users, User, Moon, Plus, Flame, Check } from "lucide-react";
+import { Activity, Globe, Users, User, Moon, Plus, Flame, Check } from "lucide-react";
 import { Drawer } from "vaul";
 import svgPaths from "../../imports/BiggDay/svg-03sgvqmew7";
 import imgBgHome1 from "../../imports/BiggDay/ec32944a87885236431eaada4b00483f53237695.png";
@@ -1178,7 +1178,7 @@ function SocialContainer() {
 
 // ─── Main scroll content ───────────────────────────────────────────────────────
 
-function MainContent({ onReservar, onOpenFab, onOpenDetail, onOpenProgramming, isToday, isFutureDay, selectedDate, todayReservedClass, cardVariant = 1 }: { onReservar: () => void; onOpenFab: () => void; onOpenDetail: (rc: ReservedClass) => void; onOpenProgramming: () => void; isToday: boolean; isFutureDay: boolean; selectedDate: Date; todayReservedClass: ReservedClass | null; cardVariant?: 1 | 2 | 3 | 4 }) {
+function MainContent({ onReservar, onOpenFab, onOpenDetail, onOpenProgramming, isToday, isFutureDay, selectedDate, todayReservedClass, cardVariant = 3 }: { onReservar: () => void; onOpenFab: () => void; onOpenDetail: (rc: ReservedClass) => void; onOpenProgramming: () => void; isToday: boolean; isFutureDay: boolean; selectedDate: Date; todayReservedClass: ReservedClass | null; cardVariant?: 1 | 2 | 3 | 4 }) {
   const dateKey = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}`;
   const pastData = isToday ? undefined : PAST_DAYS[dateKey];
 
@@ -1529,14 +1529,13 @@ function PlaceholderTabContent({ label }: { label: string }) {
 
 // ─── Bottom nav ───────────────────────────────────────────────────────────────
 
-type BottomTabId = "train" | "activity" | "world" | "community" | "perfil";
+type BottomTabId = "activity" | "world" | "community" | "perfil";
 
 const BOTTOM_TABS: { id: BottomTabId; label: string; Icon: React.ElementType }[] = [
-  { id: "train", label: "Opción 1", Icon: Dumbbell },
-  { id: "activity", label: "Opción 2", Icon: Activity },
-  { id: "world", label: "Opción 3", Icon: Globe },
+  { id: "world",     label: "Opción 3", Icon: Globe },
+  { id: "perfil",    label: "Opción 4", Icon: User },
+  { id: "activity",  label: "Opción 2", Icon: Activity },
   { id: "community", label: "Comunidad", Icon: Users },
-  { id: "perfil", label: "Opción 4", Icon: User },
 ];
 
 function BottomNav({ activeTab, onTabChange }: { activeTab: BottomTabId; onTabChange: (id: BottomTabId) => void }) {
@@ -1573,8 +1572,16 @@ function BottomNav({ activeTab, onTabChange }: { activeTab: BottomTabId; onTabCh
 
 // ─── Screen root ──────────────────────────────────────────────────────────────
 
+function getInitialTab(): BottomTabId {
+  const param = new URLSearchParams(window.location.search).get("tab");
+  if (param === "op4") return "perfil";
+  if (param === "op2") return "activity";
+  if (param === "community") return "community";
+  return "world"; // default: op3
+}
+
 export default function BiggDayScreen() {
-  const [activeTab, setActiveTab] = useState<BottomTabId>("train");
+  const [activeTab, setActiveTab] = useState<BottomTabId>(getInitialTab);
   const [reservarOpen, setReservarOpen] = useState(false);
   const [fabOpen, setFabOpen] = useState(false);
   const [programmingOpen, setProgrammingOpen] = useState(false);
@@ -1594,7 +1601,7 @@ export default function BiggDayScreen() {
 
   // Reset scroll position when switching away from train tab
   useEffect(() => {
-    if (activeTab !== "train") setHeaderScrollY(0);
+    if (activeTab !== "world") setHeaderScrollY(0);
   }, [activeTab]);
 
   const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
@@ -1652,7 +1659,7 @@ export default function BiggDayScreen() {
       </div>
 
       {/* Tab content */}
-      {(activeTab === "train" || activeTab === "activity" || activeTab === "world" || activeTab === "perfil") && (
+      {(activeTab === "activity" || activeTab === "world" || activeTab === "perfil") && (
         <div className="pb-[93px]">
           <MainContent
             onReservar={() => setReservarOpen(true)}
@@ -1663,14 +1670,14 @@ export default function BiggDayScreen() {
             isFutureDay={isFutureDay}
             selectedDate={selectedDate}
             todayReservedClass={todayReservedClass}
-            cardVariant={activeTab === "train" ? 1 : activeTab === "activity" ? 2 : activeTab === "world" ? 3 : 4}
+            cardVariant={activeTab === "activity" ? 2 : activeTab === "world" ? 3 : 4}
           />
         </div>
       )}
       {activeTab === "community" && <CommunityTabContent />}
 
       {/* Fixed overlays */}
-      {(activeTab === "train" || activeTab === "activity" || activeTab === "world" || activeTab === "perfil") && <StickyHeader today={today} selectedDate={selectedDate} onSelectDate={setSelectedDate} scrollY={headerScrollY} />}
+      {(activeTab === "activity" || activeTab === "world" || activeTab === "perfil") && <StickyHeader today={today} selectedDate={selectedDate} onSelectDate={setSelectedDate} scrollY={headerScrollY} />}
       <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
       <FloatingActionButton open={fabOpen} onOpenChange={setFabOpen} onVerProgramacion={() => setProgrammingOpen(true)} />
 
