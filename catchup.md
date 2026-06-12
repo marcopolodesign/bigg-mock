@@ -4,6 +4,16 @@
 
 ---
 
+## 2026-06-12 — Op3: CTA unificado estilo Op4 + duración en flaps
+
+- `DailyWorkoutCard.tsx` — Op3 reemplaza el MapPin suelto + botón lime por un bloque unificado estilo Op4: location row (dark) + CTA button (lime/dark según ubicación), con `rounded-[14px] overflow-hidden`
+- `FlapItem` — nuevo prop `duration?: string`; muestra la duración del bloque (15', 20'…) a la izquierda del chevron
+- Variant 3 pasa `current.duration` a cada FlapItem para respetar la ubicación seleccionada
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
 ## 2026-06-11 — Op4: CTA de acción debajo del selector de location
 
 **Source:** Claude Code — Macbook Pro

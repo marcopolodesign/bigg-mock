@@ -41,7 +41,7 @@ const V4_BLOCKS: V4BlockDef[] = [
   { id: "v4-mid",  bigg: { stimulus: "Midline",     modality: "For Quality · 3 sets",  duration: "12'" }, away: null,                                                              exercisesAdapt: false },
 ];
 
-function FlapItem({ block, isOpen, onToggle, index, total, displayStimulus, stimulusKey, showAdaptIcon = false }: { block: StimulusBlock; isOpen: boolean; onToggle: () => void; index: number; total: number; displayStimulus?: string; stimulusKey?: string; showAdaptIcon?: boolean }) {
+function FlapItem({ block, isOpen, onToggle, index, total, displayStimulus, stimulusKey, showAdaptIcon = false, duration }: { block: StimulusBlock; isOpen: boolean; onToggle: () => void; index: number; total: number; displayStimulus?: string; stimulusKey?: string; showAdaptIcon?: boolean; duration?: string }) {
   const isLast = index === total - 1;
   const titleText = displayStimulus ?? block.stimulus;
   const titleKey = stimulusKey ?? block.stimulus;
@@ -52,7 +52,7 @@ function FlapItem({ block, isOpen, onToggle, index, total, displayStimulus, stim
         borderTop: "1px solid rgba(0,0,0,0.09)",
         borderLeft: "1px solid rgba(0,0,0,0.09)",
         borderRight: "1px solid rgba(0,0,0,0.09)",
-        borderBottom: isLast ? "1px solid rgba(0,0,0,0.09)" : "none",
+        borderBottom: "none",
         borderTopLeftRadius: "14px",
         borderTopRightRadius: "14px",
         borderBottomLeftRadius: isLast ? "14px" : 0,
@@ -84,6 +84,11 @@ function FlapItem({ block, isOpen, onToggle, index, total, displayStimulus, stim
           </AnimatePresence>
         </div>
         <div className="flex items-center gap-[8px] shrink-0">
+          {duration && (
+            <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[12px] text-[#a3a3a3] tracking-[-0.24px]">
+              {duration}
+            </p>
+          )}
           <AnimatePresence initial={false}>
             {showAdaptIcon && (
               <motion.div
@@ -416,7 +421,7 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
               <div className="relative w-full flex flex-col">
                 {/* ── Content area ── */}
                 <div
-                  className={`backdrop-blur-[50px] flex flex-col gap-[16px] relative z-[2] w-full rounded-[20px] ${cardVariant === 3 ? "pb-[20px]" : "p-[20px]"} ${cardVariant === 1 ? "cursor-pointer active:opacity-90 transition-opacity" : ""}`}
+                  className={`backdrop-blur-[50px] flex flex-col gap-[16px] relative z-[2] w-full rounded-[20px] ${cardVariant === 3 ? "overflow-hidden pb-[0]" : "p-[20px]"} ${cardVariant === 1 ? "cursor-pointer active:opacity-90 transition-opacity" : ""}`}
                   style={{
                     backgroundImage: cardVariant === 1
                       ? "linear-gradient(115.214deg, rgba(255, 255, 255, 0.9) 51.472%, rgba(163, 163, 163, 0.9) 114.32%)"
@@ -470,6 +475,7 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
                             displayStimulus={current.stimulus}
                             stimulusKey={current.stimulus}
                             showAdaptIcon={showAdaptIcon}
+                            duration={current.duration}
                           />
                         );
                       })}
@@ -544,19 +550,11 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
                     </div>
                   )}
 
-                  {/* Footer: WhyLine + location — only for variants 1, 2, 3 */}
-                  {cardVariant !== 4 && (
-                    <div className={`flex flex-col gap-[16px] ${cardVariant === 3 ? "px-[20px]" : ""}`}>
-                      {!isBiggLocation && cardVariant !== 3 && (
+                  {/* Footer: location + CTA — variants 1 and 2 only */}
+                  {cardVariant <= 2 && (
+                    <div className="flex flex-col gap-[16px]">
+                      {!isBiggLocation && (
                         <WhyLine iconSize={18}>Bloques adaptados para entrenar en este espacio</WhyLine>
-                      )}
-                      {!isBiggLocation && cardVariant === 3 && (
-                        <div className="flex items-center gap-[6px]">
-                          <Sparkles size={13} className="text-[#2ab3cc]" strokeWidth={2} />
-                          <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[13px] text-[#2ab3cc] tracking-[-0.26px]">
-                            Bloque cambiado para esta ubicación
-                          </p>
-                        </div>
                       )}
                       <button
                         type="button"
@@ -569,25 +567,21 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
                         </p>
                         <ChevronDown size={14} className="text-[#565656]" strokeWidth={2} />
                       </button>
-                      {/* v3: lime CTA lives inside the card, no overlap geometry */}
-                      {cardVariant === 3 && (
-                        <button
-                          type="button"
-                          onClick={isBiggLocation ? onReservar : onOpenProgramming}
-                          className="w-full py-[16px] flex items-center justify-center rounded-[14px] active:opacity-80 transition-opacity"
-                          style={{ background: isBiggLocation ? "#adff19" : "#3d3d3d", transition: "background 0.3s ease-in-out, opacity 0.2s" }}
-                        >
-                          <span className={`font-['MessinaSansWeb:SemiBold',sans-serif] text-[15px] tracking-[-0.3px] ${isBiggLocation ? "text-[#3d3d3d]" : "text-white"}`}>
-                            {isBiggLocation ? "Reservar clase" : "Iniciar entrenamiento"}
-                          </span>
-                        </button>
-                      )}
+                    </div>
+                  )}
+                  {/* v3: adaptation indicator only — CTA is the overlap block below */}
+                  {cardVariant === 3 && !isBiggLocation && (
+                    <div className="flex items-center gap-[6px] px-[20px] pb-[20px]">
+                      <Sparkles size={13} className="text-[#2ab3cc]" strokeWidth={2} />
+                      <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[13px] text-[#2ab3cc] tracking-[-0.26px]">
+                        Bloque cambiado para esta ubicación
+                      </p>
                     </div>
                   )}
                 </div>
               </div>
 
-              {/* ── CTA: v1/v2 = dominant overlap; v3 = inside card; v4 = dark unified with location ── */}
+              {/* ── CTA: v1/v2 = centered overlap; v3 = items-start overlap with location; v4 = dark unified ── */}
               {cardVariant <= 2 ? (
                 <button
                   type="button"
@@ -603,6 +597,39 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
                     {isBiggLocation ? "Reservar clase" : "Iniciar entrenamiento"}
                   </span>
                 </button>
+              ) : cardVariant === 3 ? (
+                <div
+                  className="relative z-[1] w-full rounded-b-[16px] pt-[150px] pb-[18px] px-[20px] flex flex-col items-start gap-[4px] mb-[-150px]"
+                  style={{
+                    background: isBiggLocation ? "#adff19" : "#3d3d3d",
+                    transform: "translateY(-150px)",
+                    transition: "background 0.3s ease-in-out, opacity 0.2s",
+                  }}
+                >
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); setShowLocationSheet(true); }}
+                    className="flex items-center gap-[4px] mt-[10px] active:opacity-70 transition-opacity"
+                  >
+                    <MapPin size={16} className={isBiggLocation ? "text-[#3d3d3d]" : "text-white"} strokeWidth={1.75} />
+                    <span className={`font-['MessinaSansWeb:Regular',sans-serif] text-[14px] tracking-[-0.28px] ${isBiggLocation ? "text-[#3d3d3d]" : "text-white"}`}>
+                      Donde vas a entrenar?{" "}
+                    </span>
+                    <span className={`font-['MessinaSansWeb:Regular',sans-serif] text-[14px] tracking-[-0.28px] underline ${isBiggLocation ? "text-[#3d3d3d]" : "text-white"}`}>
+                      {selectedLocation}
+                    </span>
+                    <ChevronDown size={13} className={isBiggLocation ? "text-[#3d3d3d]" : "text-white"} strokeWidth={2} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={isBiggLocation ? onReservar : onOpenProgramming}
+                    className="active:opacity-70 transition-opacity"
+                  >
+                    <span className={`font-['MessinaSansWeb:SemiBold',sans-serif] text-[17px] tracking-[-0.34px] ${isBiggLocation ? "text-[#3d3d3d]" : "text-white"}`}>
+                      {isBiggLocation ? "Reservar clase" : "Iniciar entrenamiento"}
+                    </span>
+                  </button>
+                </div>
               ) : cardVariant === 4 ? (
                 <div className="w-full mt-[20px] rounded-[14px] overflow-hidden flex flex-col">
                   {/* Location selector */}
