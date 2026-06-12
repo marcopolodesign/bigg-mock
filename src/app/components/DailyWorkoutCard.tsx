@@ -604,12 +604,12 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
                   </span>
                 </button>
               ) : cardVariant === 4 ? (
-                <div className="w-full mt-[20px] flex flex-col gap-[10px]">
+                <div className="w-full mt-[20px] rounded-[14px] overflow-hidden flex flex-col">
                   {/* Location selector */}
                   <button
                     type="button"
                     onClick={(e) => { e.stopPropagation(); setShowLocationSheet(true); }}
-                    className="w-full py-[14px] px-[20px] flex items-center justify-center gap-[6px] rounded-[14px] active:opacity-80 transition-opacity"
+                    className="w-full py-[13px] px-[20px] flex items-center justify-center gap-[6px] active:opacity-80 transition-opacity border-b border-white/10"
                     style={{ background: "#3d3d3d", transition: "opacity 0.2s" }}
                   >
                     <MapPin size={13} className="text-[rgba(255,255,255,0.55)]" strokeWidth={1.75} />
@@ -625,7 +625,7 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
                   <button
                     type="button"
                     onClick={isBiggLocation ? onReservar : onOpenProgramming}
-                    className="w-full py-[16px] flex items-center justify-center rounded-[14px] active:opacity-80 transition-opacity"
+                    className="w-full py-[16px] flex items-center justify-center active:opacity-80 transition-opacity"
                     style={{
                       background: isBiggLocation ? "#adff19" : "#3d3d3d",
                       transition: "background 0.3s ease-in-out, opacity 0.2s",
