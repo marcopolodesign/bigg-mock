@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recomendación del Workout Diario — BIGG UX Research</title>
+<style>
+  :root {
+    --bg:       #0a0a0a;
+    --surface:  #111111;
+    --surface2: #1a1a1a;
+    --border:   #222222;
+    --text:     #e8e8e8;
+    --muted:    #666666;
+    --lime:     #c8f135;
+    --lime-dim: #9dbf28;
+    --red:      #ff4444;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, 'Helvetica Neue', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    padding: 48px 24px 120px;
+    max-width: 860px;
+    margin: 0 auto;
+  }
+
+  /* ── HEADER ─────────────────────────────────────── */
+  .doc-header {
+    margin-bottom: 64px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--border);
+  }
+  .doc-tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--lime);
+    background: rgba(200,241,53,.1);
+    border: 1px solid rgba(200,241,53,.25);
+    border-radius: 4px;
+    padding: 3px 10px;
+    margin-bottom: 20px;
+  }
+  h1 {
+    font-size: clamp(28px, 5vw, 44px);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -.02em;
+    margin-bottom: 16px;
+  }
+  h1 span { color: var(--lime); }
+  .doc-subtitle {
+    font-size: 17px;
+    color: var(--muted);
+    max-width: 580px;
+    line-height: 1.5;
+  }
+
+  /* ── SECTION ─────────────────────────────────────── */
+  .section {
+    margin-bottom: 72px;
+  }
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--lime);
+    margin-bottom: 12px;
+  }
+  h2 {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -.015em;
+    margin-bottom: 16px;
+    line-height: 1.25;
+  }
+  p {
+    color: #c0c0c0;
+    margin-bottom: 16px;
+    max-width: 680px;
+  }
+
+  /* ── PROBLEM BLOCK ───────────────────────────────── */
+  .problem-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    margin: 28px 0;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .problem-item {
+    background: var(--surface);
+    padding: 22px 20px;
+  }
+  .problem-item.wrong {
+    background: rgba(255,68,68,.06);
+    border-top: 2px solid var(--red);
+  }
+  .problem-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .problem-label.bad { color: var(--red); }
+  .problem-title {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .problem-desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.5;
+    max-width: 100%;
+    margin: 0;
+  }
+
+  /* ── INSIGHT CALLOUT ─────────────────────────────── */
+  .callout {
+    background: rgba(200,241,53,.06);
+    border: 1px solid rgba(200,241,53,.2);
+    border-left: 3px solid var(--lime);
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin: 24px 0;
+  }
+  .callout p {
+    color: #d8eea0;
+    margin: 0;
+    font-size: 15px;
+    font-weight: 500;
+    max-width: 100%;
+  }
+  .callout strong { color: var(--lime); }
+
+  /* ── REF CARDS ───────────────────────────────────── */
+  .ref-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    margin: 28px 0;
+  }
+  .ref-card {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+  }
+  .ref-card:last-child { border-bottom: none; }
+
+  /* single screenshot */
+  .ref-thumb-wrap {
+    width: 200px;
+    flex-shrink: 0;
+    border-right: 1px solid var(--border);
+  }
+  .ref-thumb-wrap img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  /* multi-screenshot variant */
+  .ref-thumb-multi {
+    width: 270px;
+    flex-shrink: 0;
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+  }
+  .ref-thumb-multi img {
+    flex: 1;
+    width: 0;
+    height: auto;
+    display: block;
+    border-right: 1px solid var(--border);
+  }
+  .ref-thumb-multi img:last-child { border-right: none; }
+
+  .ref-info {
+    padding: 28px 28px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    flex: 1;
+  }
+  .ref-app-name {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--lime);
+    margin-bottom: 4px;
+  }
+  .ref-card-title {
+    font-size: 19px;
+    font-weight: 700;
+    margin-bottom: 14px;
+    letter-spacing: -.01em;
+    line-height: 1.3;
+  }
+  .ref-card-body {
+    font-size: 14px;
+    color: #aaa;
+    line-height: 1.65;
+    max-width: 100%;
+    margin-bottom: 20px;
+  }
+  .steal-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--lime-dim);
+    margin-bottom: 8px;
+  }
+  .steal-item {
+    font-size: 13px;
+    font-weight: 600;
+    color: #d4f07a;
+    background: rgba(200,241,53,.07);
+    border: 1px solid rgba(200,241,53,.15);
+    border-radius: 6px;
+    padding: 6px 12px;
+    display: inline-block;
+    margin: 3px 4px 3px 0;
+  }
+
+  /* ── PATTERNS GRID ───────────────────────────────── */
+  .patterns-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin: 24px 0;
+  }
+  .pattern-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .pattern-num {
+    font-size: 28px;
+    font-weight: 800;
+    color: rgba(200,241,53,.25);
+    line-height: 1;
+    margin-bottom: 10px;
+  }
+  .pattern-title {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    letter-spacing: -.01em;
+  }
+  .pattern-body {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin: 0;
+    max-width: 100%;
+  }
+
+  /* ── FLOW DIAGRAM ────────────────────────────────── */
+  .flow {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 28px 0;
+  }
+  .flow-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .flow-step:last-child { border-bottom: none; }
+  .flow-dot {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--lime);
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .flow-dot.lime {
+    background: var(--lime);
+    color: #000;
+    border-color: var(--lime);
+  }
+  .flow-title {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .flow-desc {
+    font-size: 13px;
+    color: var(--muted);
+    margin: 0;
+    max-width: 100%;
+    line-height: 1.5;
+  }
+  .flow-tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+  .flow-tag.new  { background: rgba(200,241,53,.15); color: var(--lime); }
+  .flow-tag.cut  { background: rgba(255,68,68,.1);   color: var(--red); }
+
+  /* ── TABLE COMPARISON ────────────────────────────── */
+  .table-wrap {
+    overflow-x: auto;
+    margin: 24px 0;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+  .compare-table {
+    width: 100%;
+    min-width: 640px;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .compare-table th {
+    text-align: left;
+    padding: 10px 14px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+    white-space: nowrap;
+  }
+  .compare-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    color: #bbb;
+    vertical-align: top;
+    line-height: 1.5;
+  }
+  .compare-table tr:last-child td { border-bottom: none; }
+  .compare-table th:first-child,
+  .compare-table td:first-child { min-width: 80px; }
+  .compare-table td:first-child { font-weight: 600; color: var(--text); white-space: nowrap; }
+  .check { color: var(--lime); }
+  .cross { color: var(--red); }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="doc-header">
+  <div class="doc-tag">BIGG UX Research · Junio 2026</div>
+  <h1>¿Qué entreno <span>hoy</span>?</h1>
+  <p class="doc-subtitle">Cómo F45, Equinox, Barry's y Runna resuelven la recomendación del workout diario — y qué puede robar BIGG.</p>
+</div>
+
+
+<!-- 01 — EL PROBLEMA -->
+<div class="section">
+  <div class="section-label">01 — El problema</div>
+  <h2>Tres conceptos que BIGG mezcla en uno</h2>
+  <p>El home de BIGG le hace tres preguntas al usuario al mismo tiempo sin que él se dé cuenta. Eso genera fricción y confusión.</p>
+
+  <div class="problem-grid">
+    <div class="problem-item wrong">
+      <div class="problem-label bad">Confusión 1</div>
+      <div class="problem-title">Reservar una clase</div>
+      <p class="problem-desc">Asegurar un lugar físico en el estudio BIGG: horario + sede + instructor. Requiere acción explícita.</p>
+    </div>
+    <div class="problem-item wrong">
+      <div class="problem-label bad">Confusión 2</div>
+      <div class="problem-title">Elegir modalidad</div>
+      <p class="problem-desc">Decidir cómo seguir la programación del día: en el estudio, en casa, o en otro gym. Es un ajuste de entrega, no un destino.</p>
+    </div>
+    <div class="problem-item wrong">
+      <div class="problem-label bad">Confusión 3</div>
+      <div class="problem-title">BIGG Outdoors</div>
+      <p class="problem-desc">Una pista de programación separada para running y ciclismo. No es un filtro de lugar — es otro plan de entrenamiento.</p>
+    </div>
+  </div>
+
+  <div class="callout">
+    <p><strong>El problema de raíz:</strong> el home intenta ser booking + selector de modalidad + switch de plan al mismo tiempo. Los mejores apps de fitness resuelven esto poniendo el <strong>contenido primero</strong> — el workout del día aparece antes de cualquier decisión logística.</p>
+  </div>
+</div>
+
+
+<!-- 02 — REFERENCIAS -->
+<div class="section">
+  <div class="section-label">02 — Referencias reales</div>
+  <h2>Cómo lo resuelven F45, Equinox, Barry's y Runna</h2>
+  <p>Cuatro apps que tienen el mismo problema y lo resuelven de forma diferente. Cada una tiene algo concreto que BIGG puede adoptar.</p>
+
+  <div class="ref-grid">
+
+    <!-- F45 -->
+    <div class="ref-card">
+      <div class="ref-thumb-multi">
+        <img src="/refero/f45-home.jpg" alt="F45 — Workout Wherever">
+        <img src="/refero/f45-challenge.jpg" alt="F45 — 45-Day Challenge">
+      </div>
+      <div class="ref-info">
+        <div class="ref-app-name">F45 Training</div>
+        <div class="ref-card-title">Sin elección — el workout ya está decidido</div>
+        <p class="ref-card-body">
+          F45 elimina completamente la fricción de "¿qué entreno hoy?" porque la programación es la misma en todos los estudios del mundo en el mismo día. El home no te pregunta nada: te muestra directamente el workout. La modalidad (estudio / casa) es un botón secundario, no el punto de entrada.<br><br>
+          El challenge de 45 días actúa como un contrato temporal con el usuario — el app sabe exactamente en qué punto del plan está y lo refleja en el home.
+        </p>
+        <div class="steal-label">Qué robar</div>
+        <span class="steal-item">Workout primero, logística después</span>
+        <span class="steal-item">Programación como promesa diaria</span>
+        <span class="steal-item">Challenge = tracción de retención</span>
+      </div>
+    </div>
+
+    <!-- Equinox+ -->
+    <div class="ref-card">
+      <div class="ref-thumb-multi">
+        <img src="/refero/equinox-progress.jpg" alt="Equinox — Personalized Progress">
+        <img src="/refero/equinox-program.jpg" alt="Equinox — Tailored Program">
+        <img src="/refero/equinox-content.jpg" alt="Equinox — Content Hub">
+      </div>
+      <div class="ref-info">
+        <div class="ref-app-name">Equinox+</div>
+        <div class="ref-card-title">El programa como organizador del día</div>
+        <p class="ref-card-body">
+          Equinox+ te asigna un programa personalizado. Ese programa es quien responde "¿qué entreno hoy?" — no el usuario eligiendo manualmente. El home refleja el progreso del programa activo y el próximo paso.<br><br>
+          Las clases en vivo y on-demand son contenido dentro del programa, no el punto de entrada. La personalización ocurre una sola vez (onboarding) y después el app asume el control de los días siguientes.
+        </p>
+        <div class="steal-label">Qué robar</div>
+        <span class="steal-item">Programa activo visible en el home</span>
+        <span class="steal-item">Progreso de la semana como contexto</span>
+        <span class="steal-item">Onboarding → set-and-forget</span>
+      </div>
+    </div>
+
+    <!-- Barry's -->
+    <div class="ref-card">
+      <div class="ref-thumb-multi">
+        <img src="/refero/barrys-home.jpg" alt="Barry's — Homepage">
+        <img src="/refero/barrys-schedule.jpg" alt="Barry's — Schedule">
+      </div>
+      <div class="ref-info">
+        <div class="ref-app-name">Barry's</div>
+        <div class="ref-card-title">El home ES la recomendación</div>
+        <p class="ref-card-body">
+          Barry's resuelve elegantemente la coexistencia entre clase física y entrenamiento digital (Barry's X). El home personalizado no pregunta "¿qué querés hacer?" — muestra directamente tu próxima clase reservada, las clases recomendadas según tu historial, y las métricas de progreso.<br><br>
+          La reserva es una consecuencia de ver el contenido, no el punto de partida. El schedule existe para explorar, pero el home ya tomó una decisión por vos.
+        </p>
+        <div class="steal-label">Qué robar</div>
+        <span class="steal-item">Home = próxima acción recomendada</span>
+        <span class="steal-item">Reserva como CTA secundario</span>
+        <span class="steal-item">Historial como señal de recomendación</span>
+      </div>
+    </div>
+
+    <!-- Runna -->
+    <div class="ref-card">
+      <div class="ref-thumb-multi">
+        <img src="/refero/runna-today.jpg" alt="Runna — Today's Run">
+        <img src="/refero/runna-plan.jpg" alt="Runna — Training Plan">
+        <img src="/refero/runna-coaching.jpg" alt="Runna — Live Coaching">
+      </div>
+      <div class="ref-info">
+        <div class="ref-app-name">Runna</div>
+        <div class="ref-card-title">Una pista de programación separada para outdoor</div>
+        <p class="ref-card-body">
+          Runna es el mejor referente de lo que debería ser <strong>BIGG Outdoors</strong>: una pista de programación estructurada para running, completamente separada de otras modalidades. No es un filtro — es un plan propio con semanas, sesiones y coaching en vivo durante la actividad.<br><br>
+          El home de Runna nunca confunde con "¿gym o afuera?". Asume que sos runner y organiza todo en función de eso. La sesión del día aparece como hero card con toda la info necesaria para salir a correr ahora mismo.
+        </p>
+        <div class="steal-label">Qué robar</div>
+        <span class="steal-item">Outdoor = plan independiente, no filtro</span>
+        <span class="steal-item">Sesión del día como hero card</span>
+        <span class="steal-item">Semanas del plan como contexto visual</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- 03 — COMPARATIVA -->
+<div class="section">
+  <div class="section-label">03 — Comparativa</div>
+  <h2>¿Cómo responde cada app "¿qué entreno hoy?"</h2>
+
+  <div class="table-wrap"><table class="compare-table">
+    <thead>
+      <tr>
+        <th>App</th>
+        <th>Respuesta al "¿qué hago hoy?"</th>
+        <th>Modalidad</th>
+        <th>Plan Outdoor</th>
+        <th>Booking</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>F45</td>
+        <td>El workout global del día, sin opciones</td>
+        <td>Secundaria (studio/casa)</td>
+        <td><span class="cross">✗</span></td>
+        <td>Desde el home, pero no bloquea</td>
+      </tr>
+      <tr>
+        <td>Equinox+</td>
+        <td>El próximo paso de tu programa activo</td>
+        <td>On-demand / clase en vivo / gym</td>
+        <td><span class="cross">✗</span></td>
+        <td>Desde clases, no desde el home</td>
+      </tr>
+      <tr>
+        <td>Barry's</td>
+        <td>Tu próxima clase + recomendación basada en historial</td>
+        <td>Estudio / Barry's X (digital)</td>
+        <td><span class="cross">✗</span></td>
+        <td>CTA secundario en el home</td>
+      </tr>
+      <tr>
+        <td>Runna</td>
+        <td>La sesión del día de tu plan de running</td>
+        <td>No aplica (todo outdoor)</td>
+        <td><span class="check">✓</span> plan completo</td>
+        <td>No aplica</td>
+      </tr>
+      <tr style="background: rgba(200,241,53,.04);">
+        <td style="color: var(--red);">BIGG (hoy)</td>
+        <td style="color: var(--red);">Mezcla booking + modalidad + outdoor sin jerarquía</td>
+        <td style="color: var(--red);">Confundida con booking</td>
+        <td style="color: var(--red);">Confundida con filtro de lugar</td>
+        <td style="color: var(--red);">Punto de entrada equivocado</td>
+      </tr>
+      <tr style="background: rgba(200,241,53,.04);">
+        <td style="color: var(--lime);">BIGG (ideal)</td>
+        <td style="color: var(--lime);">El workout del día como hero, sin fricción</td>
+        <td>Bottom sheet post-contenido</td>
+        <td>Plan independiente (como Runna)</td>
+        <td>CTA secundario post-elección</td>
+      </tr>
+    </tbody>
+  </table></div>
+</div>
+
+
+<!-- 04 — PATRONES -->
+<div class="section">
+  <div class="section-label">04 — Patrones clave</div>
+  <h2>Lo que hay que robar</h2>
+
+  <div class="patterns-grid">
+    <div class="pattern-card">
+      <div class="pattern-num">01</div>
+      <div class="pattern-title">Contenido primero, logística después</div>
+      <p class="pattern-body">F45 y Barry's muestran el workout antes de cualquier pregunta. La modalidad (¿dónde lo hacés?) es un ajuste, no un requisito previo para ver la programación.</p>
+    </div>
+    <div class="pattern-card">
+      <div class="pattern-num">02</div>
+      <div class="pattern-title">El programa activo como contexto permanente</div>
+      <p class="pattern-body">Equinox+ usa el programa activo para responder automáticamente "¿qué entreno hoy?". El usuario elige el programa una vez, y el app toma el control de los días siguientes.</p>
+    </div>
+    <div class="pattern-card">
+      <div class="pattern-num">03</div>
+      <div class="pattern-title">Outdoor = pista propia, no filtro</div>
+      <p class="pattern-body">Runna demuestra que el entrenamiento outdoor estructurado requiere su propio plan. No es "lo mismo pero afuera" — es un producto diferente dentro del mismo app.</p>
+    </div>
+    <div class="pattern-card">
+      <div class="pattern-num">04</div>
+      <div class="pattern-title">La reserva como consecuencia, no como entrada</div>
+      <p class="pattern-body">Barry's y F45 coinciden: primero enganchan con el contenido, después ofrecen reservar. El usuario que ya quiere ir al estudio encuentra el botón. El que no lo tiene claro necesita ver el workout primero.</p>
+    </div>
+    <div class="pattern-card">
+      <div class="pattern-num">05</div>
+      <div class="pattern-title">La semana como unidad de progreso</div>
+      <p class="pattern-body">Todos los apps muestran la semana en curso: cuántos días entrenaste, cuántos quedan. Es el contexto mínimo para que el workout del día cobre sentido.</p>
+    </div>
+    <div class="pattern-card">
+      <div class="pattern-num">06</div>
+      <div class="pattern-title">La identidad del workout como headline</div>
+      <p class="pattern-body">F45 y Barry's usan el nombre y tipo del workout como título principal. En BIGG, el nombre de la clase debería ser lo primero que se lee — no el horario ni la sede.</p>
+    </div>
+  </div>
+</div>
+
+
+<!-- 05 — PROPUESTA -->
+<div class="section">
+  <div class="section-label">05 — Propuesta para BIGG</div>
+  <h2>Cómo aplicarlo</h2>
+  <p>El rediseño no requiere mover todo — requiere cambiar la jerarquía. El home actual pide decisiones; el home nuevo entrega respuestas.</p>
+
+  <div class="callout">
+    <p>El home de BIGG debería responder <strong>"¿qué entreno hoy?"</strong> sin que el usuario tenga que elegir nada. La modalidad, la reserva y BIGG Outdoors son acciones secundarias que aparecen <em>después</em> de ver el workout.</p>
+  </div>
+
+  <div class="flow">
+    <div class="flow-step">
+      <div class="flow-dot lime">1</div>
+      <div class="flow-content">
+        <div class="flow-title">Hero card: el workout del día <span class="flow-tag new">elevar</span></div>
+        <p class="flow-desc">La clase BIGG de hoy ocupa el 60–70% del above-the-fold. Nombre del workout, estímulo muscular, duración, instructor. Sin pregunta previa de modalidad.</p>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-dot lime">2</div>
+      <div class="flow-content">
+        <div class="flow-title">Selector de modalidad como bottom sheet <span class="flow-tag new">nuevo</span></div>
+        <p class="flow-desc">Tap en la hero card → bottom sheet: "¿Cómo lo vas a hacer?" → BIGG Gym (con opción de reservar) / En casa / En otro gym. El usuario decide cómo va a entrenar el workout que ya vio.</p>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-dot lime">3</div>
+      <div class="flow-content">
+        <div class="flow-title">BIGG Outdoors como plan separado <span class="flow-tag new">refactorizar</span></div>
+        <p class="flow-desc">Running y ciclismo tienen su propio plan. Aparecen en el home solo si el usuario tiene un plan outdoor activo — como Runna muestra "tu run de hoy" solo para runners. No es un filtro de lugar.</p>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-dot">4</div>
+      <div class="flow-content">
+        <div class="flow-title">Reservar = CTA post-modalidad <span class="flow-tag cut">mover</span></div>
+        <p class="flow-desc">El botón "Reservar" no desaparece — baja en la jerarquía. Aparece después de que el usuario eligió la modalidad "BIGG Gym". El flujo de reserva es el mismo, solo cambia dónde empieza.</p>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-dot">5</div>
+      <div class="flow-content">
+        <div class="flow-title">Contexto de la semana visible <span class="flow-tag new">agregar</span></div>
+        <p class="flow-desc">Strip de 7 días debajo del hero: días entrenados (check verde), hoy (resaltado), días programados (dashed). Le da al workout diario el contexto de la semana, igual que Runna y Equinox+ hacen con sus planes.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
