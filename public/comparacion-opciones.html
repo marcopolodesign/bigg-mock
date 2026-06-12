@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comparación de Opciones — BIGG Workout Card</title>
+<style>
+  :root {
+    --bg:       #0a0a0a;
+    --surface:  #111111;
+    --surface2: #1a1a1a;
+    --border:   #222222;
+    --text:     #e8e8e8;
+    --muted:    #666666;
+    --lime:     #c8f135;
+    --amber:    #f5a623;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, 'Helvetica Neue', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    padding: 48px 24px 120px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  /* ── HEADER ─────────────────────── */
+  .doc-header {
+    margin-bottom: 56px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--border);
+  }
+  .doc-tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--lime);
+    background: rgba(200,241,53,.1);
+    border: 1px solid rgba(200,241,53,.25);
+    border-radius: 4px;
+    padding: 3px 10px;
+    margin-bottom: 20px;
+  }
+  h1 {
+    font-size: clamp(28px, 4vw, 40px);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -.02em;
+    margin-bottom: 14px;
+  }
+  h1 span { color: var(--lime); }
+  .doc-subtitle {
+    font-size: 16px;
+    color: var(--muted);
+    max-width: 640px;
+    line-height: 1.55;
+  }
+  .doc-subtitle a { color: var(--lime); opacity: .75; }
+
+  /* ── PHONE TRIO ─────────────────── */
+  .phones {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+    margin-bottom: 72px;
+  }
+
+  .phone-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .phone-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--lime);
+    background: rgba(200,241,53,.1);
+    border: 1px solid rgba(200,241,53,.22);
+    border-radius: 4px;
+    padding: 4px 12px;
+  }
+
+  .phone-frame {
+    position: relative;
+    width: 100%;
+    max-width: 310px;
+    border-radius: 38px;
+    overflow: hidden;
+    border: 2px solid #333;
+    background: #000;
+    box-shadow: 0 24px 60px rgba(0,0,0,.7);
+    /* aspect ratio: 390/844 ≈ 0.462 */
+    aspect-ratio: 390 / 680;
+  }
+  .phone-frame iframe {
+    width: 390px;
+    height: 680px;
+    border: none;
+    transform-origin: top left;
+    display: block;
+    /* scale down to fill the frame */
+  }
+
+  /* ── ANALYSIS SECTION ───────────── */
+  .analysis {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    overflow: hidden;
+    margin-bottom: 56px;
+  }
+
+  .analysis-col {
+    background: var(--surface);
+    padding: 28px 24px 32px;
+  }
+  .analysis-col:not(:last-child) {
+    border-right: 1px solid var(--border);
+  }
+
+  .analysis-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--lime);
+    border: 1px solid rgba(200,241,53,.3);
+    border-radius: 4px;
+    padding: 2px 8px;
+    margin-bottom: 10px;
+  }
+
+  .analysis-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    letter-spacing: -.01em;
+    color: #fff;
+    line-height: 1.3;
+  }
+
+  .analysis-section { margin-bottom: 18px; }
+
+  .analysis-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .analysis-label.green { color: var(--lime); }
+  .analysis-label.amber { color: var(--amber); }
+
+  ul.pros, ul.contras {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+  ul.pros li::before   { content: "✓"; color: var(--lime);  margin-right: 7px; font-weight: 700; }
+  ul.contras li::before { content: "—"; color: var(--amber); margin-right: 7px; font-weight: 700; }
+  li { font-size: 13px; color: #b0b0b0; line-height: 1.45; }
+
+  .tag-row { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 14px; }
+  .tag {
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 20px;
+    border: 1px solid #2a2a2a;
+    color: #555;
+  }
+
+  /* ── CALLOUT ────────────────────── */
+  .callout {
+    background: rgba(200,241,53,.06);
+    border: 1px solid rgba(200,241,53,.2);
+    border-left: 3px solid var(--lime);
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-bottom: 40px;
+  }
+  .callout p { color: #d8eea0; margin: 0; font-size: 15px; font-weight: 500; }
+  .callout strong { color: var(--lime); }
+
+  /* ── DECISION GRID ──────────────── */
+  .decision-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .decision-cell {
+    background: var(--surface);
+    padding: 20px 18px;
+  }
+  .decision-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .decision-value {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: #fff;
+  }
+  .decision-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="doc-header">
+  <div class="doc-tag">BIGG — Decisión de diseño</div>
+  <h1>Comparación de <span>Opciones</span><br>Workout Card</h1>
+  <p class="doc-subtitle">
+    Tres enfoques para presentar el entrenamiento diario. Mismo contenido, distinta jerarquía,
+    distinta acción principal. Las vistas de abajo son <strong style="color:#fff">interactivas</strong> — podés cambiar
+    ubicación y ver cómo reacciona cada opción.
+    <br><br>
+    App en vivo: <a href="http://localhost:5175" target="_blank">localhost:5175</a>
+  </p>
+</header>
+
+<!-- LIVE PHONE TRIO -->
+<div class="phones">
+
+  <div class="phone-col">
+    <span class="phone-label">Opción 3</span>
+    <div class="phone-frame" id="frame3"></div>
+  </div>
+
+  <div class="phone-col">
+    <span class="phone-label">Opción 4</span>
+    <div class="phone-frame" id="frame4"></div>
+  </div>
+
+  <div class="phone-col">
+    <span class="phone-label">Opción 2</span>
+    <div class="phone-frame" id="frame2"></div>
+  </div>
+
+</div>
+
+<!-- ANALYSIS -->
+<div class="analysis">
+
+  <!-- ── OPCIÓN 3 ── -->
+  <div class="analysis-col">
+    <div class="analysis-badge">Opción 3</div>
+    <div class="analysis-title">Flaps Acordeón<br>CTA Interno</div>
+
+    <div class="tag-row">
+      <span class="tag">Flaps acordeón</span>
+      <span class="tag">CTA lime interno</span>
+      <span class="tag">Sin overlap</span>
+    </div>
+
+    <div class="analysis-section">
+      <div class="analysis-label green">A favor</div>
+      <ul class="pros">
+        <li>Vista inicial compacta — todos los bloques en un vistazo sin scroll.</li>
+        <li>Tap para expandir: la info está cuando se la necesita, no siempre.</li>
+        <li>CTA lime dentro del card, en flujo natural; la acción es clara sin dominar.</li>
+        <li>El cambio de ubicación anima el nombre del bloque — el contenido responde al contexto.</li>
+        <li>Más espacio para el entrenamiento complementario, racha y recomendaciones.</li>
+      </ul>
+    </div>
+
+    <div class="analysis-section">
+      <div class="analysis-label amber">A tener en cuenta</div>
+      <ul class="contras">
+        <li>Requiere un tap para ver ejercicios — depende de confianza previa del usuario en los bloques.</li>
+        <li>El nombre del flap cerrado debe ser autoexplicativo.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ── OPCIÓN 4 ── -->
+  <div class="analysis-col">
+    <div class="analysis-badge">Opción 4</div>
+    <div class="analysis-title">Bloques Flat<br>CTA Dark + Location</div>
+
+    <div class="tag-row">
+      <span class="tag">Lista flat</span>
+      <span class="tag">CTA dark unificado</span>
+      <span class="tag">Location en CTA</span>
+    </div>
+
+    <div class="analysis-section">
+      <div class="analysis-label green">A favor</div>
+      <ul class="pros">
+        <li>Separa espacio de entrenamiento — corrección directa del feedback de Gigio.</li>
+        <li>CTA unifica reservar + lugar: una sola pieza, un solo objetivo visual.</li>
+        <li>Color dark intencional: reservar no compite en intensidad con el contenido.</li>
+        <li>Animación al cambiar ubicación: nombre sube/baja, ícono aparece. El layout responde.</li>
+        <li>Lista flat con duración total (4 bloques · 59') es la forma más directa de comunicar el día.</li>
+      </ul>
+    </div>
+
+    <div class="analysis-section">
+      <div class="analysis-label amber">A tener en cuenta</div>
+      <ul class="contras">
+        <li>Sin detalles de ejercicios en estado inicial — asume que el detalle está en programación.</li>
+        <li>CTA de doble propósito (reservar + cambiar lugar) puede confundir en el primer uso.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ── OPCIÓN 2 ── -->
+  <div class="analysis-col">
+    <div class="analysis-badge">Opción 2</div>
+    <div class="analysis-title">BlockCards Expandidas<br>CTA Overlap</div>
+
+    <div class="tag-row">
+      <span class="tag">Cards siempre expandidas</span>
+      <span class="tag">CTA overlap lime</span>
+    </div>
+
+    <div class="analysis-section">
+      <div class="analysis-label green">A favor</div>
+      <ul class="pros">
+        <li>Toda la información visible de entrada — ejercicios, sets, duración — sin interacción.</li>
+        <li>El overlap lime del CTA es jerarquía visual agresiva y clara: la siguiente acción es reservar.</li>
+        <li>Ideal para revisión rápida antes de ir al gimnasio: todo en una pasada.</li>
+      </ul>
+    </div>
+
+    <div class="analysis-section">
+      <div class="analysis-label amber">A tener en cuenta</div>
+      <ul class="contras">
+        <li>Card muy alto: complementarios, racha y recomendaciones quedan lejos en el scroll.</li>
+        <li>Cuatro cards expandidas pueden resultar abrumadoras en el estado inicial de la app.</li>
+        <li>El CTA overlap empuja la sensación de que reservar es la única acción posible.</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<!-- CALLOUT -->
+<div class="callout">
+  <p>
+    <strong>Contexto de decisión:</strong> Las tres opciones resuelven la misma información con distinto orden de prioridades.
+    Op3 prioriza el escaneo rápido. Op4 prioriza la separación conceptual (feedback Gigio).
+    Op2 prioriza la densidad informativa. La elección depende del perfil de usuario BIGG y del momento de adopción.
+  </p>
+</div>
+
+<!-- DECISION GRID -->
+<div class="decision-grid">
+  <div class="decision-cell">
+    <div class="decision-label">Escaneo inicial</div>
+    <div class="decision-value">Op 3 ›</div>
+    <div class="decision-desc">Vista compacta al abrir; flaps colapsados sin sacrificar estructura.</div>
+  </div>
+  <div class="decision-cell">
+    <div class="decision-label">Claridad conceptual</div>
+    <div class="decision-value">Op 4 ›</div>
+    <div class="decision-desc">Separa espacio de entrenamiento; CTA unificado comunica mejor la intención.</div>
+  </div>
+  <div class="decision-cell">
+    <div class="decision-label">Info inmediata</div>
+    <div class="decision-value">Op 2 ›</div>
+    <div class="decision-desc">Todos los ejercicios visibles sin interacción. Mejor para usuarios avanzados.</div>
+  </div>
+</div>
+
+<script>
+  // Scale iframes to fill phone frames
+  function scaleFrames() {
+    ['frame3', 'frame4', 'frame2'].forEach(id => {
+      const div = document.getElementById(id);
+      if (!div) return;
+      const w = div.clientWidth;
+      const scale = w / 390;
+      const h = Math.round(680 * scale);
+      div.style.height = h + 'px';
+
+      // Create iframe if not already there
+      if (!div.querySelector('iframe')) {
+        const src = id === 'frame3' ? '/?tab=op3' : id === 'frame4' ? '/?tab=op4' : '/?tab=op2';
+        const iframe = document.createElement('iframe');
+        iframe.src = src;
+        iframe.style.transformOrigin = 'top left';
+        iframe.style.transform = 'scale(' + scale + ')';
+        iframe.style.width = '390px';
+        iframe.style.height = '680px';
+        div.appendChild(iframe);
+      } else {
+        const iframe = div.querySelector('iframe');
+        const scale2 = div.clientWidth / 390;
+        iframe.style.transform = 'scale(' + scale2 + ')';
+        div.style.height = Math.round(680 * scale2) + 'px';
+      }
+    });
+  }
+  scaleFrames();
+  window.addEventListener('resize', scaleFrames);
+</script>
+</body>
+</html>
