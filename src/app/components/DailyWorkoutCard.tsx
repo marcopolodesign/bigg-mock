@@ -604,21 +604,38 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
                   </span>
                 </button>
               ) : cardVariant === 4 ? (
-                <button
-                  type="button"
-                  onClick={(e) => { e.stopPropagation(); setShowLocationSheet(true); }}
-                  className="w-full mt-[20px] py-[16px] px-[20px] flex items-center justify-center gap-[6px] rounded-[14px] active:opacity-80 transition-opacity"
-                  style={{ background: "#3d3d3d", transition: "opacity 0.2s" }}
-                >
-                  <MapPin size={13} className="text-[rgba(255,255,255,0.55)]" strokeWidth={1.75} />
-                  <span className="font-['MessinaSansWeb:Regular',sans-serif] text-[13px] text-[rgba(255,255,255,0.6)] tracking-[-0.26px]">
-                    Donde vas a entrenar?
-                  </span>
-                  <span className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[13px] text-white underline tracking-[-0.26px]">
-                    {selectedLocation}
-                  </span>
-                  <ChevronDown size={11} className="text-white underline" strokeWidth={2} />
-                </button>
+                <div className="w-full mt-[20px] flex flex-col gap-[10px]">
+                  {/* Location selector */}
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); setShowLocationSheet(true); }}
+                    className="w-full py-[14px] px-[20px] flex items-center justify-center gap-[6px] rounded-[14px] active:opacity-80 transition-opacity"
+                    style={{ background: "#3d3d3d", transition: "opacity 0.2s" }}
+                  >
+                    <MapPin size={13} className="text-[rgba(255,255,255,0.55)]" strokeWidth={1.75} />
+                    <span className="font-['MessinaSansWeb:Regular',sans-serif] text-[13px] text-[rgba(255,255,255,0.6)] tracking-[-0.26px]">
+                      Donde vas a entrenar?
+                    </span>
+                    <span className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[13px] text-white underline tracking-[-0.26px]">
+                      {selectedLocation}
+                    </span>
+                    <ChevronDown size={11} className="text-white" strokeWidth={2} />
+                  </button>
+                  {/* Primary CTA */}
+                  <button
+                    type="button"
+                    onClick={isBiggLocation ? onReservar : onOpenProgramming}
+                    className="w-full py-[16px] flex items-center justify-center rounded-[14px] active:opacity-80 transition-opacity"
+                    style={{
+                      background: isBiggLocation ? "#adff19" : "#3d3d3d",
+                      transition: "background 0.3s ease-in-out, opacity 0.2s",
+                    }}
+                  >
+                    <span className={`font-['MessinaSansWeb:SemiBold',sans-serif] text-[15px] tracking-[-0.3px] ${isBiggLocation ? "text-[#3d3d3d]" : "text-white"}`}>
+                      {isBiggLocation ? "Reservar clase" : "Iniciar entrenamiento"}
+                    </span>
+                  </button>
+                </div>
               ) : null}
             </div>
           </div>

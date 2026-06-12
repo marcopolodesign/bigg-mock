@@ -4,6 +4,18 @@
 
 ---
 
+## 2026-06-11 — Op4: CTA de acción debajo del selector de location
+
+**Source:** Claude Code — Macbook Pro
+
+**Change:** Op4 ahora muestra dos botones apilados: (1) selector de location dark gray `[📍 Donde vas a entrenar? BIGG Recoleta ∨]` que abre el sheet, y (2) CTA de acción lime ("Reservar clase") o dark ("Iniciar entrenamiento") según `isBiggLocation`. Documento comparativo actualizado para reflejar el cambio.
+
+**Files modified:**
+- `src/app/components/DailyWorkoutCard.tsx` — Op4 CTA: envuelto en `div` con `gap-[10px]`, agregado botón CTA debajo del location selector
+- `public/comparacion-opciones.html` — análisis Op4 actualizado (tags + pros/contras)
+
+---
+
 ## 2026-06-11 — FAB más pequeño + Op4 CTA simplificado a location selector
 
 **Source:** Claude Code — Macbook Pro
