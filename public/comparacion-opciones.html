@@ -298,30 +298,41 @@
   <!-- ── OPCIÓN 4 ── -->
   <div class="analysis-col">
     <div class="analysis-badge">Opción 4</div>
-    <div class="analysis-title">Bloques Flat<br>Location + CTA separados</div>
+    <div class="analysis-title">Bloques Flat<br>Flujo 2 pasos: Lugar → Programación</div>
 
     <div class="tag-row">
       <span class="tag">Lista flat</span>
-      <span class="tag">Selector location dark</span>
-      <span class="tag">CTA lime/dark debajo</span>
+      <span class="tag">CTA lime fijo</span>
+      <span class="tag">Location sheet primero</span>
+      <span class="tag">2 pasos</span>
+    </div>
+
+    <div class="analysis-section">
+      <div class="analysis-label green">Flujo de interacción</div>
+      <ul class="pros">
+        <li><strong style="color:#e8e8e8">Tap "Ver entrenamiento del día"</strong> → abre el bottom sheet de ubicación.</li>
+        <li><strong style="color:#e8e8e8">Seleccionás dónde entrenás</strong> → navega a ProgrammingScreen con esa ubicación aplicada.</li>
+        <li>El selector de location en la barra dark sigue disponible para cambiar ubicación sin navegar.</li>
+      </ul>
     </div>
 
     <div class="analysis-section">
       <div class="analysis-label green">A favor</div>
       <ul class="pros">
-        <li>Separa espacio de entrenamiento — corrección directa del feedback de Gigio.</li>
-        <li>Dos acciones claramente diferenciadas: primero elegís dónde, luego reservás.</li>
-        <li>CTA lime para BIGG / dark para home — el color comunica el contexto sin texto extra.</li>
-        <li>Animación al cambiar ubicación: nombre sube/baja, ícono aparece. El layout responde.</li>
-        <li>Lista flat con duración total (4 bloques · 59') es la forma más directa de comunicar el día.</li>
+        <li>Fuerza la decisión de ubicación antes de ver la programación — contexto correcto desde el arranque.</li>
+        <li>CTA siempre lime (sin bifurcación reservar/iniciar) — una sola acción clara para cualquier ubicación.</li>
+        <li>Animación al cambiar ubicación en la barra dark: nombre sube/baja, ícono sparkle aparece. El layout responde al contexto.</li>
+        <li>Lista flat con duración total (4 bloques · 59') comunica el día de un vistazo sin necesidad de expandir.</li>
+        <li>Separa conceptualmente "qué entreno hoy" (card) de "cómo lo ejecuto" (programación) — feedback Gigio resuelto.</li>
       </ul>
     </div>
 
     <div class="analysis-section">
       <div class="analysis-label amber">A tener en cuenta</div>
       <ul class="contras">
-        <li>Sin detalles de ejercicios en estado inicial — asume que el detalle está en programación.</li>
-        <li>Dos botones en el footer requieren más espacio vertical que las otras opciones.</li>
+        <li>2 taps para llegar a la programación — un paso más que Op3.</li>
+        <li>Sin detalles de ejercicios en el card — asume que el detalle vive en ProgrammingScreen.</li>
+        <li>La barra dark con location puede generar confusión sobre qué hace cada botón en el primer uso.</li>
       </ul>
     </div>
   </div>
@@ -360,9 +371,9 @@
 <!-- CALLOUT -->
 <div class="callout">
   <p>
-    <strong>Contexto de decisión:</strong> Las tres opciones resuelven la misma información con distinto orden de prioridades.
-    Op3 prioriza el escaneo rápido. Op4 prioriza la separación conceptual (feedback Gigio).
-    Op2 prioriza la densidad informativa. La elección depende del perfil de usuario BIGG y del momento de adopción.
+    <strong>Diferencia clave en Op4:</strong> El CTA ya no bifurca entre "Reservar" e "Iniciar entrenamiento" según la ubicación.
+    Siempre dice <strong>"Ver entrenamiento del día"</strong> y abre el selector de lugar primero.
+    Elegís dónde entrenás <em>antes</em> de llegar a la programación — el contexto queda resuelto al entrar, no dentro.
   </p>
 </div>
 
@@ -374,9 +385,9 @@
     <div class="decision-desc">Vista compacta al abrir; flaps colapsados sin sacrificar estructura.</div>
   </div>
   <div class="decision-cell">
-    <div class="decision-label">Claridad conceptual</div>
+    <div class="decision-label">Contexto de ubicación</div>
     <div class="decision-value">Op 4 ›</div>
-    <div class="decision-desc">Separa espacio de entrenamiento; CTA unificado comunica mejor la intención.</div>
+    <div class="decision-desc">Fuerza la elección de lugar antes de ver la programación. Flujo más intencional, 2 taps.</div>
   </div>
   <div class="decision-cell">
     <div class="decision-label">Info inmediata</div>
