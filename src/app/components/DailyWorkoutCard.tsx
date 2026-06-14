@@ -356,11 +356,21 @@ interface DailyWorkoutCardProps {
 export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, onOpenProgramming, reservedClass, activities, showMorning = true, showAfternoon = true, cardVariant = 1 }: DailyWorkoutCardProps) {
   const [selectedLocation, setSelectedLocation] = useState("BIGG Recoleta");
   const [showLocationSheet, setShowLocationSheet] = useState(false);
+  const [locationSheetFromCta, setLocationSheetFromCta] = useState(false);
   const [showAddLocation, setShowAddLocation] = useState(false);
   const [customLocations, setCustomLocations] = useState<string[]>([]);
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
   const [openFlapId, setOpenFlapId] = useState<string | null>(null);
   const isBiggLocation = BIGG_LOCATIONS.has(selectedLocation);
+
+  const handleLocationSelect = (loc: string) => {
+    setSelectedLocation(loc);
+    setShowLocationSheet(false);
+    if (locationSheetFromCta) {
+      setLocationSheetFromCta(false);
+      onOpenProgramming?.();
+    }
+  };
 
   if (reservedClass) {
     return (
@@ -648,18 +658,15 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
                     </span>
                     <ChevronDown size={11} className="text-white" strokeWidth={2} />
                   </button>
-                  {/* Primary CTA */}
+                  {/* Primary CTA — opens location sheet first, then navigates to programming */}
                   <button
                     type="button"
-                    onClick={isBiggLocation ? onReservar : onOpenProgramming}
+                    onClick={() => { setLocationSheetFromCta(true); setShowLocationSheet(true); }}
                     className="w-full py-[16px] flex items-center justify-center active:opacity-80 transition-opacity"
-                    style={{
-                      background: isBiggLocation ? "#adff19" : "#3d3d3d",
-                      transition: "background 0.3s ease-in-out, opacity 0.2s",
-                    }}
+                    style={{ background: "#adff19", transition: "opacity 0.2s" }}
                   >
-                    <span className={`font-['MessinaSansWeb:SemiBold',sans-serif] text-[15px] tracking-[-0.3px] ${isBiggLocation ? "text-[#3d3d3d]" : "text-white"}`}>
-                      {isBiggLocation ? "Reservar clase" : "Iniciar entrenamiento"}
+                    <span className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[15px] tracking-[-0.3px] text-[#3d3d3d]">
+                      Ver entrenamiento del día
                     </span>
                   </button>
                 </div>
@@ -708,11 +715,11 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
 
     <LocationSheet
       open={showLocationSheet}
-      onClose={() => setShowLocationSheet(false)}
+      onClose={() => { setShowLocationSheet(false); setLocationSheetFromCta(false); }}
       selected={selectedLocation}
-      onSelect={(loc) => { setSelectedLocation(loc); setShowLocationSheet(false); }}
+      onSelect={handleLocationSelect}
       customLocations={customLocations}
-      onAddLocation={() => { setShowLocationSheet(false); setShowAddLocation(true); }}
+      onAddLocation={() => { setShowLocationSheet(false); setLocationSheetFromCta(false); setShowAddLocation(true); }}
     />
     <AddLocationScreen
       open={showAddLocation}

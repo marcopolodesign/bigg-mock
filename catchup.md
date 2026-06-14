@@ -4,6 +4,14 @@
 
 ---
 
+## 2026-06-14 — Op4: location sheet antes de navegar a ProgrammingScreen
+
+- `DailyWorkoutCard.tsx` — En variant 4, el CTA ("Ver entrenamiento del día") ya no navega directamente a ProgrammingScreen. Abre el location bottom sheet primero. Al seleccionar una ubicación, navega a ProgrammingScreen. El selector de location en la barra dark sigue funcionando independientemente (solo cambia ubicación, no navega). Implementado con flag `locationSheetFromCta` y handler `handleLocationSelect`.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
 ## 2026-06-12 — Op3: CTA unificado estilo Op4 + duración en flaps
 
 - `DailyWorkoutCard.tsx` — Op3 reemplaza el MapPin suelto + botón lime por un bloque unificado estilo Op4: location row (dark) + CTA button (lime/dark según ubicación), con `rounded-[14px] overflow-hidden`
