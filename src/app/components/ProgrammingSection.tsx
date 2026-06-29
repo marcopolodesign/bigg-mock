@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import { Bookmark } from "lucide-react";
 import svgPaths from "../../imports/BiggDay/svg-03sgvqmew7";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -242,12 +243,7 @@ function FlapRow({
 
         {/* Right: icon + chevron */}
         <div className="flex items-center gap-[8px] shrink-0">
-          <img
-            src="https://www.figma.com/api/mcp/asset/990e1119-13c5-4323-8fa8-cb9c96440cce"
-            alt=""
-            className="w-[18px] h-[18px] object-contain"
-            style={{ filter: "brightness(0) invert(1) brightness(0.24)" }}
-          />
+          <Bookmark size={18} strokeWidth={1.8} color="#3d3d3d" />
           <motion.div
             animate={{ rotate: isOpen ? 180 : 0 }}
             transition={{ type: "spring", stiffness: 320, damping: 28 }}

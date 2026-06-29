@@ -190,15 +190,14 @@ export default function ProgrammingScreen({ onBack, onReservar }: ProgrammingScr
                   key={chip}
                   type="button"
                   onClick={() => setActiveFilter(active ? null : chip)}
-                  className="flex items-center p-[10px] rounded-[6px] shrink-0 transition-colors"
+                  className="flex items-center px-[10px] py-[7px] rounded-[6px] shrink-0 transition-colors"
                   style={{
-                    border: active ? "none" : "1px solid #a3a3a3",
-                    background: active ? "#adff19" : "transparent",
+                    background: active ? "#adff19" : "#e8e8e8",
                   }}
                 >
                   <p
                     className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[13px] tracking-[-0.13px] whitespace-nowrap leading-[1.13]"
-                    style={{ color: active ? "#1a3d00" : "black" }}
+                    style={{ color: active ? "#1a3d00" : "#565656" }}
                   >
                     {chip}
                   </p>
