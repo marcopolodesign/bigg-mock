@@ -2,16 +2,11 @@ import { useState } from "react";
 import { motion } from "motion/react";
 import ProgrammingSection from "./ProgrammingSection";
 import BottomSheet from "./BottomSheet";
+import LocationSheet from "./LocationSheet";
 
 const FILTER_CHIPS = ["FBA", "Strenght", "Upper Body", "Lower Body", "Hypertrophy", "Cardio", "HIIT", "Full Body"];
 
-type ClassOption = "bigg-class" | "bigg-gym" | "outside-bigg" | "bigg-outdoors";
-const CLASS_OPTIONS: { id: ClassOption; label: string }[] = [
-  { id: "bigg-class", label: "BIGG Class" },
-  { id: "bigg-gym", label: "BIGG Gym" },
-  { id: "outside-bigg", label: "Outside BIGG" },
-  { id: "bigg-outdoors", label: "BIGG Outdoors" },
-];
+const BIGG_LOCATIONS = ["BIGG Recoleta", "BIGG Tortuguitas", "BIGG Outdoors"];
 
 const EQUIPMENT_ITEMS = [
   { id: "mancuernas", label: "Mancuernas" },
@@ -91,7 +86,8 @@ interface ProgrammingScreenProps {
 
 export default function ProgrammingScreen({ onBack, onReservar }: ProgrammingScreenProps) {
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
-  const [selectedClass, setSelectedClass] = useState<ClassOption>("bigg-class");
+  const [selectedLocation, setSelectedLocation] = useState("BIGG Recoleta");
+  const [customLocations, setCustomLocations] = useState<string[]>([]);
   const [selectedEquipment, setSelectedEquipment] = useState<Set<string>>(new Set());
   const [classSheetOpen, setClassSheetOpen] = useState(false);
   const [materialesSheetOpen, setMaterialesSheetOpen] = useState(false);
@@ -104,7 +100,7 @@ export default function ProgrammingScreen({ onBack, onReservar }: ProgrammingScr
     });
   }
 
-  const classLabel = CLASS_OPTIONS.find((o) => o.id === selectedClass)?.label ?? "BIGG Class";
+  const isBiggLocation = BIGG_LOCATIONS.includes(selectedLocation);
   const materialesCount = selectedEquipment.size;
 
   return (
@@ -152,7 +148,7 @@ export default function ProgrammingScreen({ onBack, onReservar }: ProgrammingScr
               >
                 <IconBiggClass />
                 <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[13px] tracking-[-0.13px] whitespace-nowrap leading-[1.13] text-black">
-                  {classLabel}
+                  {selectedLocation}
                 </p>
                 <IconChevronDown />
               </button>
@@ -215,7 +211,7 @@ export default function ProgrammingScreen({ onBack, onReservar }: ProgrammingScr
 
         {/* ── Bottom CTA ── */}
         <div className="shrink-0 px-[16px] pt-[10px] pb-[28px] bg-[#ededed] border-t border-[#e0e0e0]">
-          {selectedClass === "bigg-class" ? (
+          {isBiggLocation ? (
             <button
               type="button"
               onClick={onReservar}
@@ -238,41 +234,15 @@ export default function ProgrammingScreen({ onBack, onReservar }: ProgrammingScr
         </div>
       </motion.div>
 
-      {/* ── Tipo de clase bottom sheet ── */}
-      <BottomSheet open={classSheetOpen} onClose={() => setClassSheetOpen(false)} title="Tipo de clase">
-        <div className="px-[16px] pt-[8px] pb-[36px] flex flex-col gap-[16px]">
-          <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[17px] text-[#3d3d3d] tracking-[-0.17px]">
-            Tipo de clase
-          </p>
-          <div className="grid grid-cols-2 gap-[10px]">
-            {CLASS_OPTIONS.map((opt) => {
-              const selected = selectedClass === opt.id;
-              return (
-                <button
-                  key={opt.id}
-                  type="button"
-                  onClick={() => {
-                    setSelectedClass(opt.id);
-                    setClassSheetOpen(false);
-                  }}
-                  className="flex items-center justify-center py-[20px] px-[12px] rounded-[14px] transition-colors active:opacity-80"
-                  style={{
-                    background: selected ? "#adff19" : "white",
-                    border: `1.5px solid ${selected ? "#1a3d00" : "#a3a3a3"}`,
-                  }}
-                >
-                  <p
-                    className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[14px] tracking-[-0.14px] leading-[1.2]"
-                    style={{ color: selected ? "#1a3d00" : "#3d3d3d" }}
-                  >
-                    {opt.label}
-                  </p>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </BottomSheet>
+      {/* ── Ubicación bottom sheet ── */}
+      <LocationSheet
+        open={classSheetOpen}
+        onClose={() => setClassSheetOpen(false)}
+        selected={selectedLocation}
+        onSelect={(loc) => { setSelectedLocation(loc); setClassSheetOpen(false); }}
+        customLocations={customLocations}
+        onAddLocation={() => { setClassSheetOpen(false); setCustomLocations((prev) => [...prev, `Mi ubicación ${prev.length + 1}`]); }}
+      />
 
       {/* ── Materiales bottom sheet ── */}
       <BottomSheet open={materialesSheetOpen} onClose={() => setMaterialesSheetOpen(false)} title="Equipamiento">
