@@ -454,7 +454,7 @@ export default function BiggWorldScreen() {
 
   function handleMapClick() {
     setSelectedId(null);
-    setSheetOpen(true);
+    setSheetOpen(false);
   }
 
   function handlePinClick(id: string) {
