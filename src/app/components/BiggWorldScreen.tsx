@@ -1,8 +1,10 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { Star, Lock, ChevronRight, MapPin, Calendar, Compass, Tag, Globe, X } from "lucide-react";
+
+const BIGG_API_TOKEN = "88224c27a0de9817d3249ee3af412f8d";
 
 // ─── Colors (matching biggapp CONSTANTS) ──────────────────────────────────────
 const C = {
@@ -56,13 +58,8 @@ const VENUES: Venue[] = [
   { id: "uptown",     name: "Up Town",          category: "Restaurante", neighborhood: "Microcentro",   baseDiscount: 10,                                                                              lat: -34.603, lng: -58.373, photoSeed: "restaurant" },
 ];
 
-const BIGG_LOCATIONS: BiggLocation[] = [
-  { id: "recoleta",    name: "BIGG Recoleta",    city: "Buenos Aires", country: "Argentina", address: "Av. del Libertador 4450", lat: -34.567, lng: -58.415, photoSeed: "gym1" },
-  { id: "palermo",     name: "BIGG Palermo",     city: "Buenos Aires", country: "Argentina", address: "Thames 1747",             lat: -34.585, lng: -58.440, photoSeed: "gym2" },
-  { id: "belgrano",    name: "BIGG Belgrano",    city: "Buenos Aires", country: "Argentina", address: "Av. Cabildo 2560",        lat: -34.559, lng: -58.449, photoSeed: "gym3" },
-  { id: "tortuguitas", name: "BIGG Tortuguitas", city: "Tortuguitas",  country: "Argentina", address: "Ramal Pilar km 44.5",     lat: -34.471, lng: -58.630, photoSeed: "gym4" },
-  { id: "montevideo",  name: "BIGG Montevideo",  city: "Montevideo",   country: "Uruguay",   address: "Av. 18 de Julio 1234",    lat: -34.906, lng: -56.191, photoSeed: "gym5" },
-];
+// Populated dynamically from API — see BiggWorldScreen useEffect
+const BIGG_LOCATIONS_INITIAL: BiggLocation[] = [];
 
 // ─── Loyalty tiers ─────────────────────────────────────────────────────────────
 
@@ -225,17 +222,22 @@ function LocationCard({ loc, selected, onSelect }: { loc: BiggLocation; selected
 
 // ─── Sedes panel ──────────────────────────────────────────────────────────────
 
-const COUNTRIES = ["Todos", "Argentina", "Uruguay", "Paraguay", "Chile", "Perú"];
-
-function SedesPanel({ selectedId, onSelect }: { selectedId: string | null; onSelect: (id: string) => void }) {
+function SedesPanel({ locations, selectedId, onSelect }: { locations: BiggLocation[]; selectedId: string | null; onSelect: (id: string) => void }) {
   const [country, setCountry] = useState("Todos");
-  const filtered = country === "Todos" ? BIGG_LOCATIONS : BIGG_LOCATIONS.filter((l) => l.country === country);
+
+  const countries = useMemo(() => {
+    const seen = new Set<string>();
+    locations.forEach((l) => seen.add(l.country));
+    return ["Todos", ...Array.from(seen).sort()];
+  }, [locations]);
+
+  const filtered = country === "Todos" ? locations : locations.filter((l) => l.country === country);
 
   return (
     <>
       {/* Country chips — sticky, non-scrollable */}
       <div style={{ display: "flex", gap: 8, padding: "6px 16px 10px", overflowX: "auto", flexShrink: 0, scrollbarWidth: "none" } as React.CSSProperties}>
-        {COUNTRIES.map((c) => {
+        {countries.map((c) => {
           const on = country === c;
           return (
             <button
@@ -437,10 +439,51 @@ export default function BiggWorldScreen() {
   const [active, setActive] = useState<MapFilter>("sedes");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [sheetOpen, setSheetOpen] = useState(true);
+  const [biggLocations, setBiggLocations] = useState<BiggLocation[]>(BIGG_LOCATIONS_INITIAL);
 
   // Ref to avoid stale closures in Leaflet event handlers
   const selectedIdRef = useRef(selectedId);
   selectedIdRef.current = selectedId;
+
+  // Fetch real BIGG sedes from API on mount
+  useEffect(() => {
+    fetch("https://api.bigg.fit/available_locations", {
+      headers: {
+        Authorization: `Bearer ${BIGG_API_TOKEN}`,
+        Accept: "application/json",
+      },
+    })
+      .then((r) => r.json())
+      .then((data: Array<{
+        id: number;
+        name: string;
+        active: boolean;
+        country_name: string;
+        slug?: string;
+        address?: {
+          latitude?: string | null;
+          longitude?: string | null;
+          address_line_1?: string | null;
+          city?: string | null;
+          state?: string | null;
+        } | null;
+      }>) => {
+        const mapped: BiggLocation[] = data
+          .filter((l) => l.active && l.address?.latitude && l.address?.longitude)
+          .map((l) => ({
+            id: String(l.id),
+            name: l.name,
+            country: l.country_name,
+            city: [l.address!.city, l.address!.state].find((v) => v && v !== "-") ?? l.country_name,
+            address: (l.address!.address_line_1 ?? "").trim(),
+            lat: parseFloat(l.address!.latitude!),
+            lng: parseFloat(l.address!.longitude!),
+            photoSeed: l.slug ?? l.name.toLowerCase().replace(/\s+/g, "-"),
+          }));
+        setBiggLocations(mapped);
+      })
+      .catch(() => {/* keep empty — map still works */});
+  }, []);
 
   const isBeneficios = active === "beneficios";
   const showVenues = active === "beneficios" || active === "all";
@@ -476,7 +519,7 @@ export default function BiggWorldScreen() {
         <TileLayer url={TILE_URL} />
         <MapClickHandler onMapClick={handleMapClick} />
 
-        {BIGG_LOCATIONS.map((loc) => (
+        {biggLocations.map((loc) => (
           <Marker
             key={loc.id}
             position={[loc.lat, loc.lng]}
@@ -534,7 +577,7 @@ export default function BiggWorldScreen() {
           {isBeneficios ? (
             <BeneficiosPanel selectedId={selectedId} />
           ) : (
-            <SedesPanel selectedId={selectedId} onSelect={(id) => setSelectedId(id || null)} />
+            <SedesPanel locations={biggLocations} selectedId={selectedId} onSelect={(id) => setSelectedId(id || null)} />
           )}
         </div>
       </div>

@@ -4,6 +4,68 @@
 
 ---
 
+## 2026-06-30 — BIGG World: sedes reales desde API
+
+- `BiggWorldScreen.tsx` — Reemplazadas las 5 sedes hardcodeadas por fetch a `GET https://api.bigg.fit/available_locations` en un `useEffect` al montar. Token extraído del interceptor de bigg-eye.
+- Respuesta mapeada al tipo `BiggLocation`: 68 sedes activas en 9 países (Argentina, España, Uruguay, Paraguay, Chile, Colombia, Perú, Panamá, Portugal).
+- Países del filtro del sheet generados dinámicamente desde los datos reales (antes hardcodeado).
+- City fallback mejorado: descarta valores nulos y `"-"`, cae a `country_name`.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-30 — BIGG World: fix scroll del contenedor principal
+
+- `BiggDayScreen.tsx` — Root div cambia de `overflow-y-auto` a `overflow-y-hidden` cuando `activeTab === "perfil"`. Solo el bottom sheet y el mapa (Leaflet nativo) manejan su propio scroll.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-30 — BIGG World: mapa fullscreen, botón X, pins responsivos
+
+- `BiggDayScreen.tsx` — Removido `pt-[40px]` del contenedor de BiggWorldScreen. El mapa ahora llega hasta el top sin gap ni texture del fondo.
+- `BiggWorldScreen.tsx` — Botón X (top-right del sheet) para cerrar. El click en mapa/pin reabre. Fix de stale closure en event handlers de Leaflet vía `selectedIdRef`. Stop propagation en markers BIGG (antes el click propagaba al mapa y reseteaba selectedId).
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-30 — BIGG World: pins sin %, sheet a 0 real
+
+- `BiggWorldScreen.tsx` — Venue markers reemplazados por dots simples (14px, sin texto %). Lime para unlocked, gris para locked, verde cuando selected.
+- Sheet colapsa a `0px` (oculto totalmente) — mapa full screen real. Mapa click + pin click lo reabre. Handle solo cierra.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-30 — BIGG World: mapa gris, sheet colapsable, filtro "Todos"
+
+- `BiggWorldScreen.tsx` — Tiles cambiados de CartoDB Dark Matter a CartoDB Positron (mapa gris claro).
+- Bottom sheet colapsable: nuevo estado `sheetOpen`. Toca el drag handle → colapsa a 32px (solo la manija). Toca el mapa, la manija o un pin → reabre con transición CSS suave (0.35s cubic-bezier).
+- Nuevo chip "Todos" (ícono Globe): muestra simultáneamente pins BIGG (sedes) y pills de descuento (venues) en el mapa.
+- Tipo `MapFilter` extendido con `"all"`. Condición `showVenues = active === "beneficios" || active === "all"`.
+- Importados `Globe` y `ChevronUp` de lucide-react.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-06-30 — BIGG World: mapa Leaflet interactivo + Club de Beneficios completo
+
+- `BiggWorldScreen.tsx` — Reescritura completa. Reemplazado mapa CSS simulado por `MapContainer` de react-leaflet v4 con tiles CartoDB Positron (mapa gris real, sin API key). Downgrade react-leaflet 5→4 (v5 requiere React 19, el proyecto usa React 18).
+- Marcadores BIGG: 5 sedes con `L.divIcon` (pill oscuro con texto lime). Siempre visibles.
+- Marcadores de venues: aparecen solo en tab Beneficios. Muestran el descuento (10-20% off), estado locked si el tier no alcanza.
+- Panel Sedes: 5 location cards con gradiente oscuro, badge de país, dirección. Country filter chips (TODOS / ARGENTINA / URUGUAY / PARAGUAY / CHILE / PERÚ).
+- Panel Beneficios: header "Club de Beneficios" con progress bar (8/12 clases, Nivel 2 · 15% off), 11 venue cards horizontales scrolleables. Cada card: estado unlocked/locked por tier, sponsored workout badge (+5% extra), CTA "Usar beneficio".
+- Al tocar un pin en el mapa → selecciona la card y hace scroll automático.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
 ## 2026-06-29 — Bookmark icon en flap header de ProgrammingSection
 
 - `ProgrammingSection.tsx` — Reemplazado `<img>` con URL de asset Figma (mostraba cuadrado gris) por `<Bookmark>` de lucide-react. Importado `Bookmark` de `lucide-react`. Ícono `size=18`, `strokeWidth=1.8`, color `#3d3d3d`.
