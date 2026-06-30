@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { Star, Lock, ChevronRight, MapPin, Calendar, Compass, Tag, Globe, ChevronUp } from "lucide-react";
+import { Star, Lock, ChevronRight, MapPin, Calendar, Compass, Tag, Globe } from "lucide-react";
 
 // ─── Colors (matching biggapp CONSTANTS) ──────────────────────────────────────
 const C = {
@@ -101,18 +101,12 @@ function makeBiggIcon(selected: boolean) {
 
 function makeVenueIcon(v: Venue, selected: boolean, tierDiscount: number | null) {
   const unlocked = tierDiscount !== null && tierDiscount >= v.baseDiscount;
-  const bg = selected ? C.GREEN : unlocked ? C.WHITE : "rgba(255,255,255,0.55)";
-  const color = selected ? "#111" : C.NEW_DARK;
+  const bg = selected ? C.GREEN : unlocked ? C.NEW_GREEN : C.MID;
   return L.divIcon({
-    html: `<div style="display:flex;flex-direction:column;align-items:center">
-      <div style="background:${bg};color:${color};font-size:10px;font-weight:700;font-family:sans-serif;padding:4px 9px;border-radius:20px;box-shadow:0 1px 4px rgba(0,0,0,0.28);white-space:nowrap;line-height:1">
-        ${v.baseDiscount}% off
-      </div>
-      <div style="width:1.5px;height:5px;background:${bg}"></div>
-    </div>`,
+    html: `<div style="width:14px;height:14px;border-radius:50%;background:${bg};box-shadow:0 1px 4px rgba(0,0,0,0.32);border:2px solid #fff"></div>`,
     className: "",
-    iconSize: [58, 26],
-    iconAnchor: [29, 26],
+    iconSize: [14, 14],
+    iconAnchor: [7, 7],
   });
 }
 
@@ -437,7 +431,7 @@ function BeneficiosPanel({ selectedId }: { selectedId: string | null }) {
 
 const BA_CENTER: [number, number] = [-34.583, -58.425];
 const SHEET_OPEN_H = "50%";
-const SHEET_CLOSED_H = "32px"; // just the drag handle
+const SHEET_CLOSED_H = "0px"; // fully hidden — map click re-opens
 
 export default function BiggWorldScreen() {
   const [active, setActive] = useState<MapFilter>("sedes");
@@ -519,14 +513,13 @@ export default function BiggWorldScreen() {
           overflow: "hidden",
         }}
       >
-        {/* Drag handle — tapping toggles sheet open/closed */}
+        {/* Drag handle — tapping closes the sheet; map/pin click re-opens */}
         <button
           type="button"
-          onClick={() => setSheetOpen((o) => !o)}
-          style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "8px 0 4px", flexShrink: 0, background: "none", border: "none", cursor: "pointer", gap: 3 }}
+          onClick={() => setSheetOpen(false)}
+          style={{ display: "flex", justifyContent: "center", padding: "8px 0 4px", flexShrink: 0, background: "none", border: "none", cursor: "pointer", width: "100%" }}
         >
           <div style={{ width: 36, height: 4, borderRadius: 9999, background: C.MID }} />
-          {!sheetOpen && <ChevronUp size={12} strokeWidth={2} style={{ color: C.MID }} />}
         </button>
 
         {/* Panel content — takes remaining height and manages its own scroll */}
