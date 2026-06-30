@@ -1611,7 +1611,7 @@ export default function BiggDayScreen() {
   }, [activeTab]);
 
   return (
-    <div ref={scrollRef} onScroll={handleScroll} className="bg-[#ededed] relative w-screen h-full overflow-x-hidden overflow-y-auto" data-name="BIGG Day">
+    <div ref={scrollRef} onScroll={handleScroll} className={`bg-[#ededed] relative w-screen h-full overflow-x-hidden ${activeTab === "perfil" ? "overflow-y-hidden" : "overflow-y-auto"}`} data-name="BIGG Day">
       {/* Background image */}
       <div className="absolute h-[780.001px] left-0 top-0 w-full" data-name="bg-home 1">
         <img alt="" className="absolute inset-0 max-w-none object-cover opacity-50 pointer-events-none size-full" src={imgBgHome1} />
