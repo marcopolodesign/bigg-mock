@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
 import { AnimatePresence } from "motion/react";
-import { Activity, Globe, Users, User, Moon, Plus, Flame, Check } from "lucide-react";
+import { Activity, Globe, Users, Moon, Plus, Flame, Check } from "lucide-react";
 import { Drawer } from "vaul";
 import svgPaths from "../../imports/BiggDay/svg-03sgvqmew7";
 import imgBgHome1 from "../../imports/BiggDay/ec32944a87885236431eaada4b00483f53237695.png";
@@ -21,6 +21,7 @@ import ReservarSheet from "../components/ReservarSheet";
 import FloatingActionButton from "../components/FloatingActionButton";
 import ProgrammingScreen from "../components/ProgrammingScreen";
 import ClassDetailScreen from "../components/ClassDetailScreen";
+import BiggWorldScreen from "../components/BiggWorldScreen";
 
 // ─── Today's scheduled activities ────────────────────────────────────────────
 
@@ -1532,8 +1533,8 @@ function PlaceholderTabContent({ label }: { label: string }) {
 type BottomTabId = "activity" | "world" | "community" | "perfil";
 
 const BOTTOM_TABS: { id: BottomTabId; label: string; Icon: React.ElementType }[] = [
-  { id: "world",     label: "Opción 3", Icon: Globe },
-  { id: "perfil",    label: "Opción 4", Icon: User },
+  { id: "world",     label: "Opción 3",    Icon: Globe },
+  { id: "perfil",    label: "BIGG World",  Icon: Globe },
   { id: "activity",  label: "Opción 2", Icon: Activity },
   { id: "community", label: "Comunidad", Icon: Users },
 ];
@@ -1659,7 +1660,7 @@ export default function BiggDayScreen() {
       </div>
 
       {/* Tab content */}
-      {(activeTab === "activity" || activeTab === "world" || activeTab === "perfil") && (
+      {(activeTab === "activity" || activeTab === "world") && (
         <div className="pb-[93px]">
           <MainContent
             onReservar={() => setReservarOpen(true)}
@@ -1670,14 +1671,19 @@ export default function BiggDayScreen() {
             isFutureDay={isFutureDay}
             selectedDate={selectedDate}
             todayReservedClass={todayReservedClass}
-            cardVariant={activeTab === "activity" ? 2 : activeTab === "world" ? 3 : 4}
+            cardVariant={activeTab === "activity" ? 2 : 3}
           />
+        </div>
+      )}
+      {activeTab === "perfil" && (
+        <div className="absolute inset-0 pb-[70px] pt-[40px]">
+          <BiggWorldScreen />
         </div>
       )}
       {activeTab === "community" && <CommunityTabContent />}
 
       {/* Fixed overlays */}
-      {(activeTab === "activity" || activeTab === "world" || activeTab === "perfil") && <StickyHeader today={today} selectedDate={selectedDate} onSelectDate={setSelectedDate} scrollY={headerScrollY} />}
+      {(activeTab === "activity" || activeTab === "world") && <StickyHeader today={today} selectedDate={selectedDate} onSelectDate={setSelectedDate} scrollY={headerScrollY} />}
       <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
       <FloatingActionButton open={fabOpen} onOpenChange={setFabOpen} onVerProgramacion={() => setProgrammingOpen(true)} />
 
