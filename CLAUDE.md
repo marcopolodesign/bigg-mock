@@ -92,9 +92,16 @@ pnpm build      # Production build
 - After modifying, creating, or deleting a component, update `components.md` in the same task.
 - Keep `design-system.md` in sync with `theme.css` whenever tokens are added or changed.
 
+---
+
+## Verificación en browser (obligatorio)
+
+Después de implementar cualquier cambio en un proyecto web o de UI, SIEMPRE verificar el resultado en el browser antes de reportar la tarea como completada. Usar el skill `/verify` o abrir el browser manualmente. No reportar "listo" sin haber visto el resultado funcionando.
+
 ## Recent Changes
 
 <!-- Add a one-liner per session here, newest first -->
+
 - **2026-06-08:** `BlockCard` rediseñado para matchear Pádel — layout columna izq (Druk title + badge modalidad + movimientos) + columna der (SVG reloj de `svgPaths`). Removido pill de duración y badge "BLOQUE X" del card.
 - **2026-06-05:** Racha de actividad real-time — `buildWeekStrip()` desde `new Date()`; `ONBOARDING_TRAINING_DAYS` muestra dashed-lime en días futuros programados; V (hoy) con ring negro punteado; racha y texto motivacional dinámicos.
 - **2026-06-05:** Timeline unificado — se eliminó "Para completar tu día"; un solo timeline (10AM BIGG Class → 18:00hs Running pasadas → Afternoon Mobility); `WhyLine` estandarizado inline en todas las cards.
@@ -116,3 +123,13 @@ pnpm build      # Production build
 - **2026-06-01:** 5-tab bottom nav (Train / Actividad / BIGG World / Comunidad / Perfil). IG/Social component migrated to Community tab.
 - **2026-06-01:** `DailyWorkoutCard` — interactive tab switcher (BIGG Class / Home/Gym / Outdoors). `BiggDayScreen` created as the editable screen wrapper.
 - **2026-06-01:** Initial project scaffolding — CLAUDE.md, catchup.md, components.md, design-system.md created.
+
+
+## Actualizar AMBOS timelines (obligatorio)
+
+Después de cada tarea completada, antes de reportar al usuario, actualizar:
+
+1. **Timeline del proyecto** — mover el item a "Completado", actualizar "Ahora (en curso)" y "Próximo".
+2. **Timeline global** — `~/Local/timeline.md` — actualizar la fila del proyecto en la tabla resumen + el bloque Estado/Próximo paso del proyecto.
+
+No preguntar. No saltear aunque la tarea sea pequeña. El timeline global es la fuente de verdad que Alan usa para saber en qué está cada proyecto y qué sigue.
