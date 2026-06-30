@@ -1676,7 +1676,7 @@ export default function BiggDayScreen() {
         </div>
       )}
       {activeTab === "perfil" && (
-        <div className="absolute inset-0 pb-[70px] pt-[40px]">
+        <div className="absolute inset-0 pb-[70px]">
           <BiggWorldScreen />
         </div>
       )}

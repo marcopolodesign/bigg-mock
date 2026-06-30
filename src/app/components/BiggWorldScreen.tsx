@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { Star, Lock, ChevronRight, MapPin, Calendar, Compass, Tag, Globe } from "lucide-react";
+import { Star, Lock, ChevronRight, MapPin, Calendar, Compass, Tag, Globe, X } from "lucide-react";
 
 // ─── Colors (matching biggapp CONSTANTS) ──────────────────────────────────────
 const C = {
@@ -438,6 +438,10 @@ export default function BiggWorldScreen() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [sheetOpen, setSheetOpen] = useState(true);
 
+  // Ref to avoid stale closures in Leaflet event handlers
+  const selectedIdRef = useRef(selectedId);
+  selectedIdRef.current = selectedId;
+
   const isBeneficios = active === "beneficios";
   const showVenues = active === "beneficios" || active === "all";
   const tierDiscount = getActiveTier()?.discount ?? null;
@@ -453,8 +457,8 @@ export default function BiggWorldScreen() {
     setSheetOpen(true);
   }
 
-  function handlePinClick(id: string, currentSelected: string | null) {
-    setSelectedId(currentSelected === id ? null : id);
+  function handlePinClick(id: string) {
+    setSelectedId(selectedIdRef.current === id ? null : id);
     setSheetOpen(true);
   }
 
@@ -477,7 +481,7 @@ export default function BiggWorldScreen() {
             key={loc.id}
             position={[loc.lat, loc.lng]}
             icon={makeBiggIcon(selectedId === loc.id)}
-            eventHandlers={{ click: () => handlePinClick(loc.id, selectedId) }}
+            eventHandlers={{ click: (e) => { L.DomEvent.stopPropagation(e); handlePinClick(loc.id); } }}
           />
         ))}
 
@@ -486,7 +490,7 @@ export default function BiggWorldScreen() {
             key={v.id}
             position={[v.lat, v.lng]}
             icon={makeVenueIcon(v, selectedId === v.id, tierDiscount)}
-            eventHandlers={{ click: (e) => { L.DomEvent.stopPropagation(e); handlePinClick(v.id, selectedId); } }}
+            eventHandlers={{ click: (e) => { L.DomEvent.stopPropagation(e); handlePinClick(v.id); } }}
           />
         ))}
       </MapContainer>
@@ -513,14 +517,17 @@ export default function BiggWorldScreen() {
           overflow: "hidden",
         }}
       >
-        {/* Drag handle — tapping closes the sheet; map/pin click re-opens */}
-        <button
-          type="button"
-          onClick={() => setSheetOpen(false)}
-          style={{ display: "flex", justifyContent: "center", padding: "8px 0 4px", flexShrink: 0, background: "none", border: "none", cursor: "pointer", width: "100%" }}
-        >
+        {/* Sheet header: drag handle + X close button */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "10px 16px 4px", flexShrink: 0, position: "relative" }}>
           <div style={{ width: 36, height: 4, borderRadius: 9999, background: C.MID }} />
-        </button>
+          <button
+            type="button"
+            onClick={() => setSheetOpen(false)}
+            style={{ position: "absolute", right: 16, top: "50%", transform: "translateY(-50%)", background: "rgba(0,0,0,0.08)", border: "none", borderRadius: 999, width: 26, height: 26, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
+          >
+            <X size={13} strokeWidth={2.5} style={{ color: C.NEW_DARK }} />
+          </button>
+        </div>
 
         {/* Panel content — takes remaining height and manages its own scroll */}
         <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
