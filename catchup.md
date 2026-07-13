@@ -4,6 +4,15 @@
 
 ---
 
+## 2026-07-13 — Timeline: entrada de sueño y wind-down
+
+- `DailyWorkoutCard.tsx` — `SleepEntry`: fila compacta una línea al tope del timeline mostrando duración + calidad desde Apple Health (7h 12m, calidad buena).
+- `WindDownCard`: card recomendación al fondo del timeline (antes del botón Agregar) — rutina nocturna 22:00hs con toggle + / check animado, tinte púrpura.
+
+**Source:** Claude Code — Remote
+
+---
+
 ## 2026-06-30 — BIGG World: sedes reales desde API
 
 - `BiggWorldScreen.tsx` — Reemplazadas las 5 sedes hardcodeadas por fetch a `GET https://api.bigg.fit/available_locations` en un `useEffect` al montar. Token extraído del interceptor de bigg-eye.
