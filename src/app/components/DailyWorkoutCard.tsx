@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronDown, MapPin, Plus, Check, Pencil, Sparkles } from "lucide-react";
+import { ChevronDown, MapPin, Plus, Check, Pencil, Sparkles, Moon } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import SourceChip, { type DataSource } from "./SourceChip";
 import WhyLine from "./WhyLine";
@@ -141,6 +141,55 @@ function TimePill({ label }: { label: string }) {
       <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-white text-[13px] whitespace-nowrap tracking-[-0.26px] leading-[1.2]">
         {label}
       </p>
+    </div>
+  );
+}
+
+// Compact single-line sleep summary at top of timeline
+function SleepEntry() {
+  return (
+    <div className="relative z-10 flex items-center gap-[10px] w-full px-[4px]">
+      <Moon size={13} className="text-[#6b7280] shrink-0" />
+      <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[13px] text-[#6b7280] tracking-[-0.26px] leading-[1.2]">
+        Dormiste <span className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[#3d3d3d]">7h 12m</span> — calidad buena · Apple Health
+      </p>
+    </div>
+  );
+}
+
+// Wind-down recommendation at bottom of timeline
+function WindDownCard() {
+  const [added, setAdded] = useState(false);
+  return (
+    <div className="flex flex-col items-start gap-[10px] w-full">
+      <div className="relative z-10 flex flex-row items-center gap-[10px]">
+        <TimePill label="Wind down" />
+      </div>
+      <div className="relative z-10 w-full rounded-[16px] overflow-hidden"
+        style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(235,231,255,0.95) 100%)", border: "1px solid rgba(139,120,230,0.18)" }}>
+        <div className="flex items-center justify-between px-[16px] py-[14px] gap-[12px]">
+          <div className="flex flex-col gap-[2px] flex-1 min-w-0">
+            <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[14px] text-[#3d3d3d] tracking-[-0.28px] leading-[1.3]">
+              Rutina nocturna · 22:00hs
+            </p>
+            <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[12px] text-[#6b7280] tracking-[-0.24px] leading-[1.3]">
+              10 min de respiración + stretching para mejorar tu sueño
+            </p>
+          </div>
+          <motion.button
+            type="button"
+            onClick={() => setAdded((v) => !v)}
+            whileTap={{ scale: 0.92 }}
+            className="shrink-0 w-[32px] h-[32px] rounded-full flex items-center justify-center transition-colors"
+            style={{ background: added ? "#8b78e6" : "rgba(139,120,230,0.15)" }}
+          >
+            {added
+              ? <Check size={15} strokeWidth={2.5} className="text-white" />
+              : <Plus size={15} strokeWidth={2.5} className="text-[#8b78e6]" />
+            }
+          </motion.button>
+        </div>
+      </div>
     </div>
   );
 }
@@ -421,6 +470,9 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
       <div className="absolute left-[22px] top-0 bottom-0 w-[1px] bg-[#c4c4c4]" />
       <div className="flex flex-col items-start gap-[24px]">
 
+        {/* Sleep summary — top of timeline */}
+        <SleepEntry />
+
         {/* BIGG Class at 10AM */}
         {showMorning && (
           <div className="flex flex-col items-start gap-[10px] w-full">
@@ -698,6 +750,9 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
             </div>
           </div>
         )}
+
+        {/* Wind-down recommendation */}
+        <WindDownCard />
 
         {/* Add to day */}
         <button
