@@ -1214,6 +1214,7 @@ function MainContent({ onReservar, onOpenFab, onOpenDetail, onOpenProgramming, i
   // only the extra activities/banners layered on top change per weekday.
   const weekday = selectedDate.getDay(); // 0 = Sun … 6 = Sat
   const isMonday = weekday === 1;
+  const isWednesday = weekday === 3;
   const isRestDay = !isToday && weekday === 4; // Thursday
   const isSaturday = weekday === 6;
   const isSunday = weekday === 0;
@@ -1232,16 +1233,6 @@ function MainContent({ onReservar, onOpenFab, onOpenDetail, onOpenProgramming, i
     // pt clears the fixed StickyHeader (greeting + week calendar, no status bar)
     <div className="flex flex-col gap-[16px] items-center w-full px-[20px] pt-[153px]">
 
-      {/* Saturday — BIGG Run Club banner, above the timeline; no BIGG workout card that day */}
-      {isSaturday && (
-        <div className="w-full max-w-[388px] flex items-center gap-[10px] backdrop-blur-sm bg-[#6ab5ff]/15 border border-[#6ab5ff]/30 rounded-full px-[16px] py-[10px]">
-          <Users size={15} className="text-[#4a90d9] shrink-0" />
-          <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[#4a6fa5] text-[13px] tracking-[-0.26px]">
-            Este sábado hay BIGG Run Club — sumate a correr con la comunidad
-          </p>
-        </div>
-      )}
-
       {/* ── Timeline — same module every day ── */}
       <div className="w-full max-w-[388px] mb-[24px]">
         <DailyWorkoutCard
@@ -1257,6 +1248,7 @@ function MainContent({ onReservar, onOpenFab, onOpenDetail, onOpenProgramming, i
           isFutureDay={isFutureDay}
           blockTitles={blockTitles}
           weatherNote={isSunday ? { temp: "24°", caption: "Día ideal para entrenar afuera. Ver bloques de BIGG Outdoors" } : undefined}
+          showRunClub={isWednesday || isSaturday}
         />
       </div>
 

@@ -8,6 +8,7 @@ import LocationSheet from "./LocationSheet";
 import BottomSheet from "./BottomSheet";
 import AddLocationScreen from "./AddLocationScreen";
 import { BlockCard, type StimulusBlock } from "./ProgrammingSection";
+import imgBiggRun from "../../assets/bigg-run.jpg";
 
 const BASE_CHIPS = ["FBA", "Upper Body", "HIIT", "Midline"];
 const RECOVERY_TAGS = ["Piernas cargadas", "Espalda tensa", "Hombros", "Fatiga general", "Sin molestias"];
@@ -470,7 +471,16 @@ function WindDownCard() {
   );
 }
 
-function AfternoonRecommendationCard() {
+// Generic addable recommendation card — dashed border, gradient, WhyLine + Agregar button.
+// Shared by the Mobility recommendation and the BIGG Run Club recommendation (Wed/Sat).
+interface RecommendationCardProps {
+  title: string;
+  chip: string;
+  why: string;
+  gradient: string;
+}
+
+function RecommendationCard({ title, chip, why, gradient }: RecommendationCardProps) {
   const [added, setAdded] = useState(false);
 
   return (
@@ -487,9 +497,6 @@ function AfternoonRecommendationCard() {
         transition={{ duration: 0.4 }}
       />
 
-      {/* White cover below card — masks the vertical line in the gap to the Agregar button */}
-      <div className="absolute left-0 right-0 bg-[#ededed]" style={{ bottom: "-16px", height: "20px", zIndex: 20 }} />
-
       <motion.div
         className="content-stretch flex flex-col isolate items-center overflow-clip relative rounded-[20px] w-full"
         style={{ borderTopLeftRadius: "7px" }}
@@ -499,19 +506,19 @@ function AfternoonRecommendationCard() {
         {/* Single gradient section — WhyLine inline (running pasadas pattern) */}
         <div
           className="backdrop-blur-[50px] content-stretch flex gap-[20px] items-start p-[20px] relative rounded-[20px] shrink-0 w-full"
-          style={{ backgroundImage: "linear-gradient(112.876deg, rgba(255,255,255,0.9) 37.068%, rgba(42,179,204,0.9) 114.32%)", borderTopLeftRadius: "7px" }}
+          style={{ backgroundImage: gradient, borderTopLeftRadius: "7px" }}
         >
           {/* Left: title + chip + why */}
           <div className="content-stretch flex flex-[1_0_0] flex-col gap-[16px] items-start min-w-px relative">
             <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] font-['Druk_Wide:Medium',sans-serif] text-[26px] text-[#565656] tracking-[-1.3px] whitespace-nowrap">
-              Mobility
+              {title}
             </p>
             <div className="bg-[#ededed] px-[12px] py-[4px] rounded-[3px] flex items-center justify-center">
               <p className="font-['MessinaSansWeb:Bold',sans-serif] text-[11px] text-[#565656] tracking-[-0.11px] uppercase whitespace-nowrap">
-                BIGG Soft Life
+                {chip}
               </p>
             </div>
-            <WhyLine>Cooldown recomendado por tu entrenamiento de la mañana en BIGG Recoleta</WhyLine>
+            <WhyLine>{why}</WhyLine>
           </div>
 
           {/* Right: Agregar / Agregado button */}
@@ -552,6 +559,84 @@ function AfternoonRecommendationCard() {
           </button>
         </div>
       </motion.div>
+    </div>
+  );
+}
+
+function AfternoonRecommendationCard() {
+  return (
+    <RecommendationCard
+      title="Mobility"
+      chip="BIGG Soft Life"
+      why="Cooldown recomendado por tu entrenamiento de la mañana en BIGG Recoleta"
+      gradient="linear-gradient(112.876deg, rgba(255,255,255,0.9) 37.068%, rgba(42,179,204,0.9) 114.32%)"
+    />
+  );
+}
+
+// Merges the RecommendationCard mechanics (dashed border, Agregar button, connector corner)
+// with the BIGG MOVE full-bleed photo treatment (fluid Fixture_Ultra title over an image).
+function RunClubRecommendationCard() {
+  const [added, setAdded] = useState(false);
+
+  return (
+    <div className="relative rounded-[20px] w-full overflow-hidden" style={{ borderTopLeftRadius: "7px", aspectRatio: "390 / 200", containerType: "inline-size" }}>
+      <img alt="" className="absolute inset-0 w-full h-full object-cover pointer-events-none" src={imgBiggRun} />
+      <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(0,0,0,0) 35%, rgba(0,0,0,0.75) 100%)" }} />
+
+      <motion.div
+        aria-hidden
+        className="absolute border border-dashed inset-0 pointer-events-none rounded-[20px] z-10"
+        style={{ borderColor: "rgba(255,255,255,0.7)", borderTopLeftRadius: "7px" }}
+        animate={{ opacity: added ? 0 : 1 }}
+        transition={{ duration: 0.4 }}
+      />
+
+      <div className="absolute inset-0 z-[2] flex items-end justify-between gap-[16px] p-[20px]">
+        <div className="flex flex-col gap-[4px] min-w-0">
+          <p
+            className="[word-break:break-word] font-['Fixture_Ultra:SemiBold',sans-serif] leading-[1.005] not-italic text-white whitespace-nowrap"
+            style={{ fontSize: "clamp(24px, 12cqw, 44px)" }}
+          >
+            BIGG RUN CLUB
+          </p>
+          <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-white/85 text-[13px] tracking-[-0.13px]">
+            Sumate a correr con la comunidad
+          </p>
+        </div>
+
+        <button
+          onClick={() => setAdded(true)}
+          disabled={added}
+          className="content-stretch flex flex-col gap-[9px] items-center relative shrink-0 w-[56px] cursor-pointer disabled:cursor-default"
+        >
+          <div className="bg-white/20 backdrop-blur-sm flex items-center justify-center size-[56px] relative rounded-[8px] shrink-0 overflow-hidden">
+            <AnimatePresence mode="wait">
+              {added ? (
+                <motion.div
+                  key="check"
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ type: "spring", stiffness: 500, damping: 22 }}
+                >
+                  <Check size={20} strokeWidth={2} className="text-white" />
+                </motion.div>
+              ) : (
+                <motion.div key="plus" exit={{ scale: 0, opacity: 0 }} transition={{ duration: 0.12 }}>
+                  <Plus size={20} strokeWidth={1.5} className="text-white" />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+          <motion.p
+            className="font-['MessinaSansWeb:Regular',sans-serif] text-white text-[13px] text-center w-full leading-[1.25] whitespace-nowrap"
+            animate={{ opacity: 1 }}
+            key={added ? "added" : "add"}
+          >
+            {added ? "Agregado!" : "Agregar"}
+          </motion.p>
+        </button>
+      </div>
     </div>
   );
 }
@@ -686,9 +771,11 @@ interface DailyWorkoutCardProps {
   blockTitles?: string[];
   /** Weather context merged into the "Entrenamiento del día" milestone, between the pill and the blocks. */
   weatherNote?: { temp: string; caption: string };
+  /** Shows the "Run Club" recommendation milestone, above Mobility & recovery. */
+  showRunClub?: boolean;
 }
 
-export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, onOpenProgramming, reservedClass, activities, showMorning = true, showAfternoon = true, cardVariant = 1, isFutureDay = false, blockTitles, weatherNote }: DailyWorkoutCardProps) {
+export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, onOpenProgramming, reservedClass, activities, showMorning = true, showAfternoon = true, cardVariant = 1, isFutureDay = false, blockTitles, weatherNote, showRunClub = false }: DailyWorkoutCardProps) {
   const [selectedLocation, setSelectedLocation] = useState("BIGG Recoleta");
   const [showLocationSheet, setShowLocationSheet] = useState(false);
   const [locationSheetFromCta, setLocationSheetFromCta] = useState(false);
@@ -1083,6 +1170,18 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
             </div>
           </div>
         ))}
+
+        {/* Run Club recommendation — Wed/Sat, above Mobility */}
+        {showRunClub && showTrainingContent && (
+          <div className="relative z-10 flex flex-col items-start w-full">
+            <div className="relative z-10 flex flex-row items-center gap-[10px]">
+              <TimePill label="BIGG Run Club" style={CONNECTED_PILL_STYLE} />
+            </div>
+            <div className="relative z-10 w-full" style={{ transform: "translateY(-15px)" }}>
+              <RunClubRecommendationCard />
+            </div>
+          </div>
+        )}
 
         {/* Afternoon Mobility recommendation */}
         {showAfternoon && showTrainingContent && (

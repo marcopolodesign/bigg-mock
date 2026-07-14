@@ -4,6 +4,29 @@
 
 ---
 
+## 2026-07-14 — BIGG Run Club: foto real + fix grey block + estilo BIGG MOVE
+
+- **Fix**: se sacó del `RecommendationCard` genérico la capa "White cover below card" (`bg-[#ededed]` con `bottom:-16px`) que estaba pensada para un único card al final del timeline — al apilar Run Club + Mobility (mismo componente), ese div de 20px de alto quedaba visible como un bloque gris flotando debajo de cada card. No hacía falta: el resto de milestones del timeline no tienen ese hack y se ven bien.
+- **`RunClubRecommendationCard` ahora es su propio componente** (dejó de reusar el `RecommendationCard` de gradient) — fusiona el mecanismo de esa card (borde punteado que se apaga al agregar, botón Agregar/Agregado, esquina conectora `borderTopLeftRadius: 7px`) con el tratamiento visual de `Group17`/BIGG MOVE (foto full-bleed + título fluido en `Fixture_Ultra:SemiBold` con `clamp()`, subtítulo debajo). Fondo: `bigg-run.jpg` provisto por el usuario (Downloads), redimensionado de 3840×2160/8.3MB a 1200px de ancho/~80KB con `sips`, copiado a `src/assets/bigg-run.jpg`. Overlay con gradient negro de abajo hacia arriba para legibilidad del texto blanco sobre la foto (clara, cielo de fondo).
+- Verificado en Chrome (sábado): foto de fondo visible, título "BIGG RUN CLUB" + subtítulo, borde punteado blanco, botón Agregar → "Agregado!" funcional, sin el bloque gris debajo ni en Run Club ni en Mobility. Sin errores de consola.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-07-14 — Run Club como milestone dentro del timeline (miércoles y sábado)
+
+- `AfternoonRecommendationCard` (Mobility) refactorizado a un componente genérico `RecommendationCard` ({title, chip, why, gradient}) para poder reusar exactamente el mismo patrón visual (borde punteado, gradient, `WhyLine`, botón Agregar) en otro contenido — confirmado con el usuario antes de implementar (`AskUserQuestion`): ambos días deben mostrar el mismo recomendado de "Run Club", no contenidos distintos.
+- Nuevo `RunClubRecommendationCard` usa ese componente genérico con gradient celeste/azul (`rgba(74,144,217,...)`) para diferenciarlo de Mobility.
+- Nuevo prop `DailyWorkoutCard.showRunClub` — renderiza el milestone "BIGG Run Club" (mismo estilo tab-connector que Mobility/Entrenamiento complementario) inmediatamente ARRIBA de "Mobility & recovery" dentro del timeline.
+- **Miércoles**: ahora también muestra el milestone "BIGG Run Club" arriba de Mobility (antes no tenía contenido propio).
+- **Sábado**: se sacó el banner standalone que vivía arriba de "Tu BIGG day" — el Run Club ahora vive DENTRO del timeline, en el mismo lugar (arriba de Mobility), consistente con miércoles. Sigue sin mostrar la card "Entrenamiento del día" ese día.
+- Verificado en Chrome: miércoles y sábado muestran "BIGG Run Club" con el mismo look que Mobility, en el orden correcto; sábado sin banner top ni card de entrenamiento. Sin errores de consola.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
 ## 2026-07-14 — Bloques rotativos por día, sábado sin BIGG workout card, domingo con clima integrado
 
 - **Bloques de "Entrenamiento del día" rotan por día**: en vez de repetir siempre FBA/Upper Body/HIIT/Midline, cada día toma 4 títulos de un pool de 7 (`DAY_BLOCK_TITLE_POOL`: Strength, Hyrox, Cardio, Lower Body, Hypertrophy, Full Body, Pilates), con una ventana rotativa de 4 basada en `selectedDate.getDay()` (`getDayBlockTitles`). Hoy (el día real "actual" del mock) mantiene su plan específico sin cambios; el resto de los días muestra la rotación. Nuevo prop `DailyWorkoutCard.blockTitles` sobreescribe `V4_BLOCKS[i].bigg.stimulus` solo cuando está en una ubicación BIGG.
