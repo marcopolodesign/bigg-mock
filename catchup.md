@@ -4,6 +4,19 @@
 
 ---
 
+## 2026-07-14 — Correcciones: glow solo en el botón, SleepEntry vuelve al timeline, sueño/nutrición ocultos en días futuros
+
+Tres correcciones directas sobre la entrega anterior (misma sesión), a pedido del usuario:
+
+- **Glow solo en "Reservar clase"**: el pulso/glow del pedido anterior había quedado en la barra CTA completa (bg lime + botón "Donde vas a entrenar?" + "Reservar clase"). Revertido — la barra vuelve a ser un `<div>` plano; ahora es el `<button>` de "Reservar clase" el que es `motion.button`, con `scale` + `boxShadow` blanco pulsante (2.2s loop) solo alrededor de sí mismo, apagado en la variante "Iniciar entrenamiento".
+- **`SleepEntry` vuelve a estar dentro del contenedor con la línea del timeline**: el fix anterior (sacarla afuera para evitar el "stub" de la línea asomando en su esquina) fue la corrección equivocada — el usuario aclaró que el timeline span debe arrancar DESDE "Dormiste...", no desde "Entrenamiento del día". Revertido: `SleepEntry` es de nuevo el primer ítem dentro de la lista con `gap-[24px]`, y la línea vertical arranca en su posición.
+- **Sueño y nutrición ocultos en días futuros**: "Dormiste bien" reporta sobre la noche anterior y "¿Comiste bien hoy?" sobre el día en curso — no tiene sentido mostrarlos en miércoles/jueves/viernes u otro día que todavía no pasó. Nuevo prop `DailyWorkoutCard.isFutureDay` (pasado desde `MainContent` en `BiggDayScreen.tsx`); `showSleepContent`/`showNutritionContent` ahora chequean `!isFutureDay` además del filtro seleccionado.
+- Verificado en Chrome: glow acotado al botón, línea arrancando en el sleep card en Mar 14 (hoy), sueño/nutrición ausentes en Mié 15 (día futuro) sin afectar Entrenamiento del día/Mobility/Wind down. Sin errores de consola.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
 ## 2026-07-14 — CTA "Reservar clase" con glow, fix visual de SleepEntry, módulo unificado por día, Padel + Sport Specific, banners Sáb/Dom
 
 - **"Reservar clase" más prominente**: la barra CTA (`cardVariant === 3`) pasa a `motion.div` con un `boxShadow` lime pulsante en loop (2.2s, ease-in-out) solo cuando `isBiggLocation` es true (o sea, cuando el texto es "Reservar clase", no "Iniciar entrenamiento") — se apaga automáticamente para la variante "away".

@@ -680,9 +680,11 @@ interface DailyWorkoutCardProps {
   showMorning?: boolean;
   showAfternoon?: boolean;
   cardVariant?: 1 | 2 | 3 | 4;
+  /** Sleep check-in reports on last night — never shown for days that haven't happened yet. */
+  isFutureDay?: boolean;
 }
 
-export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, onOpenProgramming, reservedClass, activities, showMorning = true, showAfternoon = true, cardVariant = 1 }: DailyWorkoutCardProps) {
+export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, onOpenProgramming, reservedClass, activities, showMorning = true, showAfternoon = true, cardVariant = 1, isFutureDay = false }: DailyWorkoutCardProps) {
   const [selectedLocation, setSelectedLocation] = useState("BIGG Recoleta");
   const [showLocationSheet, setShowLocationSheet] = useState(false);
   const [locationSheetFromCta, setLocationSheetFromCta] = useState(false);
@@ -695,8 +697,9 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
   const isBiggLocation = BIGG_LOCATIONS.has(selectedLocation);
   const activeFilterLabel = TIMELINE_FILTERS.find((f) => f.key === selectedFilter)?.label ?? "Todos";
   const showTrainingContent = selectedFilter === "todos" || selectedFilter === "entrenamiento";
-  const showSleepContent = selectedFilter === "todos" || selectedFilter === "sueno";
-  const showNutritionContent = selectedFilter === "todos" || selectedFilter === "nutricion";
+  // Sleep/nutrition check-ins report on last night / today — never valid for a day that hasn't happened yet
+  const showSleepContent = !isFutureDay && (selectedFilter === "todos" || selectedFilter === "sueno");
+  const showNutritionContent = !isFutureDay && (selectedFilter === "todos" || selectedFilter === "nutricion");
   const isFilterEmpty = !showTrainingContent && !showSleepContent && !showNutritionContent;
 
   const handleLocationSelect = (loc: string) => {
@@ -768,17 +771,12 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
         <ChevronDown size={14} className="text-[#565656] shrink-0" strokeWidth={2} />
       </button>
     </div>
-    {/* Sleep check-in — no TimePill node of its own, sits above the connected timeline
-        so the line below doesn't run through/behind it and peek out at its rounded corner */}
-    {showSleepContent && (
-      <div className="relative z-10 w-full mb-[24px]">
-        <SleepEntry />
-      </div>
-    )}
-
     <div className="relative w-full">
       <div className="absolute left-[22px] top-0 bottom-0 w-[2.5px] bg-[#3d3d3d] z-0" />
       <div className="flex flex-col items-start gap-[24px]">
+
+        {/* Sleep summary — timeline starts here */}
+        {showSleepContent && <SleepEntry />}
 
         {/* BIGG Class at 10AM */}
         {showMorning && showTrainingContent && (
@@ -983,7 +981,7 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
                   </span>
                 </button>
               ) : cardVariant === 3 ? (
-                <motion.div
+                <div
                   className="relative z-[1] w-full rounded-b-[16px] pt-[150px] pb-[18px] px-[20px] flex flex-col items-start gap-[4px] mb-[-150px]"
                   style={{
                     background: isBiggLocation ? "#adff19" : "#3d3d3d",
@@ -991,14 +989,6 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
                     transition: "background 0.3s ease-in-out, opacity 0.2s",
                     alignItems: "center",
                   }}
-                  animate={isBiggLocation ? {
-                    boxShadow: [
-                      "0 4px 14px rgba(173,255,25,0.15)",
-                      "0 8px 28px rgba(173,255,25,0.65)",
-                      "0 4px 14px rgba(173,255,25,0.15)",
-                    ],
-                  } : { boxShadow: "0 0px 0px rgba(0,0,0,0)" }}
-                  transition={isBiggLocation ? { duration: 2.2, repeat: Infinity, ease: "easeInOut" } : { duration: 0.3 }}
                 >
                   <button
                     type="button"
@@ -1014,16 +1004,25 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
                     </span>
                     <ChevronDown size={13} className={isBiggLocation ? "text-[#3d3d3d]" : "text-white"} strokeWidth={2} />
                   </button>
-                  <button
+                  <motion.button
                     type="button"
                     onClick={isBiggLocation ? onReservar : onOpenProgramming}
-                    className="active:opacity-70 transition-opacity"
+                    className="active:opacity-70 transition-opacity rounded-full px-[14px] py-[2px]"
+                    animate={isBiggLocation ? {
+                      scale: [1, 1.05, 1],
+                      boxShadow: [
+                        "0 0 0px rgba(255,255,255,0)",
+                        "0 0 16px rgba(255,255,255,0.85)",
+                        "0 0 0px rgba(255,255,255,0)",
+                      ],
+                    } : { scale: 1, boxShadow: "0 0 0px rgba(0,0,0,0)" }}
+                    transition={isBiggLocation ? { duration: 2.2, repeat: Infinity, ease: "easeInOut" } : { duration: 0.3 }}
                   >
                     <span className={`font-['MessinaSansWeb:SemiBold',sans-serif] text-[17px] tracking-[-0.34px] ${isBiggLocation ? "text-[#3d3d3d]" : "text-white"}`}>
                       {isBiggLocation ? "Reservar clase" : "Iniciar entrenamiento"}
                     </span>
-                  </button>
-                </motion.div>
+                  </motion.button>
+                </div>
               ) : cardVariant === 4 ? (
                 <div className="w-full mt-[20px] rounded-[14px] overflow-hidden flex flex-col">
                   {/* Location selector */}

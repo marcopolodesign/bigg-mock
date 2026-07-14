@@ -1232,6 +1232,7 @@ function MainContent({ onReservar, onOpenFab, onOpenDetail, onOpenProgramming, i
           cardVariant={cardVariant}
           showMorning={!isRestDay}
           showAfternoon={true}
+          isFutureDay={isFutureDay}
         />
       </div>
 
