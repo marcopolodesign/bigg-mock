@@ -47,6 +47,14 @@ function getDayBlockTitles(weekday: number): string[] {
 
 const MONDAY_ACTIVITIES: ActivityEntry[] = [
   {
+    time: "11:30hs",
+    title: "Prehab",
+    sectionLabel: "Antes de tu Padel",
+    gradient: "linear-gradient(115deg, rgba(255,255,255,0.9) 40%, rgba(248,179,46,0.25) 120%)",
+    why: "Activá cadera y hombros antes de tu partido de Padel — previene lesiones y mejora tu rendimiento",
+    addable: true,
+  },
+  {
     time: "12:00hs",
     timeRange: "12:00hs — 13:00hs",
     title: "Padel",

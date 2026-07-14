@@ -4,6 +4,15 @@
 
 ---
 
+## 2026-07-14 — "Prehab" antes de actividad recurrente (cronned)
+
+- Nuevo ítem "Prehab" (11:30hs) agregado ANTES de la actividad de Padel de los lunes en `MONDAY_ACTIVITIES` — pill propio "Antes de tu Padel", addable con `WhyLine` ("Activá cadera y hombros antes de tu partido de Padel — previene lesiones y mejora tu rendimiento"). Concepto general: cuando el usuario tiene una actividad recurrente ("cronned", ej. Padel todos los lunes), el timeline debe mostrar un warm-up/prehab chico arriba de esa actividad.
+- Verificado en Chrome (lunes): "Prehab" aparece arriba de "Padel" en el orden correcto. Sin errores de consola.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
 ## 2026-07-14 — "Ver todos" en el bottom sheet de sueño
 
 - Bottom sheet "Detalles de sueño": la lista de Duración/Calidad se había recortado antes en la sesión (se sacaron Sueño profundo/REM/Frecuencia cardíaca para hacer lugar a los tags de recuperación). Ahora un link "Ver todos" (toggle a "Ver menos") expande esas 3 filas in-place, debajo de Duración/Calidad y arriba de los tags.
