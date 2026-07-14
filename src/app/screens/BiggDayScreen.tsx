@@ -1236,6 +1236,7 @@ function MainContent({ onReservar, onOpenFab, onOpenDetail, onOpenProgramming, i
       {/* ── Timeline — same module every day ── */}
       <div className="w-full max-w-[388px] mb-[24px]">
         <DailyWorkoutCard
+          key={dateKey}
           onReservar={onReservar}
           onOpenFab={onOpenFab}
           onOpenDetail={isToday && todayReservedClass ? () => onOpenDetail(todayReservedClass) : undefined}
@@ -1249,6 +1250,7 @@ function MainContent({ onReservar, onOpenFab, onOpenDetail, onOpenProgramming, i
           blockTitles={blockTitles}
           weatherNote={isSunday ? { temp: "24°", caption: "Día ideal para entrenar afuera. Ver bloques de BIGG Outdoors" } : undefined}
           showRunClub={isWednesday || isSaturday}
+          defaultLocation={isSunday ? "BIGG Outdoors" : undefined}
         />
       </div>
 

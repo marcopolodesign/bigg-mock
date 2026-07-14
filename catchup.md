@@ -4,6 +4,22 @@
 
 ---
 
+## 2026-07-14 — CTA "Reservar clase" estático, Domingo pre-selecciona BIGG Outdoors (naranja), 4 ajustes al Run Club
+
+- **"Reservar clase" sin animación**: se sacó el pulso/glow (scale+boxShadow) del pedido anterior — ahora es un botón estático con su propio bg (`#3d3d3d`, texto blanco) distinto del bg lime de la barra, sin ningún tipo de animación en el texto.
+- **Domingo pre-selecciona "BIGG Outdoors"** en "¿Dónde vas a entrenar?" — nuevo prop `DailyWorkoutCard.defaultLocation`. Como "BIGG Outdoors" no está en `BIGG_LOCATIONS`, cae en la rama "away": bg de la barra CTA pasa a **naranja** (`#f8b32e`, mismo tono que Padel) en vez del gris oscuro default, texto "Iniciar entrenamiento". Bonus emergente: al ser ubicación "away", el bloque Upper Body pasa a "Push Pull" con el ícono de adaptación — comportamiento ya existente en el código, ahora visible por primera vez.
+- **Bug real encontrado en el camino**: `defaultLocation` no se aplicaba al cambiar de día porque `DailyWorkoutCard` nunca se desmontaba entre fechas (React reusa la instancia, `useState(defaultLocation)` solo corre en el mount inicial) — fix: `key={dateKey}` en `MainContent` para forzar remount completo del card en cada cambio de día (esto también resetea correctamente cualquier otro estado interno del card — filtro, ubicación, flaps abiertos — al cambiar de fecha, que es el comportamiento esperado).
+- **4 ajustes al BIGG Run Club** (feedback tras la versión con foto):
+  - (a) Sacado el borde punteado — ahora es una card de foto limpia, sin el efecto "connector" de las demás recomendaciones.
+  - (b) Nuevo `showRunClubContent` — el Run Club también aparece al filtrar por "Social" (además de "Todos"/"Entrenamiento & actividad" los días que corresponde), sin agregar ningún chip/badge visual al componente.
+  - (c) Reemplazado el subtítulo "Sumate a correr..." por dos líneas con ícono: 📍 Rosedal De Palermo y 🕐 19:00hs.
+  - (d) Botón "Agregar" → "Anotarse" (confirmado: "¡Anotado!"), ícono `+` → `CalendarPlus`.
+- Verificado en Chrome: Reservar clase estático, domingo con Outdoors pre-seleccionado y barra naranja, Run Club sin borde punteado con ubicación/hora/Anotarse, filtro Social aislando correctamente el Run Club. Sin errores de consola.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
 ## 2026-07-14 — BIGG Run Club: foto real + fix grey block + estilo BIGG MOVE
 
 - **Fix**: se sacó del `RecommendationCard` genérico la capa "White cover below card" (`bg-[#ededed]` con `bottom:-16px`) que estaba pensada para un único card al final del timeline — al apilar Run Club + Mobility (mismo componente), ese div de 20px de alto quedaba visible como un bloque gris flotando debajo de cada card. No hacía falta: el resto de milestones del timeline no tienen ese hack y se ven bien.

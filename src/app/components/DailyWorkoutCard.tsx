@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import type { CSSProperties, MouseEvent } from "react";
-import { ChevronDown, ChevronRight, MapPin, Plus, Check, Pencil, Sparkles, Moon, ThumbsUp, ThumbsDown, Utensils, Sun } from "lucide-react";
+import { ChevronDown, ChevronRight, MapPin, Plus, Check, Pencil, Sparkles, Moon, ThumbsUp, ThumbsDown, Utensils, Sun, Clock, CalendarPlus } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import SourceChip, { type DataSource } from "./SourceChip";
 import WhyLine from "./WhyLine";
@@ -584,25 +584,26 @@ function RunClubRecommendationCard() {
       <img alt="" className="absolute inset-0 w-full h-full object-cover pointer-events-none" src={imgBiggRun} />
       <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(0,0,0,0) 35%, rgba(0,0,0,0.75) 100%)" }} />
 
-      <motion.div
-        aria-hidden
-        className="absolute border border-dashed inset-0 pointer-events-none rounded-[20px] z-10"
-        style={{ borderColor: "rgba(255,255,255,0.7)", borderTopLeftRadius: "7px" }}
-        animate={{ opacity: added ? 0 : 1 }}
-        transition={{ duration: 0.4 }}
-      />
-
       <div className="absolute inset-0 z-[2] flex items-end justify-between gap-[16px] p-[20px]">
-        <div className="flex flex-col gap-[4px] min-w-0">
+        <div className="flex flex-col gap-[8px] min-w-0">
           <p
             className="[word-break:break-word] font-['Fixture_Ultra:SemiBold',sans-serif] leading-[1.005] not-italic text-white whitespace-nowrap"
             style={{ fontSize: "clamp(24px, 12cqw, 44px)" }}
           >
             BIGG RUN CLUB
           </p>
-          <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-white/85 text-[13px] tracking-[-0.13px]">
-            Sumate a correr con la comunidad
-          </p>
+          <div className="flex items-center gap-[6px]">
+            <MapPin size={13} className="text-white/85 shrink-0" strokeWidth={1.75} />
+            <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-white/85 text-[13px] tracking-[-0.13px] whitespace-nowrap">
+              Rosedal De Palermo
+            </p>
+          </div>
+          <div className="flex items-center gap-[6px]">
+            <Clock size={13} className="text-white/85 shrink-0" strokeWidth={1.75} />
+            <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-white/85 text-[13px] tracking-[-0.13px] whitespace-nowrap">
+              19:00hs
+            </p>
+          </div>
         </div>
 
         <button
@@ -622,8 +623,8 @@ function RunClubRecommendationCard() {
                   <Check size={20} strokeWidth={2} className="text-white" />
                 </motion.div>
               ) : (
-                <motion.div key="plus" exit={{ scale: 0, opacity: 0 }} transition={{ duration: 0.12 }}>
-                  <Plus size={20} strokeWidth={1.5} className="text-white" />
+                <motion.div key="cal" exit={{ scale: 0, opacity: 0 }} transition={{ duration: 0.12 }}>
+                  <CalendarPlus size={20} strokeWidth={1.5} className="text-white" />
                 </motion.div>
               )}
             </AnimatePresence>
@@ -633,7 +634,7 @@ function RunClubRecommendationCard() {
             animate={{ opacity: 1 }}
             key={added ? "added" : "add"}
           >
-            {added ? "Agregado!" : "Agregar"}
+            {added ? "¡Anotado!" : "Anotarse"}
           </motion.p>
         </button>
       </div>
@@ -773,10 +774,12 @@ interface DailyWorkoutCardProps {
   weatherNote?: { temp: string; caption: string };
   /** Shows the "Run Club" recommendation milestone, above Mobility & recovery. */
   showRunClub?: boolean;
+  /** Pre-selects a location in "Donde vas a entrenar?" instead of defaulting to BIGG Recoleta. */
+  defaultLocation?: string;
 }
 
-export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, onOpenProgramming, reservedClass, activities, showMorning = true, showAfternoon = true, cardVariant = 1, isFutureDay = false, blockTitles, weatherNote, showRunClub = false }: DailyWorkoutCardProps) {
-  const [selectedLocation, setSelectedLocation] = useState("BIGG Recoleta");
+export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, onOpenProgramming, reservedClass, activities, showMorning = true, showAfternoon = true, cardVariant = 1, isFutureDay = false, blockTitles, weatherNote, showRunClub = false, defaultLocation = "BIGG Recoleta" }: DailyWorkoutCardProps) {
+  const [selectedLocation, setSelectedLocation] = useState(defaultLocation);
   const [showLocationSheet, setShowLocationSheet] = useState(false);
   const [locationSheetFromCta, setLocationSheetFromCta] = useState(false);
   const [showAddLocation, setShowAddLocation] = useState(false);
@@ -786,12 +789,15 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
   const [selectedFilter, setSelectedFilter] = useState<TimelineFilter>("todos");
   const [showFilterSheet, setShowFilterSheet] = useState(false);
   const isBiggLocation = BIGG_LOCATIONS.has(selectedLocation);
+  const isOutdoorsLocation = selectedLocation === "BIGG Outdoors";
   const activeFilterLabel = TIMELINE_FILTERS.find((f) => f.key === selectedFilter)?.label ?? "Todos";
   const showTrainingContent = selectedFilter === "todos" || selectedFilter === "entrenamiento";
   // Sleep/nutrition check-ins report on last night / today — never valid for a day that hasn't happened yet
   const showSleepContent = !isFutureDay && (selectedFilter === "todos" || selectedFilter === "sueno");
   const showNutritionContent = !isFutureDay && (selectedFilter === "todos" || selectedFilter === "nutricion");
-  const isFilterEmpty = !showTrainingContent && !showSleepContent && !showNutritionContent;
+  // Run Club also counts as "Social" content, in addition to training days (Wed/Sat)
+  const showRunClubContent = showRunClub && (showTrainingContent || selectedFilter === "social");
+  const isFilterEmpty = !showTrainingContent && !showSleepContent && !showNutritionContent && !showRunClubContent;
 
   const handleLocationSelect = (loc: string) => {
     setSelectedLocation(loc);
@@ -1085,7 +1091,7 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
                 <div
                   className="relative z-[1] w-full rounded-b-[16px] pt-[150px] pb-[18px] px-[20px] flex flex-col items-start gap-[4px] mb-[-150px]"
                   style={{
-                    background: isBiggLocation ? "#adff19" : "#3d3d3d",
+                    background: isBiggLocation ? "#adff19" : isOutdoorsLocation ? "#f8b32e" : "#3d3d3d",
                     transform: "translateY(-150px)",
                     transition: "background 0.3s ease-in-out, opacity 0.2s",
                     alignItems: "center",
@@ -1096,33 +1102,25 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
                     onClick={(e) => { e.stopPropagation(); setShowLocationSheet(true); }}
                     className="flex items-center gap-[4px] mt-[10px] active:opacity-70 transition-opacity"
                   >
-                    <MapPin size={16} className={isBiggLocation ? "text-[#3d3d3d]" : "text-white"} strokeWidth={1.75} />
-                    <span className={`font-['MessinaSansWeb:Regular',sans-serif] text-[14px] tracking-[-0.28px] ${isBiggLocation ? "text-[#3d3d3d]" : "text-white"}`}>
+                    <MapPin size={16} className={isBiggLocation || isOutdoorsLocation ? "text-[#3d3d3d]" : "text-white"} strokeWidth={1.75} />
+                    <span className={`font-['MessinaSansWeb:Regular',sans-serif] text-[14px] tracking-[-0.28px] ${isBiggLocation || isOutdoorsLocation ? "text-[#3d3d3d]" : "text-white"}`}>
                       Donde vas a entrenar?{" "}
                     </span>
-                    <span className={`font-['MessinaSansWeb:Regular',sans-serif] text-[14px] tracking-[-0.28px] underline ${isBiggLocation ? "text-[#3d3d3d]" : "text-white"}`}>
+                    <span className={`font-['MessinaSansWeb:Regular',sans-serif] text-[14px] tracking-[-0.28px] underline ${isBiggLocation || isOutdoorsLocation ? "text-[#3d3d3d]" : "text-white"}`}>
                       {selectedLocation}
                     </span>
-                    <ChevronDown size={13} className={isBiggLocation ? "text-[#3d3d3d]" : "text-white"} strokeWidth={2} />
+                    <ChevronDown size={13} className={isBiggLocation || isOutdoorsLocation ? "text-[#3d3d3d]" : "text-white"} strokeWidth={2} />
                   </button>
-                  <motion.button
+                  <button
                     type="button"
                     onClick={isBiggLocation ? onReservar : onOpenProgramming}
-                    className="active:opacity-70 transition-opacity rounded-full px-[14px] py-[2px]"
-                    animate={isBiggLocation ? {
-                      scale: [1, 1.05, 1],
-                      boxShadow: [
-                        "0 0 0px rgba(255,255,255,0)",
-                        "0 0 16px rgba(255,255,255,0.85)",
-                        "0 0 0px rgba(255,255,255,0)",
-                      ],
-                    } : { scale: 1, boxShadow: "0 0 0px rgba(0,0,0,0)" }}
-                    transition={isBiggLocation ? { duration: 2.2, repeat: Infinity, ease: "easeInOut" } : { duration: 0.3 }}
+                    className="active:opacity-70 transition-opacity rounded-full px-[16px] py-[6px]"
+                    style={{ background: isBiggLocation ? "#3d3d3d" : "transparent" }}
                   >
-                    <span className={`font-['MessinaSansWeb:SemiBold',sans-serif] text-[17px] tracking-[-0.34px] ${isBiggLocation ? "text-[#3d3d3d]" : "text-white"}`}>
+                    <span className={`font-['MessinaSansWeb:SemiBold',sans-serif] text-[17px] tracking-[-0.34px] ${isBiggLocation ? "text-white" : isOutdoorsLocation ? "text-[#3d3d3d]" : "text-white"}`}>
                       {isBiggLocation ? "Reservar clase" : "Iniciar entrenamiento"}
                     </span>
-                  </motion.button>
+                  </button>
                 </div>
               ) : cardVariant === 4 ? (
                 <div className="w-full mt-[20px] rounded-[14px] overflow-hidden flex flex-col">
@@ -1171,8 +1169,8 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
           </div>
         ))}
 
-        {/* Run Club recommendation — Wed/Sat, above Mobility */}
-        {showRunClub && showTrainingContent && (
+        {/* Run Club recommendation — Wed/Sat, above Mobility; also counts as "Social" content */}
+        {showRunClubContent && (
           <div className="relative z-10 flex flex-col items-start w-full">
             <div className="relative z-10 flex flex-row items-center gap-[10px]">
               <TimePill label="BIGG Run Club" style={CONNECTED_PILL_STYLE} />
