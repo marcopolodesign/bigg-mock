@@ -4,6 +4,15 @@
 
 ---
 
+## 2026-07-14 — "Ver todos" en el bottom sheet de sueño
+
+- Bottom sheet "Detalles de sueño": la lista de Duración/Calidad se había recortado antes en la sesión (se sacaron Sueño profundo/REM/Frecuencia cardíaca para hacer lugar a los tags de recuperación). Ahora un link "Ver todos" (toggle a "Ver menos") expande esas 3 filas in-place, debajo de Duración/Calidad y arriba de los tags.
+- Verificado en Chrome: tap en "Ver todos" expande Sueño profundo/REM/Frecuencia cardíaca, tap en "Ver menos" colapsa de nuevo. Sin errores de consola.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
 ## 2026-07-14 — CTA "Reservar clase" estático, Domingo pre-selecciona BIGG Outdoors (naranja), 4 ajustes al Run Club
 
 - **"Reservar clase" sin animación**: se sacó el pulso/glow (scale+boxShadow) del pedido anterior — ahora es un botón estático con su propio bg (`#3d3d3d`, texto blanco) distinto del bg lime de la barra, sin ningún tipo de animación en el texto.

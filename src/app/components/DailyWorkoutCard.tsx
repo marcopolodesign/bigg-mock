@@ -177,6 +177,7 @@ function SleepEntry() {
   const [showToast, setShowToast] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [showAllStats, setShowAllStats] = useState(false);
   const toastTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const toggleTag = (tag: string) => {
@@ -264,6 +265,11 @@ function SleepEntry() {
             {[
               { label: "Duración", value: "7h 12m" },
               { label: "Calidad", value: "Buena" },
+              ...(showAllStats ? [
+                { label: "Sueño profundo", value: "1h 48m" },
+                { label: "Sueño REM", value: "1h 32m" },
+                { label: "Frecuencia cardíaca promedio", value: "58 bpm" },
+              ] : []),
             ].map((row) => (
               <div key={row.label} className="flex items-center justify-between py-[12px]" style={{ borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
                 <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[14px] text-[#6b7280] tracking-[-0.28px]">{row.label}</p>
@@ -271,6 +277,13 @@ function SleepEntry() {
               </div>
             ))}
           </div>
+          <button
+            type="button"
+            onClick={() => setShowAllStats((v) => !v)}
+            className="self-start font-['MessinaSansWeb:SemiBold',sans-serif] text-[13px] text-[#8b78e6] tracking-[-0.26px] underline active:opacity-70 transition-opacity"
+          >
+            {showAllStats ? "Ver menos" : "Ver todos"}
+          </button>
           <div className="flex flex-col gap-[10px]">
             <div className="flex flex-col gap-[2px]">
               <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[13px] text-[#3d3d3d] tracking-[-0.26px]">
