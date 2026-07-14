@@ -4,6 +4,18 @@
 
 ---
 
+## 2026-07-14 — NPS diario/semanal/mensual (verde/amarillo/rojo)
+
+Decisiones confirmadas con el usuario antes de implementar (`AskUserQuestion`): score = conteo simple de 4 factores (entrenaste lo recomendado / hiciste actividad / dormiste bien / comiste bien) → 4/4 verde, 2-3 amarillo, 0-1 rojo; datos históricos mockeados con variedad realista (no hay tracking real de cumplimiento por día todavía); vista mensual en formato grilla de calendario.
+
+- **`WeeklyNPSCard`** (nuevo, en `DailyWorkoutCard.tsx`) — milestone "Tu NPS semanal" al FINAL del timeline, solo domingos (`showWeeklyNPS` prop, gateado por `isSunday` en `BiggDayScreen.tsx`). Lista vertical Lunes→Domingo, cada fila con label + punto de color (verde/amarillo/rojo); el día actual (domingo) siempre muestra "En curso" (gris) ya que el día no terminó. Mismo estilo tab-connector que Mobility/Run Club/Wind down.
+- **`MonthlyNPSGrid`** (nuevo componente, `src/app/components/MonthlyNPSGrid.tsx`) — grilla tipo calendario (Lun-Dom, semanas del mes actual) para la pestaña "Actividad" (Opción 2, antes solo duplicaba el timeline con otro estilo de bloques). Cada celda = día del mes con color de fondo según status; días futuros en gris claro sin dato; el día de hoy tiene un anillo oscuro; leyenda de colores abajo. Insertado arriba del timeline vía nuevo prop `MainContent.showMonthlyNPS` / `DailyWorkoutCard`... en realidad vive directamente en `MainContent`, no pasa por `DailyWorkoutCard`.
+- Verificado en Chrome: domingo muestra "Tu NPS semanal" al final del timeline con los 7 días y colores; pestaña "Opción 2" muestra la grilla de Julio 2026 con el 14 (hoy) marcado y los días 15-31 en gris/sin dato. Sin errores de consola.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
 ## 2026-07-14 — "Prehab" antes de actividad recurrente (cronned)
 
 - Nuevo ítem "Prehab" (11:30hs) agregado ANTES de la actividad de Padel de los lunes en `MONDAY_ACTIVITIES` — pill propio "Antes de tu Padel", addable con `WhyLine` ("Activá cadera y hombros antes de tu partido de Padel — previene lesiones y mejora tu rendimiento"). Concepto general: cuando el usuario tiene una actividad recurrente ("cronned", ej. Padel todos los lunes), el timeline debe mostrar un warm-up/prehab chico arriba de esa actividad.

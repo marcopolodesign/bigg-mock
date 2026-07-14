@@ -35,6 +35,63 @@ const CONNECTED_PILL_STYLE: CSSProperties = {
   marginLeft: "1px",
 };
 
+// Weekly NPS recap — mocked variety since there's no real per-day completion tracking yet.
+// Score = count of 4 factors (trained recommended / did activity / slept well / ate well):
+// 4/4 green, 2-3 yellow, 0-1 red. Today's own day is always "pending" (not finished yet).
+type NPSStatus = "green" | "yellow" | "red" | "pending";
+const NPS_STATUS_META: Record<NPSStatus, { color: string; label: string }> = {
+  green: { color: "#3ecf5f", label: "Excelente" },
+  yellow: { color: "#f8b32e", label: "Bien" },
+  red: { color: "#ff5c5c", label: "A mejorar" },
+  pending: { color: "#c4c4c4", label: "En curso" },
+};
+const WEEKLY_NPS_MOCK: { day: string; status: NPSStatus }[] = [
+  { day: "Lunes", status: "green" },
+  { day: "Martes", status: "green" },
+  { day: "Miércoles", status: "yellow" },
+  { day: "Jueves", status: "green" },
+  { day: "Viernes", status: "yellow" },
+  { day: "Sábado", status: "red" },
+  { day: "Domingo", status: "pending" },
+];
+
+function WeeklyNPSCard() {
+  return (
+    <div className="relative z-10 w-full rounded-[16px] overflow-hidden bg-white" style={{ border: "1px solid rgba(0,0,0,0.08)" }}>
+      <div className="flex flex-col gap-[2px] p-[16px]">
+        <p className="font-['MessinaSansWeb:Bold',sans-serif] text-[15px] text-[#3d3d3d] tracking-[-0.3px]">
+          Tu semana
+        </p>
+        <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[12px] text-[#6b7280] tracking-[-0.24px]">
+          Entrenamiento, actividad, sueño y nutrición combinados
+        </p>
+      </div>
+      <div className="flex flex-col">
+        {WEEKLY_NPS_MOCK.map((row, i) => {
+          const meta = NPS_STATUS_META[row.status];
+          return (
+            <div
+              key={row.day}
+              className="flex items-center justify-between px-[16px] py-[12px]"
+              style={{ borderTop: i > 0 ? "1px solid rgba(0,0,0,0.06)" : "none" }}
+            >
+              <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[14px] text-[#3d3d3d] tracking-[-0.28px]">
+                {row.day}
+              </p>
+              <div className="flex items-center gap-[8px]">
+                <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[13px]" style={{ color: meta.color }}>
+                  {meta.label}
+                </p>
+                <div className="rounded-full size-[10px] shrink-0" style={{ background: meta.color }} />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 const DAY_BLOCKS: StimulusBlock[] = [
   { id: "day-fba", stimulus: "FBA", modality: "Superset · 3 sets", duration: "15'",
     movements: ["SA DB Press 3 × 10 c/lado", "Nordic Curl 3 × 8", "Copenhagen Plank 3 × 30''", "Bulgarian Split 3 × 10 c/lado"],
@@ -789,9 +846,11 @@ interface DailyWorkoutCardProps {
   showRunClub?: boolean;
   /** Pre-selects a location in "Donde vas a entrenar?" instead of defaulting to BIGG Recoleta. */
   defaultLocation?: string;
+  /** Shows the weekly NPS recap at the end of the timeline — Sundays only. */
+  showWeeklyNPS?: boolean;
 }
 
-export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, onOpenProgramming, reservedClass, activities, showMorning = true, showAfternoon = true, cardVariant = 1, isFutureDay = false, blockTitles, weatherNote, showRunClub = false, defaultLocation = "BIGG Recoleta" }: DailyWorkoutCardProps) {
+export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, onOpenProgramming, reservedClass, activities, showMorning = true, showAfternoon = true, cardVariant = 1, isFutureDay = false, blockTitles, weatherNote, showRunClub = false, defaultLocation = "BIGG Recoleta", showWeeklyNPS = false }: DailyWorkoutCardProps) {
   const [selectedLocation, setSelectedLocation] = useState(defaultLocation);
   const [showLocationSheet, setShowLocationSheet] = useState(false);
   const [locationSheetFromCta, setLocationSheetFromCta] = useState(false);
@@ -1211,6 +1270,18 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
 
         {/* Wind-down recommendation */}
         {showSleepContent && <WindDownCard />}
+
+        {/* Weekly NPS recap — end of day, Sundays only */}
+        {showWeeklyNPS && (
+          <div className="relative z-10 flex flex-col items-start w-full">
+            <div className="relative z-10 flex flex-row items-center gap-[10px]">
+              <TimePill label="Tu NPS semanal" style={CONNECTED_PILL_STYLE} />
+            </div>
+            <div className="relative z-10 w-full" style={{ transform: "translateY(-15px)" }}>
+              <WeeklyNPSCard />
+            </div>
+          </div>
+        )}
 
         {/* Empty state for filters with no matching content yet (Social) */}
         {isFilterEmpty && (

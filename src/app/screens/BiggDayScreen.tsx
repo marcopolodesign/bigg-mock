@@ -14,6 +14,7 @@ import imgSocialImage3 from "../../imports/BiggDay/b292cbcf40664006c8d7417ba5e71
 import imgSocialImage4 from "../../imports/BiggDay/c7e91abf0983739fe423cb74e6d1c3b8d494aa30.png";
 import imgEllipse167 from "../../imports/BiggDay/0bdccca1063fe17c8030deb1278cb4c21c493290.png";
 import DailyWorkoutCard, { type ReservedClass, type ActivityEntry } from "../components/DailyWorkoutCard";
+import MonthlyNPSGrid from "../components/MonthlyNPSGrid";
 import SourceChip from "../components/SourceChip";
 import WhyLine from "../components/WhyLine";
 import BottomSheet from "../components/BottomSheet";
@@ -1214,7 +1215,7 @@ function SocialContainer() {
 
 // ─── Main scroll content ───────────────────────────────────────────────────────
 
-function MainContent({ onReservar, onOpenFab, onOpenDetail, onOpenProgramming, isToday, isFutureDay, selectedDate, todayReservedClass, cardVariant = 3 }: { onReservar: () => void; onOpenFab: () => void; onOpenDetail: (rc: ReservedClass) => void; onOpenProgramming: () => void; isToday: boolean; isFutureDay: boolean; selectedDate: Date; todayReservedClass: ReservedClass | null; cardVariant?: 1 | 2 | 3 | 4 }) {
+function MainContent({ onReservar, onOpenFab, onOpenDetail, onOpenProgramming, isToday, isFutureDay, selectedDate, todayReservedClass, cardVariant = 3, showMonthlyNPS = false }: { onReservar: () => void; onOpenFab: () => void; onOpenDetail: (rc: ReservedClass) => void; onOpenProgramming: () => void; isToday: boolean; isFutureDay: boolean; selectedDate: Date; todayReservedClass: ReservedClass | null; cardVariant?: 1 | 2 | 3 | 4; showMonthlyNPS?: boolean }) {
   const dateKey = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}`;
   const pastData = isToday ? undefined : PAST_DAYS[dateKey];
 
@@ -1241,6 +1242,13 @@ function MainContent({ onReservar, onOpenFab, onOpenDetail, onOpenProgramming, i
     // pt clears the fixed StickyHeader (greeting + week calendar, no status bar)
     <div className="flex flex-col gap-[16px] items-center w-full px-[20px] pt-[153px]">
 
+      {/* ── Monthly NPS recap — Actividad tab only ── */}
+      {showMonthlyNPS && (
+        <div className="w-full max-w-[388px] mb-[8px]">
+          <MonthlyNPSGrid />
+        </div>
+      )}
+
       {/* ── Timeline — same module every day ── */}
       <div className="w-full max-w-[388px] mb-[24px]">
         <DailyWorkoutCard
@@ -1259,6 +1267,7 @@ function MainContent({ onReservar, onOpenFab, onOpenDetail, onOpenProgramming, i
           weatherNote={isSunday ? { temp: "24°", caption: "Día ideal para entrenar afuera. Ver bloques de BIGG Outdoors" } : undefined}
           showRunClub={isWednesday || isSaturday}
           defaultLocation={isSunday ? "BIGG Outdoors" : undefined}
+          showWeeklyNPS={isSunday}
         />
       </div>
 
@@ -1704,6 +1713,7 @@ export default function BiggDayScreen() {
             selectedDate={selectedDate}
             todayReservedClass={todayReservedClass}
             cardVariant={activeTab === "activity" ? 2 : 3}
+            showMonthlyNPS={activeTab === "activity"}
           />
         </div>
       )}
