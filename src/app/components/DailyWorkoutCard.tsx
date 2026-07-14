@@ -17,7 +17,7 @@ const NUTRITION_TAGS = ["Hinchazón", "Con energía", "Antojos", "Buena digesti�
 type TimelineFilter = "todos" | "entrenamiento" | "sueno" | "nutricion" | "social";
 const TIMELINE_FILTERS: { key: TimelineFilter; label: string }[] = [
   { key: "todos", label: "Todos" },
-  { key: "entrenamiento", label: "Entrenamiento & actividad" },
+  { key: "entrenamiento", label: "Entrenamiento y actividad" },
   { key: "sueno", label: "Sueño" },
   { key: "nutricion", label: "Nutrición" },
   { key: "social", label: "Social" },
