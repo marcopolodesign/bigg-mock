@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import type { CSSProperties, MouseEvent } from "react";
-import { ChevronDown, ChevronRight, MapPin, Plus, Check, Pencil, Sparkles, Moon, ThumbsUp, ThumbsDown, Utensils } from "lucide-react";
+import { ChevronDown, ChevronRight, MapPin, Plus, Check, Pencil, Sparkles, Moon, ThumbsUp, ThumbsDown, Utensils, Sun } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import SourceChip, { type DataSource } from "./SourceChip";
 import WhyLine from "./WhyLine";
@@ -682,9 +682,13 @@ interface DailyWorkoutCardProps {
   cardVariant?: 1 | 2 | 3 | 4;
   /** Sleep check-in reports on last night — never shown for days that haven't happened yet. */
   isFutureDay?: boolean;
+  /** Overrides the 4 "Entrenamiento del día" block titles (defaults to FBA/Upper Body/HIIT/Midline). */
+  blockTitles?: string[];
+  /** Weather context merged into the "Entrenamiento del día" milestone, between the pill and the blocks. */
+  weatherNote?: { temp: string; caption: string };
 }
 
-export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, onOpenProgramming, reservedClass, activities, showMorning = true, showAfternoon = true, cardVariant = 1, isFutureDay = false }: DailyWorkoutCardProps) {
+export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, onOpenProgramming, reservedClass, activities, showMorning = true, showAfternoon = true, cardVariant = 1, isFutureDay = false, blockTitles, weatherNote }: DailyWorkoutCardProps) {
   const [selectedLocation, setSelectedLocation] = useState("BIGG Recoleta");
   const [showLocationSheet, setShowLocationSheet] = useState(false);
   const [locationSheetFromCta, setLocationSheetFromCta] = useState(false);
@@ -797,6 +801,14 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
                 <ChevronRight size={16} strokeWidth={2} className={cardVariant === 3 ? "text-white" : "text-[#565656]"} />
               </button>
             </div>
+            {weatherNote && (
+              <div className="relative z-10 flex items-center gap-[6px] w-full px-[20px] pb-[12px]">
+                <Sun size={12} className="text-[#f8b32e] shrink-0" />
+                <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[12px] text-white/70 tracking-[-0.24px] leading-[1.2]">
+                  <span className="font-['MessinaSansWeb:SemiBold',sans-serif] text-white">{weatherNote.temp}</span> — {weatherNote.caption}
+                </p>
+              </div>
+            )}
             <div
               className={`relative z-10 w-full flex flex-col items-center ${cardVariant === 3 ? "p-[20px]" : ""}`}
               style={cardVariant === 3 ? { padding: "7.5px 7.5px", paddingTop: 0 } : undefined}
@@ -845,7 +857,9 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
                     <div className="flex flex-col w-full">
                       {DAY_BLOCKS.map((block, i) => {
                         const vb = V4_BLOCKS[i];
-                        const current = isBiggLocation ? vb.bigg : (vb.away ?? vb.bigg);
+                        const current = isBiggLocation
+                          ? { ...vb.bigg, stimulus: blockTitles?.[i] ?? vb.bigg.stimulus }
+                          : (vb.away ?? vb.bigg);
                         const showAdaptIcon = !isBiggLocation && vb.away === null && vb.exercisesAdapt;
                         return (
                           <FlapItem

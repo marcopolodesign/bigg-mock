@@ -4,6 +4,17 @@
 
 ---
 
+## 2026-07-14 — Bloques rotativos por día, sábado sin BIGG workout card, domingo con clima integrado
+
+- **Bloques de "Entrenamiento del día" rotan por día**: en vez de repetir siempre FBA/Upper Body/HIIT/Midline, cada día toma 4 títulos de un pool de 7 (`DAY_BLOCK_TITLE_POOL`: Strength, Hyrox, Cardio, Lower Body, Hypertrophy, Full Body, Pilates), con una ventana rotativa de 4 basada en `selectedDate.getDay()` (`getDayBlockTitles`). Hoy (el día real "actual" del mock) mantiene su plan específico sin cambios; el resto de los días muestra la rotación. Nuevo prop `DailyWorkoutCard.blockTitles` sobreescribe `V4_BLOCKS[i].bigg.stimulus` solo cuando está en una ubicación BIGG.
+- **Sábado — Run Club arriba, sin card de entrenamiento**: el banner de BIGG Run Club se movió arriba de todo (antes de "Tu BIGG day"/timeline); `showMorning` ahora también se apaga los sábados (`!isRestDay && !isSaturday`), así que ese día no aparece la card "Entrenamiento del día".
+- **Domingo — clima integrado en "Entrenamiento del día"**: se sacó el banner standalone de BIGG Outdoors; ahora `DailyWorkoutCard` recibe un prop `weatherNote` ({temp, caption}) que se renderiza DENTRO del milestone oscuro, entre el pill "Entrenamiento del día" y los bloques ("24° — Día ideal para entrenar afuera. Ver bloques de BIGG Outdoors").
+- Verificado en Chrome: hoy sin cambios, lunes con Hyrox/Cardio/Lower Body/Hypertrophy, sábado con banner arriba y sin card de entrenamiento, domingo con el clima fusionado adentro del bloque oscuro. Sin errores de consola.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
 ## 2026-07-14 — Correcciones: glow solo en el botón, SleepEntry vuelve al timeline, sueño/nutrición ocultos en días futuros
 
 Tres correcciones directas sobre la entrega anterior (misma sesión), a pedido del usuario:

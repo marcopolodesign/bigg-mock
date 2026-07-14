@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
 import { AnimatePresence } from "motion/react";
-import { Activity, Globe, Users, Moon, Flame, Check, Sun } from "lucide-react";
+import { Activity, Globe, Users, Moon, Flame, Check } from "lucide-react";
 import { Drawer } from "vaul";
 import svgPaths from "../../imports/BiggDay/svg-03sgvqmew7";
 import imgBgHome1 from "../../imports/BiggDay/ec32944a87885236431eaada4b00483f53237695.png";
@@ -34,6 +34,14 @@ const TODAY_ACTIVITIES: ActivityEntry[] = [
     why: "Sumás fondo aeróbico sin chocar con tu clase de fuerza de la mañana",
   },
 ];
+
+// ─── Rotating "Entrenamiento del día" block titles — a different training focus each day ──
+
+const DAY_BLOCK_TITLE_POOL = ["Strength", "Hyrox", "Cardio", "Lower Body", "Hypertrophy", "Full Body", "Pilates"];
+
+function getDayBlockTitles(weekday: number): string[] {
+  return [0, 1, 2, 3].map((i) => DAY_BLOCK_TITLE_POOL[(weekday + i) % DAY_BLOCK_TITLE_POOL.length]);
+}
 
 // ─── Monday-only extras: Padel game + Sport Specific recommendation ──────────
 
@@ -1216,9 +1224,23 @@ function MainContent({ onReservar, onOpenFab, onOpenDetail, onOpenProgramming, i
     ...(pastData?.activities ?? []),
   ];
 
+  // Today keeps its own specific plan (FBA/Upper Body/HIIT/Midline); every other
+  // day rotates through a pool of training focuses so it isn't just a repeat of today.
+  const blockTitles = isToday ? undefined : getDayBlockTitles(weekday);
+
   return (
     // pt clears the fixed StickyHeader (greeting + week calendar, no status bar)
     <div className="flex flex-col gap-[16px] items-center w-full px-[20px] pt-[153px]">
+
+      {/* Saturday — BIGG Run Club banner, above the timeline; no BIGG workout card that day */}
+      {isSaturday && (
+        <div className="w-full max-w-[388px] flex items-center gap-[10px] backdrop-blur-sm bg-[#6ab5ff]/15 border border-[#6ab5ff]/30 rounded-full px-[16px] py-[10px]">
+          <Users size={15} className="text-[#4a90d9] shrink-0" />
+          <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[#4a6fa5] text-[13px] tracking-[-0.26px]">
+            Este sábado hay BIGG Run Club — sumate a correr con la comunidad
+          </p>
+        </div>
+      )}
 
       {/* ── Timeline — same module every day ── */}
       <div className="w-full max-w-[388px] mb-[24px]">
@@ -1230,9 +1252,11 @@ function MainContent({ onReservar, onOpenFab, onOpenDetail, onOpenProgramming, i
           reservedClass={isToday ? (todayReservedClass ?? undefined) : undefined}
           activities={activities}
           cardVariant={cardVariant}
-          showMorning={!isRestDay}
+          showMorning={!isRestDay && !isSaturday}
           showAfternoon={true}
           isFutureDay={isFutureDay}
+          blockTitles={blockTitles}
+          weatherNote={isSunday ? { temp: "24°", caption: "Día ideal para entrenar afuera. Ver bloques de BIGG Outdoors" } : undefined}
         />
       </div>
 
@@ -1242,26 +1266,6 @@ function MainContent({ onReservar, onOpenFab, onOpenDetail, onOpenProgramming, i
           <Moon size={15} className="text-[#4a90d9] shrink-0" />
           <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[#4a6fa5] text-[13px] tracking-[-0.26px]">
             Día de descanso recomendado
-          </p>
-        </div>
-      )}
-
-      {/* Saturday — BIGG Run Clubs banner */}
-      {isSaturday && (
-        <div className="w-full max-w-[388px] flex items-center gap-[10px] backdrop-blur-sm bg-[#6ab5ff]/15 border border-[#6ab5ff]/30 rounded-full px-[16px] py-[10px]">
-          <Users size={15} className="text-[#4a90d9] shrink-0" />
-          <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[#4a6fa5] text-[13px] tracking-[-0.26px]">
-            Este sábado hay BIGG Run Club — sumate a correr con la comunidad
-          </p>
-        </div>
-      )}
-
-      {/* Sunday — BIGG Outdoors training banner (single-line, same pattern as "Dormiste bien") */}
-      {isSunday && (
-        <div className="w-full max-w-[388px] flex items-center gap-[10px] px-[16px] py-[14px] rounded-[16px]" style={{ background: "linear-gradient(135deg, rgba(255,183,46,0.16) 0%, rgba(255,183,46,0.08) 100%)" }}>
-          <Sun size={13} className="text-[#f8b32e] shrink-0" />
-          <p className="flex-1 font-['MessinaSansWeb:Regular',sans-serif] text-[13px] text-[#6b7280] tracking-[-0.26px] leading-[1.2]">
-            <span className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[#3d3d3d]">24°</span> — Día ideal para entrenar afuera. Ver bloques de BIGG Outdoors
           </p>
         </div>
       )}
