@@ -4,6 +4,76 @@
 
 ---
 
+## 2026-07-14 — CTA "Reservar clase" con glow, fix visual de SleepEntry, módulo unificado por día, Padel + Sport Specific, banners Sáb/Dom
+
+- **"Reservar clase" más prominente**: la barra CTA (`cardVariant === 3`) pasa a `motion.div` con un `boxShadow` lime pulsante en loop (2.2s, ease-in-out) solo cuando `isBiggLocation` es true (o sea, cuando el texto es "Reservar clase", no "Iniciar entrenamiento") — se apaga automáticamente para la variante "away".
+- **Fix real "Dormiste bien" tapado por la línea del timeline**: `SleepEntry` no tiene su propio `TimePill`/nodo, así que la línea vertical (que arranca en `top-0` del contenedor) pasaba literalmente por detrás de esa card y se veía un "stub" asomando en su esquina redondeada inferior. Fix: `SleepEntry` se sacó del contenedor con la línea — ahora vive como bloque standalone arriba del timeline conectado (con su propio `mb-[24px]`), consistente con no tener nodo propio.
+- **Módulo unificado por día** (`BiggDayScreen.tsx`, `MainContent`): antes cada día tenía un render distinto (hoy = módulo completo; días pasados con `reservedClass` = branch viejo sin dark-box/header/filtros; días futuros = `cardVariant` default 1 en vez de 3; sin datos = placeholder "Sin actividad registrada"). Ahora TODOS los días renderizan el mismo `DailyWorkoutCard` con `cardVariant` consistente — solo cambian las `activities`/banners extra por día de semana (`selectedDate.getDay()`), no la estructura del módulo.
+- **Padel + recomendación "Sport Specific" los lunes**: `MONDAY_ACTIVITIES` agrega una card de Padel (12:00-13:00hs) bajo "Entrenamiento complementario", seguida de una card addable "Sport Specific" bajo su propio pill "Recomendación" ("Bloques diseñados especialmente para ayudarte a rendir mejor en Padel"). Nuevo campo opcional `ActivityEntry.sectionLabel` para poder overridear el label del TimePill por entry (antes siempre decía "Entrenamiento complementario").
+- **Banners de fin de semana**: sábado muestra un banner pill "Este sábado hay BIGG Run Club — sumate a correr con la comunidad"; domingo muestra una línea única (mismo patrón visual que "Dormiste bien") con ícono de sol, temperatura mockeada y "Día ideal para entrenar afuera. Ver bloques de BIGG Outdoors".
+- Verificado en Chrome navegando Lun/Mar/Sáb/Dom: mismo módulo en todos, Padel+Sport Specific solo lunes, banners solo sáb/dom, sin errores de consola.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-07-14 — Filtro fix (vaul drag), gradient de Sueño, tab-connector en el timeline, chevron a Programación, fix Bloque 1
+
+- **Bug real de filtros**: Sueño/Nutrición/Social no respondían al tap real en el bottom sheet de filtros (solo Todos/Entrenamiento funcionaban) — causa: vaul (Drawer) intercepta gestures de drag-to-dismiss sobre todo el contenido del sheet, tragándose el tap en filas alejadas del handle. Fix a nivel de `BottomSheet.tsx` (afecta TODOS los sheets de la app): `data-vaul-no-drag` en el wrapper scrolleable de `children`. Verificado con taps reales (no JS) en Sueño/Nutrición/Social — los 3 funcionan ahora.
+- **Gradient de `SleepEntry`**: pasa de violeta claro a `linear-gradient(70deg, #1a2040 2%, #2e1e6e 74%)` — el mismo azul/índigo oscuro de la card "SUEÑO ANOCHE" en "Recomendaciones basadas en tus hábitos" (`SleepCard` en `BiggDayScreen.tsx`). Texto/ícono/thumbs pasan a blanco/`#7b9de8` para contraste.
+- **Estilo "tab conectado"** replicado (a partir de un DOM editado por el usuario en DevTools) en Entrenamiento complementario, Mobility & recovery y Wind down: el `TimePill` de cada milestone se alarga hacia abajo (`paddingBottom: 20px`, esquinas inferiores cuadradas, `CONNECTED_PILL_STYLE` compartido) y la card de contenido se sube con `transform: translateY(-15px)` para quedar "enchufada" debajo del pill — borde de la card pasa a `#3d3d3d` con `borderTopLeftRadius: 7px` en el punto de unión (`ActivityCard` nuevo prop `connected`, aplicado solo en el uso del timeline principal, no en el de `reservedClass`; `AfternoonRecommendationCard` y `WindDownCard` actualizados en sus 4 capas).
+- **Z-index explícito**: trama de fondo (`imgBgHome1` en `BiggDayScreen.tsx`) con `z-0`; wrapper de `MainContent` con `relative z-10` — garantiza que todo el timeline pinte arriba de la trama en vez de depender del orden de pintado accidental de CSS. Línea vertical del timeline: color `#c4c4c4` → `#3d3d3d`, ancho `1.5px` → `2.5px` (1px más gruesa).
+- **Chevron a Programación**: nuevo botón con `ChevronRight` al lado de "Entrenamiento del día" (dentro del pill row) que llama a `onOpenProgramming` — abre `ProgrammingScreen` directo desde el timeline, sin pasar por el CTA "Reservar clase".
+- **Fix "Bloque 1" sin borde en `ProgrammingScreen`**: el header de la pantalla (`bg-[#f5f5f5] pb-[20px]`) se solapa con el contenido scrolleable vía `-mt-[20px]` para eliminar el gap contra el chip strip — pero ese solape (con `z-10` en el header) tapaba el `borderTop` del primer `FlapRow` ("Bloque 1"), mientras Bloque 2+ sí lo mostraban por tener espacio natural arriba. Fix: `FlapRow` recibe prop `isFirst`; cuando es true, `marginTop: 20px` para que el borde del primer bloque quede fuera de la zona tapada por el header.
+- Verificado todo en Chrome: filtros con taps reales, gradient de sueño, tab-connector visual en los 3 milestones, chevron abre Programación, Bloque 1 con borde igual a Bloque 2. Sin errores de consola.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-07-13 — DailyWorkoutCard: NutritionEntry (check-in de nutrición, mismo patrón que SleepEntry)
+
+- Nuevo componente `NutritionEntry` — calca 1:1 el patrón de `SleepEntry`: card "¿Comiste bien hoy?" (ícono `Utensils`, acento naranja `#f2994a` para diferenciarlo del violeta de sueño) con thumbs up/down, toast fijo arriba del footer ("Nutrición guardada" + botón "Agregar detalles"), y `BottomSheet` con `SourceChip source="myfitnesspal"` + tags de digestión/energía (`NUTRITION_TAGS`: Hinchazón, Con energía, Antojos, Buena digestión, Pesadez) togglables.
+- `SourceChip.tsx` — agregado nuevo `DataSource` "myfitnesspal" (`#f2994a`), mismo patrón que Strava/Garmin/Apple Health.
+- Decisiones tomadas con el usuario antes de implementar: check-in simple sin macros (no resumen de calorías), fuente simulada (MyFitnessPal) en vez de sin-fuente, tags de digestión/energía (no de adherencia al plan), y visible siempre en "Todos" (no solo al filtrar por Nutrición) — se agregó al timeline entre "Mobility & recovery" y "Wind down".
+- `showNutritionContent` nuevo en la lógica de filtros; el empty state ahora solo aplica a "Social" (Nutrición ya tiene contenido real).
+- Verificado en Chrome: entry visible en "Todos", thumbs + toast + tags funcionan igual que en sueño, filtrar por "Nutrición" aísla correctamente solo esta card, sin errores de consola.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-07-13 — DailyWorkoutCard: header "Tu BIGG Day" + filtros, tags de recuperación, z-index/línea del timeline
+
+- Se probó extender el estilo dark container de "Entrenamiento del día" a Entrenamiento complementario/Mobility/Wind down vía un componente `MilestoneShell` reutilizable — **revertido a pedido del usuario** ("for now"); esos tres bloques volvieron a su estilo original (TimePill + card suelta, sin container oscuro). Solo "Entrenamiento del día" conserva el dark container.
+- Nuevo header arriba del timeline: "TU BIGG DAY" (font `MessinaSansWeb:Bold`, no Druk) + botón "Todos ⌄" a la derecha que abre un `BottomSheet` con 5 filtros (Todos / Entrenamiento & actividad / Sueño / Nutrición / Social). Seleccionar un filtro oculta/muestra las secciones del timeline acordemente (`showTrainingContent` / `showSleepContent`); Nutrición y Social — sin contenido modelado todavía — muestran un empty state ("Todavía no hay actividad de..."). El label del filtro trunca con ellipsis para no romper el layout con opciones largas.
+- Bottom sheet de "Sueño de anoche": se sacaron las filas Sueño profundo/REM/Frecuencia cardíaca (quedan Duración y Calidad) y se agregó una sección de tags de recuperación muscular (`RECOVERY_TAGS`: Piernas cargadas, Espalda tensa, Hombros, Fatiga general, Sin molestias) — chips multi-select con estado local, pensados para trackear cómo llega el cuerpo día a día.
+- Línea vertical del timeline: `w-[1px]` → `w-[1.5px]` + `z-0` explícito. Todos los wrappers de milestones (SleepEntry, Entrenamiento del día, complementario, mobility, wind-down, y las variantes del estado `reservedClass`) ahora tienen `relative z-10` explícito en su contenedor externo — antes dependía del orden de pintado accidental de CSS, ahora es robusto. El header "Tu BIGG Day" también lleva `relative z-10` para quedar por encima de la trama de fondo (`imgBgHome1`, position:absolute sin z-index propio) en `BiggDayScreen.tsx`.
+- Verificado en Chrome: filtro abre/cierra el bottom sheet y oculta/muestra secciones correctamente, thumbs up/down + toast + "Agregar detalles" siguen funcionando, tags togglean estado, header no se corta contra la trama, sin errores de consola.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-07-13 — DailyWorkoutCard: rediseño "Entrenamiento del día" (dark container) + SleepEntry interactivo
+
+- `DailyWorkoutCard.tsx` (`cardVariant === 3`, el default en uso) — milestone "Entrenamiento del día" reconstruido pixel-a-pixel a partir de un DOM editado por el usuario en Chrome DevTools: contenedor pasa de gris a `bg-[#3d3d3d]` con `border-radius: 20px` (sin gap); el `TimePill` de este milestone ahora recibe un override de estilo (`padding: 12.5px 20px; background-color: unset`) para fundirse con el container oscuro en vez de tener su propio pill oscuro; el wrapper del contenido pasa a padding `7.5px 7.5px` con `padding-top: 0`; el último flap ("Midline") pierde el radio en las 4 esquinas (antes redondeaba arriba y abajo) para quedar a ras del CTA; el CTA verde/oscuro pasa a `align-items: center`. Todos estos cambios quedaron condicionados a `cardVariant === 3` para no afectar las otras variantes del card.
+- `SleepEntry` reescrito dos veces en esta sesión según feedback:
+  1. Primer pase: card violeta con radio, thumbs up/down para aprobar/desaprobar la calidad, botón "Agregar detalles" inline, toast de confirmación y `BottomSheet` con detalle de sueño.
+  2. Ajuste final: se sacó "Apple Health" y "Agregar detalles" de la fila inline — el texto ahora es una pregunta ("Dormiste 7h 12m — ¿Descansaste bien?"), toda la fila es tappable y abre el `BottomSheet` de detalle (que incluye el `SourceChip` de Apple Health adentro). El toast que aparece al tocar thumbs up/down ahora incluye el botón "Agregar detalles" (antes vivía en el componente del timeline) — tocarlo abre el mismo bottom sheet. Verificado en Chrome: toast fixed correctamente por encima del bottom nav, tap en la fila y tap en "Agregar detalles" del toast abren el sheet con duración/calidad/sueño profundo/REM/FC promedio.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-07-13 — DailyWorkoutCard: bg gris solo en el milestone "Entrenamiento del día"
+
+- `DailyWorkoutCard.tsx` — primer intento aplicó `bg-[#ededed]` al contenedor de todo el timeline; corregido a pedido del usuario para que el gris viva únicamente en el wrapper del milestone "Entrenamiento del día" (time pill + card + CTA "Reservar clase"), mismo tono que las chips internas. El resto del timeline (sueño, entrenamiento complementario, mobility, wind-down) queda sin bg propio. Primer paso de una serie de cambios pendientes sobre este card.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
 ## 2026-07-13 — Timeline: entrada de sueño y wind-down
 
 - `DailyWorkoutCard.tsx` — `SleepEntry`: fila compacta una línea al tope del timeline mostrando duración + calidad desde Apple Health (7h 12m, calidad buena).

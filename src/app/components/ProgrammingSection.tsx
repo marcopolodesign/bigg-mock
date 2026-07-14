@@ -202,10 +202,12 @@ function FlapRow({
   row,
   selectedId,
   onSelect,
+  isFirst = false,
 }: {
   row: ProgrammingRow;
   selectedId: string | null;
   onSelect: (id: string) => void;
+  isFirst?: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(true);
 
@@ -218,6 +220,10 @@ function FlapRow({
         borderTop: "1px solid rgba(0,0,0,0.09)",
         borderTopLeftRadius: "14px",
         borderTopRightRadius: "14px",
+        // The header overlaps the content by 20px (`-mt-[20px]`) to remove the gap
+        // below the chip strip. That overlap sits on top of (and hides) this row's
+        // own borderTop when it's the first row — push it down to clear that band.
+        marginTop: isFirst ? "20px" : 0,
       }}
     >
       {/* ── Flap header ── */}
@@ -324,6 +330,7 @@ export default function ProgrammingSection({ activeFilter }: { activeFilter?: st
           row={row}
           selectedId={selected[i] ?? null}
           onSelect={(id) => handleSelect(i, id)}
+          isFirst={i === 0}
         />
       ))}
 

@@ -2,12 +2,13 @@
 // Used across the activity timeline and the habit-recommendation cards
 // (sleep, steps) to make clear where each datapoint comes from.
 
-export type DataSource = "strava" | "garmin" | "apple-health";
+export type DataSource = "strava" | "garmin" | "apple-health" | "myfitnesspal";
 
 const SOURCE_META: Record<DataSource, { label: string; color: string }> = {
   strava: { label: "Strava", color: "#fc4c02" },
   garmin: { label: "Garmin", color: "#007cc3" },
   "apple-health": { label: "Apple Health", color: "#fe375f" },
+  myfitnesspal: { label: "MyFitnessPal", color: "#f2994a" },
 };
 
 interface SourceChipProps {

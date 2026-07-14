@@ -21,7 +21,7 @@ export default function BottomSheet({ open, onClose, children, title = "Panel" }
           <div className="flex justify-center pt-[14px] pb-[4px] shrink-0">
             <div className="w-[40px] h-[4px] rounded-full bg-[#c4c4c4]" />
           </div>
-          <div className="overflow-y-auto">
+          <div className="overflow-y-auto" data-vaul-no-drag>
             {children}
           </div>
         </Drawer.Content>

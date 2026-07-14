@@ -1,14 +1,38 @@
-import { useState } from "react";
-import { ChevronDown, MapPin, Plus, Check, Pencil, Sparkles, Moon } from "lucide-react";
+import { useRef, useState } from "react";
+import type { CSSProperties, MouseEvent } from "react";
+import { ChevronDown, ChevronRight, MapPin, Plus, Check, Pencil, Sparkles, Moon, ThumbsUp, ThumbsDown, Utensils } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import SourceChip, { type DataSource } from "./SourceChip";
 import WhyLine from "./WhyLine";
 import LocationSheet from "./LocationSheet";
+import BottomSheet from "./BottomSheet";
 import AddLocationScreen from "./AddLocationScreen";
 import { BlockCard, type StimulusBlock } from "./ProgrammingSection";
 
 const BASE_CHIPS = ["FBA", "Upper Body", "HIIT", "Midline"];
+const RECOVERY_TAGS = ["Piernas cargadas", "Espalda tensa", "Hombros", "Fatiga general", "Sin molestias"];
+const NUTRITION_TAGS = ["Hinchazón", "Con energía", "Antojos", "Buena digestión", "Pesadez"];
+
+type TimelineFilter = "todos" | "entrenamiento" | "sueno" | "nutricion" | "social";
+const TIMELINE_FILTERS: { key: TimelineFilter; label: string }[] = [
+  { key: "todos", label: "Todos" },
+  { key: "entrenamiento", label: "Entrenamiento & actividad" },
+  { key: "sueno", label: "Sueño" },
+  { key: "nutricion", label: "Nutrición" },
+  { key: "social", label: "Social" },
+];
 const BIGG_LOCATIONS = new Set(["BIGG Recoleta", "BIGG Tortuguitas"]);
+
+// TimePill style shared by every non-"Entrenamiento del día" milestone — squares off
+// the pill's bottom corners and extends it downward so the card below (pulled up via
+// translateY(-15px) on its wrapper) reads as plugged into the pill, like a folder tab.
+const CONNECTED_PILL_STYLE: CSSProperties = {
+  borderRadius: "12px",
+  borderBottomLeftRadius: 0,
+  borderBottomRightRadius: 0,
+  paddingBottom: "20px",
+  marginLeft: "1px",
+};
 
 const DAY_BLOCKS: StimulusBlock[] = [
   { id: "day-fba", stimulus: "FBA", modality: "Superset · 3 sets", duration: "15'",
@@ -53,10 +77,10 @@ function FlapItem({ block, isOpen, onToggle, index, total, displayStimulus, stim
         borderLeft: "1px solid rgba(0,0,0,0.09)",
         borderRight: "1px solid rgba(0,0,0,0.09)",
         borderBottom: "none",
-        borderTopLeftRadius: "14px",
-        borderTopRightRadius: "14px",
-        borderBottomLeftRadius: isLast ? "14px" : 0,
-        borderBottomRightRadius: isLast ? "14px" : 0,
+        borderTopLeftRadius: isLast ? 0 : "14px",
+        borderTopRightRadius: isLast ? 0 : "14px",
+        borderBottomLeftRadius: 0,
+        borderBottomRightRadius: 0,
         paddingBottom: isLast ? 0 : FLAP_OVERLAP,
         marginTop: index > 0 ? -FLAP_OVERLAP : 0,
         position: "relative",
@@ -67,6 +91,7 @@ function FlapItem({ block, isOpen, onToggle, index, total, displayStimulus, stim
         type="button"
         onClick={(e) => { e.stopPropagation(); onToggle(); }}
         className="w-full flex items-center justify-between px-[16px] py-[14px] active:opacity-70 transition-opacity"
+        style={isLast ? { borderRadius: 0 } : undefined}
       >
         <div style={{ height: "21px", overflow: "hidden", position: "relative", flex: 1 }}>
           <AnimatePresence mode="wait" initial={false}>
@@ -135,9 +160,9 @@ function FlapItem({ block, isOpen, onToggle, index, total, displayStimulus, stim
 }
 
 // Dark time pill used as the timeline node label (e.g. "10AM", "18:00hs").
-function TimePill({ label }: { label: string }) {
+function TimePill({ label, style }: { label: string; style?: CSSProperties }) {
   return (
-    <div className="bg-[#3d3d3d] rounded-full px-[12px] py-[6px] flex items-center justify-center">
+    <div className="bg-[#3d3d3d] rounded-full px-[12px] py-[6px] flex items-center justify-center" style={style}>
       <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-white text-[13px] whitespace-nowrap tracking-[-0.26px] leading-[1.2]">
         {label}
       </p>
@@ -145,15 +170,266 @@ function TimePill({ label }: { label: string }) {
   );
 }
 
-// Compact single-line sleep summary at top of timeline
+// Sleep summary at top of timeline — quality approve/disapprove + details sheet
 function SleepEntry() {
+  const [approval, setApproval] = useState<"approved" | "rejected" | null>(null);
+  const [showToast, setShowToast] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const toastTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const toggleTag = (tag: string) => {
+    setSelectedTags((prev) => prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]);
+  };
+
+  const handleApproval = (e: MouseEvent, value: "approved" | "rejected") => {
+    e.stopPropagation();
+    setApproval(value);
+    setShowToast(true);
+    if (toastTimeout.current) clearTimeout(toastTimeout.current);
+    toastTimeout.current = setTimeout(() => setShowToast(false), 4000);
+  };
+
+  const openDetails = () => {
+    if (toastTimeout.current) clearTimeout(toastTimeout.current);
+    setShowToast(false);
+    setShowDetails(true);
+  };
+
   return (
-    <div className="relative z-10 flex items-center gap-[10px] w-full px-[4px]">
-      <Moon size={13} className="text-[#6b7280] shrink-0" />
-      <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[13px] text-[#6b7280] tracking-[-0.26px] leading-[1.2]">
-        Dormiste <span className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[#3d3d3d]">7h 12m</span> — calidad buena · Apple Health
-      </p>
-    </div>
+    <>
+      <motion.div
+        role="button"
+        tabIndex={0}
+        whileTap={{ scale: 0.98 }}
+        onClick={openDetails}
+        className="relative z-10 flex items-center gap-[10px] w-full px-[16px] py-[14px] rounded-[16px] cursor-pointer overflow-hidden"
+        style={{ background: "linear-gradient(70deg, #1a2040 2%, #2e1e6e 74%)" }}
+      >
+        <Moon size={13} className="text-white/60 shrink-0" />
+        <p className="flex-1 font-['MessinaSansWeb:Regular',sans-serif] text-[13px] text-white/60 tracking-[-0.26px] leading-[1.2]">
+          Dormiste <span className="font-['MessinaSansWeb:SemiBold',sans-serif] text-white">7h 12m</span> — ¿Descansaste bien?
+        </p>
+        <div className="flex items-center gap-[6px] shrink-0">
+          <motion.button
+            type="button"
+            whileTap={{ scale: 0.9 }}
+            onClick={(e) => handleApproval(e, "approved")}
+            className="w-[24px] h-[24px] rounded-full flex items-center justify-center transition-colors"
+            style={{ background: approval === "approved" ? "#7b9de8" : "rgba(255,255,255,0.12)" }}
+          >
+            <ThumbsUp size={12} strokeWidth={2} className={approval === "approved" ? "text-white" : "text-white/60"} />
+          </motion.button>
+          <motion.button
+            type="button"
+            whileTap={{ scale: 0.9 }}
+            onClick={(e) => handleApproval(e, "rejected")}
+            className="w-[24px] h-[24px] rounded-full flex items-center justify-center transition-colors"
+            style={{ background: approval === "rejected" ? "#7b9de8" : "rgba(255,255,255,0.12)" }}
+          >
+            <ThumbsDown size={12} strokeWidth={2} className={approval === "rejected" ? "text-white" : "text-white/60"} />
+          </motion.button>
+        </div>
+      </motion.div>
+
+      <AnimatePresence>
+        {showToast && (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 12 }}
+            transition={{ duration: 0.25 }}
+            className="fixed left-1/2 bottom-[86px] z-[80] -translate-x-1/2 flex items-center gap-[10px] bg-[#3d3d3d] text-white text-[13px] font-['MessinaSansWeb:SemiBold',sans-serif] pl-[16px] pr-[8px] py-[8px] rounded-full shadow-lg whitespace-nowrap"
+          >
+            <span>Calidad de sueño guardada</span>
+            <button
+              type="button"
+              onClick={openDetails}
+              className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[13px] text-[#3d3d3d] bg-[#adff19] px-[12px] py-[6px] rounded-full active:opacity-80 transition-opacity"
+            >
+              Agregar detalles
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <BottomSheet open={showDetails} onClose={() => setShowDetails(false)} title="Detalles de sueño">
+        <div className="flex flex-col gap-[16px] px-[20px] pb-[32px]">
+          <p className="font-['Druk_Wide:Medium',sans-serif] text-[20px] text-[#3d3d3d] tracking-[-0.6px] uppercase">
+            Sueño de anoche
+          </p>
+          <SourceChip source="apple-health" prefix="Tomado desde" />
+          <div className="flex flex-col">
+            {[
+              { label: "Duración", value: "7h 12m" },
+              { label: "Calidad", value: "Buena" },
+            ].map((row) => (
+              <div key={row.label} className="flex items-center justify-between py-[12px]" style={{ borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
+                <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[14px] text-[#6b7280] tracking-[-0.28px]">{row.label}</p>
+                <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[14px] text-[#3d3d3d] tracking-[-0.28px]">{row.value}</p>
+              </div>
+            ))}
+          </div>
+          <div className="flex flex-col gap-[10px]">
+            <div className="flex flex-col gap-[2px]">
+              <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[13px] text-[#3d3d3d] tracking-[-0.26px]">
+                ¿Cómo sentís tu cuerpo hoy?
+              </p>
+              <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[12px] text-[#6b7280] tracking-[-0.24px]">
+                Sumá tags para trackear tu recuperación muscular
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-[8px]">
+              {RECOVERY_TAGS.map((tag) => {
+                const isSelected = selectedTags.includes(tag);
+                return (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={() => toggleTag(tag)}
+                    className="px-[14px] py-[8px] rounded-full transition-colors active:opacity-80"
+                    style={{ background: isSelected ? "#8b78e6" : "rgba(139,120,230,0.1)" }}
+                  >
+                    <span
+                      className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[13px] tracking-[-0.26px]"
+                      style={{ color: isSelected ? "#fff" : "#8b78e6" }}
+                    >
+                      {tag}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </BottomSheet>
+    </>
+  );
+}
+
+// Nutrition check-in — same pattern as SleepEntry (approve/disapprove + toast + details sheet)
+function NutritionEntry() {
+  const [approval, setApproval] = useState<"approved" | "rejected" | null>(null);
+  const [showToast, setShowToast] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const toastTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const toggleTag = (tag: string) => {
+    setSelectedTags((prev) => prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]);
+  };
+
+  const handleApproval = (e: MouseEvent, value: "approved" | "rejected") => {
+    e.stopPropagation();
+    setApproval(value);
+    setShowToast(true);
+    if (toastTimeout.current) clearTimeout(toastTimeout.current);
+    toastTimeout.current = setTimeout(() => setShowToast(false), 4000);
+  };
+
+  const openDetails = () => {
+    if (toastTimeout.current) clearTimeout(toastTimeout.current);
+    setShowToast(false);
+    setShowDetails(true);
+  };
+
+  return (
+    <>
+      <motion.div
+        role="button"
+        tabIndex={0}
+        whileTap={{ scale: 0.98 }}
+        onClick={openDetails}
+        className="relative z-10 flex items-center gap-[10px] w-full px-[16px] py-[14px] rounded-[16px] cursor-pointer"
+        style={{ background: "linear-gradient(135deg, rgba(242,153,74,0.16) 0%, rgba(242,153,74,0.08) 100%)" }}
+      >
+        <Utensils size={13} className="text-[#f2994a] shrink-0" />
+        <p className="flex-1 font-['MessinaSansWeb:Regular',sans-serif] text-[13px] text-[#6b7280] tracking-[-0.26px] leading-[1.2]">
+          ¿Comiste bien hoy?
+        </p>
+        <div className="flex items-center gap-[6px] shrink-0">
+          <motion.button
+            type="button"
+            whileTap={{ scale: 0.9 }}
+            onClick={(e) => handleApproval(e, "approved")}
+            className="w-[24px] h-[24px] rounded-full flex items-center justify-center transition-colors"
+            style={{ background: approval === "approved" ? "#f2994a" : "rgba(242,153,74,0.15)" }}
+          >
+            <ThumbsUp size={12} strokeWidth={2} className={approval === "approved" ? "text-white" : "text-[#f2994a]"} />
+          </motion.button>
+          <motion.button
+            type="button"
+            whileTap={{ scale: 0.9 }}
+            onClick={(e) => handleApproval(e, "rejected")}
+            className="w-[24px] h-[24px] rounded-full flex items-center justify-center transition-colors"
+            style={{ background: approval === "rejected" ? "#f2994a" : "rgba(242,153,74,0.15)" }}
+          >
+            <ThumbsDown size={12} strokeWidth={2} className={approval === "rejected" ? "text-white" : "text-[#f2994a]"} />
+          </motion.button>
+        </div>
+      </motion.div>
+
+      <AnimatePresence>
+        {showToast && (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 12 }}
+            transition={{ duration: 0.25 }}
+            className="fixed left-1/2 bottom-[86px] z-[80] -translate-x-1/2 flex items-center gap-[10px] bg-[#3d3d3d] text-white text-[13px] font-['MessinaSansWeb:SemiBold',sans-serif] pl-[16px] pr-[8px] py-[8px] rounded-full shadow-lg whitespace-nowrap"
+          >
+            <span>Nutrición guardada</span>
+            <button
+              type="button"
+              onClick={openDetails}
+              className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[13px] text-white bg-[#f2994a] px-[12px] py-[6px] rounded-full active:opacity-80 transition-opacity"
+            >
+              Agregar detalles
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <BottomSheet open={showDetails} onClose={() => setShowDetails(false)} title="Detalles de nutrición">
+        <div className="flex flex-col gap-[16px] px-[20px] pb-[32px]">
+          <p className="font-['Druk_Wide:Medium',sans-serif] text-[20px] text-[#3d3d3d] tracking-[-0.6px] uppercase">
+            Nutrición de hoy
+          </p>
+          <SourceChip source="myfitnesspal" prefix="Tomado desde" />
+          <div className="flex flex-col gap-[10px]">
+            <div className="flex flex-col gap-[2px]">
+              <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[13px] text-[#3d3d3d] tracking-[-0.26px]">
+                ¿Cómo te cayó la comida?
+              </p>
+              <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[12px] text-[#6b7280] tracking-[-0.24px]">
+                Sumá tags para trackear tu digestión y energía
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-[8px]">
+              {NUTRITION_TAGS.map((tag) => {
+                const isSelected = selectedTags.includes(tag);
+                return (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={() => toggleTag(tag)}
+                    className="px-[14px] py-[8px] rounded-full transition-colors active:opacity-80"
+                    style={{ background: isSelected ? "#f2994a" : "rgba(242,153,74,0.1)" }}
+                  >
+                    <span
+                      className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[13px] tracking-[-0.26px]"
+                      style={{ color: isSelected ? "#fff" : "#f2994a" }}
+                    >
+                      {tag}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </BottomSheet>
+    </>
   );
 }
 
@@ -161,12 +437,12 @@ function SleepEntry() {
 function WindDownCard() {
   const [added, setAdded] = useState(false);
   return (
-    <div className="flex flex-col items-start gap-[10px] w-full">
+    <div className="relative z-10 flex flex-col items-start w-full">
       <div className="relative z-10 flex flex-row items-center gap-[10px]">
-        <TimePill label="Wind down" />
+        <TimePill label="Wind down" style={CONNECTED_PILL_STYLE} />
       </div>
       <div className="relative z-10 w-full rounded-[16px] overflow-hidden"
-        style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(235,231,255,0.95) 100%)", border: "1px solid rgba(139,120,230,0.18)" }}>
+        style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(235,231,255,0.95) 100%)", border: "1px solid #3d3d3d", borderTopLeftRadius: "7px", transform: "translateY(-15px)" }}>
         <div className="flex items-center justify-between px-[16px] py-[14px] gap-[12px]">
           <div className="flex flex-col gap-[2px] flex-1 min-w-0">
             <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[14px] text-[#3d3d3d] tracking-[-0.28px] leading-[1.3]">
@@ -198,14 +474,15 @@ function AfternoonRecommendationCard() {
   const [added, setAdded] = useState(false);
 
   return (
-    <div className="relative rounded-[20px] w-full">
+    <div className="relative rounded-[20px] w-full" style={{ borderTopLeftRadius: "7px" }}>
       {/* Solid white bg — sits behind content so opacity doesn't bleed into page grey */}
-      <div className="absolute inset-0 bg-white rounded-[20px]" />
+      <div className="absolute inset-0 bg-white rounded-[20px]" style={{ borderTopLeftRadius: "7px" }} />
 
       {/* Dashed border — z-10, always on top */}
       <motion.div
         aria-hidden
-        className="absolute border border-[#a3a3a3] border-dashed inset-0 pointer-events-none rounded-[20px] z-10"
+        className="absolute border border-dashed inset-0 pointer-events-none rounded-[20px] z-10"
+        style={{ borderColor: "#3d3d3d", borderTopLeftRadius: "7px" }}
         animate={{ opacity: added ? 0 : 1 }}
         transition={{ duration: 0.4 }}
       />
@@ -215,13 +492,14 @@ function AfternoonRecommendationCard() {
 
       <motion.div
         className="content-stretch flex flex-col isolate items-center overflow-clip relative rounded-[20px] w-full"
+        style={{ borderTopLeftRadius: "7px" }}
         animate={{ opacity: added ? 1 : 0.55 }}
         transition={{ duration: 0.5 }}
       >
         {/* Single gradient section — WhyLine inline (running pasadas pattern) */}
         <div
           className="backdrop-blur-[50px] content-stretch flex gap-[20px] items-start p-[20px] relative rounded-[20px] shrink-0 w-full"
-          style={{ backgroundImage: "linear-gradient(112.876deg, rgba(255,255,255,0.9) 37.068%, rgba(42,179,204,0.9) 114.32%)" }}
+          style={{ backgroundImage: "linear-gradient(112.876deg, rgba(255,255,255,0.9) 37.068%, rgba(42,179,204,0.9) 114.32%)", borderTopLeftRadius: "7px" }}
         >
           {/* Left: title + chip + why */}
           <div className="content-stretch flex flex-[1_0_0] flex-col gap-[16px] items-start min-w-px relative">
@@ -346,16 +624,18 @@ export interface ActivityEntry {
   source?: DataSource;
   why?: string;
   addable?: boolean;
+  /** Overrides the "Entrenamiento complementario" TimePill label for this entry. */
+  sectionLabel?: string;
 }
 
-function ActivityCard({ entry }: { entry: ActivityEntry }) {
+function ActivityCard({ entry, connected = false }: { entry: ActivityEntry; connected?: boolean }) {
   const [added, setAdded] = useState(false);
   const gradient = entry.gradient ?? "linear-gradient(115deg, rgba(255,255,255,0.9) 40%, rgba(163,163,163,0.15) 120%)";
 
   return (
     <div
       className={`backdrop-blur-[50px] flex flex-col relative rounded-[20px] w-full ${entry.addable ? "border border-dashed border-[#a3a3a3]" : "border border-solid border-[#a3a3a3]"}`}
-      style={{ backgroundImage: gradient }}
+      style={{ backgroundImage: gradient, ...(connected ? { borderTopLeftRadius: "7px", borderColor: "#3d3d3d" } : {}) }}
     >
       <div className="flex flex-col gap-[12px] items-start p-[20px]">
         {entry.timeRange && (
@@ -410,7 +690,14 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
   const [customLocations, setCustomLocations] = useState<string[]>([]);
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
   const [openFlapId, setOpenFlapId] = useState<string | null>(null);
+  const [selectedFilter, setSelectedFilter] = useState<TimelineFilter>("todos");
+  const [showFilterSheet, setShowFilterSheet] = useState(false);
   const isBiggLocation = BIGG_LOCATIONS.has(selectedLocation);
+  const activeFilterLabel = TIMELINE_FILTERS.find((f) => f.key === selectedFilter)?.label ?? "Todos";
+  const showTrainingContent = selectedFilter === "todos" || selectedFilter === "entrenamiento";
+  const showSleepContent = selectedFilter === "todos" || selectedFilter === "sueno";
+  const showNutritionContent = selectedFilter === "todos" || selectedFilter === "nutricion";
+  const isFilterEmpty = !showTrainingContent && !showSleepContent && !showNutritionContent;
 
   const handleLocationSelect = (loc: string) => {
     setSelectedLocation(loc);
@@ -424,9 +711,9 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
   if (reservedClass) {
     return (
       <motion.div key="reserved" className="relative w-full" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: "easeOut" }}>
-        <div className="absolute left-[22px] top-0 bottom-0 w-[1px] bg-[#c4c4c4]" />
+        <div className="absolute left-[22px] top-0 bottom-0 w-[2.5px] bg-[#3d3d3d] z-0" />
         <div className="flex flex-col items-start gap-[24px]">
-          <div className="flex flex-col items-start gap-[10px] w-full">
+          <div className="relative z-10 flex flex-col items-start gap-[10px] w-full">
             <div className="relative z-10 flex flex-row items-center gap-[10px]">
               <TimePill label={reservedClass.time} />
               <p className="font-['MessinaSansWeb:Regular',sans-serif] italic text-[#a3a3a3] text-[13px] tracking-[-0.26px]">
@@ -439,7 +726,7 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
           </div>
           {/* Additional activity entries */}
           {activities?.map((activity, i) => (
-            <div key={i} className="flex flex-col items-start gap-[10px] w-full">
+            <div key={i} className="relative z-10 flex flex-col items-start gap-[10px] w-full">
               <div className="relative z-10 flex flex-row items-center gap-[10px]">
                 <TimePill label={activity.time} />
               </div>
@@ -466,20 +753,56 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
   // ── Single unified timeline (recommendation state) ──
   return (
     <>
+    <div className="relative z-10 flex items-center justify-between w-full mb-[16px] gap-[8px]">
+      <p className="shrink-0 font-['MessinaSansWeb:Bold',sans-serif] text-[20px] text-[#3d3d3d] tracking-[-0.4px] whitespace-nowrap">
+        Tu BIGG day
+      </p>
+      <button
+        type="button"
+        onClick={() => setShowFilterSheet(true)}
+        className="flex items-center gap-[4px] min-w-0 active:opacity-70 transition-opacity"
+      >
+        <span className="truncate max-w-[130px] font-['MessinaSansWeb:SemiBold',sans-serif] text-[14px] text-[#565656] tracking-[-0.28px]">
+          {activeFilterLabel}
+        </span>
+        <ChevronDown size={14} className="text-[#565656] shrink-0" strokeWidth={2} />
+      </button>
+    </div>
+    {/* Sleep check-in — no TimePill node of its own, sits above the connected timeline
+        so the line below doesn't run through/behind it and peek out at its rounded corner */}
+    {showSleepContent && (
+      <div className="relative z-10 w-full mb-[24px]">
+        <SleepEntry />
+      </div>
+    )}
+
     <div className="relative w-full">
-      <div className="absolute left-[22px] top-0 bottom-0 w-[1px] bg-[#c4c4c4]" />
+      <div className="absolute left-[22px] top-0 bottom-0 w-[2.5px] bg-[#3d3d3d] z-0" />
       <div className="flex flex-col items-start gap-[24px]">
 
-        {/* Sleep summary — top of timeline */}
-        <SleepEntry />
-
         {/* BIGG Class at 10AM */}
-        {showMorning && (
-          <div className="flex flex-col items-start gap-[10px] w-full">
+        {showMorning && showTrainingContent && (
+          <div
+            className={cardVariant === 3 ? "relative z-10 flex flex-col items-start w-full bg-[#3d3d3d]" : "relative z-10 flex flex-col items-start gap-[10px] w-full"}
+            style={cardVariant === 3 ? { borderRadius: "20px" } : undefined}
+          >
             <div className="relative z-10 flex flex-row items-center justify-between w-full">
-              <TimePill label="Entrenamiento del día" />
+              <TimePill
+                label="Entrenamiento del día"
+                style={cardVariant === 3 ? { padding: "12.5px 20px", backgroundColor: "unset" } : undefined}
+              />
+              <button
+                type="button"
+                onClick={onOpenProgramming}
+                className="shrink-0 p-[8px] active:opacity-60 transition-opacity"
+              >
+                <ChevronRight size={16} strokeWidth={2} className={cardVariant === 3 ? "text-white" : "text-[#565656]"} />
+              </button>
             </div>
-            <div className="relative z-10 w-full flex flex-col items-center">
+            <div
+              className={`relative z-10 w-full flex flex-col items-center ${cardVariant === 3 ? "p-[20px]" : ""}`}
+              style={cardVariant === 3 ? { padding: "7.5px 7.5px", paddingTop: 0 } : undefined}
+            >
               <div className="relative w-full flex flex-col">
                 {/* ── Content area ── */}
                 <div
@@ -660,13 +983,22 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
                   </span>
                 </button>
               ) : cardVariant === 3 ? (
-                <div
+                <motion.div
                   className="relative z-[1] w-full rounded-b-[16px] pt-[150px] pb-[18px] px-[20px] flex flex-col items-start gap-[4px] mb-[-150px]"
                   style={{
                     background: isBiggLocation ? "#adff19" : "#3d3d3d",
                     transform: "translateY(-150px)",
                     transition: "background 0.3s ease-in-out, opacity 0.2s",
+                    alignItems: "center",
                   }}
+                  animate={isBiggLocation ? {
+                    boxShadow: [
+                      "0 4px 14px rgba(173,255,25,0.15)",
+                      "0 8px 28px rgba(173,255,25,0.65)",
+                      "0 4px 14px rgba(173,255,25,0.15)",
+                    ],
+                  } : { boxShadow: "0 0px 0px rgba(0,0,0,0)" }}
+                  transition={isBiggLocation ? { duration: 2.2, repeat: Infinity, ease: "easeInOut" } : { duration: 0.3 }}
                 >
                   <button
                     type="button"
@@ -691,7 +1023,7 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
                       {isBiggLocation ? "Reservar clase" : "Iniciar entrenamiento"}
                     </span>
                   </button>
-                </div>
+                </motion.div>
               ) : cardVariant === 4 ? (
                 <div className="w-full mt-[20px] rounded-[14px] overflow-hidden flex flex-col">
                   {/* Location selector */}
@@ -728,31 +1060,43 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
         )}
 
         {/* Additional scheduled activities (e.g. Running pasadas) */}
-        {activities?.map((activity, i) => (
-          <div key={i} className="flex flex-col items-start gap-[10px] w-full">
+        {showTrainingContent && activities?.map((activity, i) => (
+          <div key={i} className="relative z-10 flex flex-col items-start w-full">
             <div className="relative z-10 flex flex-row items-center gap-[10px]">
-              <TimePill label="Entrenamiento complementario" />
+              <TimePill label={activity.sectionLabel ?? "Entrenamiento complementario"} style={CONNECTED_PILL_STYLE} />
             </div>
-            <div className="relative z-10 w-full">
-              <ActivityCard entry={activity} />
+            <div className="relative z-10 w-full" style={{ transform: "translateY(-15px)" }}>
+              <ActivityCard entry={activity} connected />
             </div>
           </div>
         ))}
 
         {/* Afternoon Mobility recommendation */}
-        {showAfternoon && (
-          <div className="flex flex-col items-start gap-[10px] w-full">
+        {showAfternoon && showTrainingContent && (
+          <div className="relative z-10 flex flex-col items-start w-full">
             <div className="relative z-10 flex flex-row items-center gap-[10px]">
-              <TimePill label="Mobility & recovery" />
+              <TimePill label="Mobility & recovery" style={CONNECTED_PILL_STYLE} />
             </div>
-            <div className="relative z-10 w-full">
+            <div className="relative z-10 w-full" style={{ transform: "translateY(-15px)" }}>
               <AfternoonRecommendationCard />
             </div>
           </div>
         )}
 
+        {/* Nutrition check-in */}
+        {showNutritionContent && <NutritionEntry />}
+
         {/* Wind-down recommendation */}
-        <WindDownCard />
+        {showSleepContent && <WindDownCard />}
+
+        {/* Empty state for filters with no matching content yet (Social) */}
+        {isFilterEmpty && (
+          <div className="relative z-10 w-full py-[40px] flex flex-col items-center gap-[6px]">
+            <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[14px] text-[#a3a3a3] tracking-[-0.28px]">
+              Todavía no hay actividad de {activeFilterLabel.toLowerCase()}
+            </p>
+          </div>
+        )}
 
         {/* Add to day */}
         <button
@@ -785,6 +1129,31 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
         setShowAddLocation(false);
       }}
     />
+
+    <BottomSheet open={showFilterSheet} onClose={() => setShowFilterSheet(false)} title="Filtrar timeline">
+      <div className="flex flex-col gap-[8px] px-[20px] pb-[32px]">
+        <p className="font-['Druk_Wide:Medium',sans-serif] text-[20px] text-[#3d3d3d] tracking-[-0.6px] uppercase mb-[8px]">
+          Filtrar
+        </p>
+        {TIMELINE_FILTERS.map((f) => {
+          const active = selectedFilter === f.key;
+          return (
+            <button
+              key={f.key}
+              type="button"
+              onClick={() => { setSelectedFilter(f.key); setShowFilterSheet(false); }}
+              className="w-full flex items-center justify-between px-[16px] py-[14px] rounded-[14px] transition-colors active:opacity-80"
+              style={{ background: active ? "#3d3d3d" : "#ededed" }}
+            >
+              <span className={`font-['MessinaSansWeb:SemiBold',sans-serif] text-[15px] tracking-[-0.3px] ${active ? "text-white" : "text-[#3d3d3d]"}`}>
+                {f.label}
+              </span>
+              {active && <Check size={16} strokeWidth={2.5} className="text-white" />}
+            </button>
+          );
+        })}
+      </div>
+    </BottomSheet>
     </>
   );
 }

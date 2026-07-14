@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
 import { AnimatePresence } from "motion/react";
-import { Activity, Globe, Users, Moon, Plus, Flame, Check } from "lucide-react";
+import { Activity, Globe, Users, Moon, Flame, Check, Sun } from "lucide-react";
 import { Drawer } from "vaul";
 import svgPaths from "../../imports/BiggDay/svg-03sgvqmew7";
 import imgBgHome1 from "../../imports/BiggDay/ec32944a87885236431eaada4b00483f53237695.png";
@@ -32,6 +32,25 @@ const TODAY_ACTIVITIES: ActivityEntry[] = [
     title: "Running pasadas",
     gradient: "linear-gradient(115deg, rgba(255,255,255,0.9) 40%, rgba(173,255,25,0.25) 120%)",
     why: "Sumás fondo aeróbico sin chocar con tu clase de fuerza de la mañana",
+  },
+];
+
+// ─── Monday-only extras: Padel game + Sport Specific recommendation ──────────
+
+const MONDAY_ACTIVITIES: ActivityEntry[] = [
+  {
+    time: "12:00hs",
+    timeRange: "12:00hs — 13:00hs",
+    title: "Padel",
+    gradient: "linear-gradient(122.85deg, rgba(255,255,255,0.9) 37%, rgba(248,179,46,0.9) 114%)",
+  },
+  {
+    time: "13:15hs",
+    title: "Sport Specific",
+    sectionLabel: "Recomendación",
+    gradient: "linear-gradient(115deg, rgba(255,255,255,0.9) 40%, rgba(173,255,25,0.25) 120%)",
+    why: "Bloques diseñados especialmente para ayudarte a rendir mejor en Padel",
+    addable: true,
   },
 ];
 
@@ -1183,59 +1202,65 @@ function MainContent({ onReservar, onOpenFab, onOpenDetail, onOpenProgramming, i
   const dateKey = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}`;
   const pastData = isToday ? undefined : PAST_DAYS[dateKey];
 
+  // Weekday-driven extras — every day renders the same DailyWorkoutCard module;
+  // only the extra activities/banners layered on top change per weekday.
+  const weekday = selectedDate.getDay(); // 0 = Sun … 6 = Sat
+  const isMonday = weekday === 1;
+  const isRestDay = !isToday && weekday === 4; // Thursday
+  const isSaturday = weekday === 6;
+  const isSunday = weekday === 0;
+
+  const activities: ActivityEntry[] = [
+    ...(isToday ? TODAY_ACTIVITIES : []),
+    ...(isMonday ? MONDAY_ACTIVITIES : []),
+    ...(pastData?.activities ?? []),
+  ];
+
   return (
     // pt clears the fixed StickyHeader (greeting + week calendar, no status bar)
     <div className="flex flex-col gap-[16px] items-center w-full px-[20px] pt-[153px]">
 
-      {/* ── Timeline ── */}
+      {/* ── Timeline — same module every day ── */}
       <div className="w-full max-w-[388px] mb-[24px]">
-        {isToday ? (
-          <DailyWorkoutCard
-            onReservar={onReservar}
-            onOpenFab={onOpenFab}
-            onOpenDetail={todayReservedClass ? () => onOpenDetail(todayReservedClass) : undefined}
-            onOpenProgramming={todayReservedClass ? undefined : onOpenProgramming}
-            reservedClass={todayReservedClass ?? undefined}
-            activities={TODAY_ACTIVITIES}
-            cardVariant={cardVariant}
-          />
-        ) : pastData?.reservedClass ? (
-          <DailyWorkoutCard
-            reservedClass={pastData.reservedClass}
-            activities={pastData.activities}
-            onOpenFab={onOpenFab}
-            onOpenDetail={() => onOpenDetail(pastData.reservedClass!)}
-          />
-        ) : isFutureDay ? (
-          selectedDate.getDay() === 4
-            ? <DailyWorkoutCard onOpenFab={onOpenFab} showMorning={false} showAfternoon={true} />
-            : <DailyWorkoutCard onReservar={onReservar} onOpenFab={onOpenFab} onOpenProgramming={onOpenProgramming} showMorning={true} showAfternoon={false} />
-        ) : (
-          <div className="flex flex-col gap-[12px]">
-            <div className="bg-[rgba(255,255,255,0.5)] rounded-[8px] p-[20px] flex items-center justify-center min-h-[120px]">
-              <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[#a3a3a3] text-[15px] tracking-[-0.3px] text-center">
-                Sin actividad registrada
-              </p>
-            </div>
-            <button
-              onClick={onOpenFab}
-              className="w-full rounded-[16px] border border-dashed border-[#858585] py-[16px] flex items-center justify-center gap-[8px] bg-[#ededed] active:opacity-60 transition-opacity"
-            >
-              <Plus size={16} strokeWidth={2} className="text-[#858585]" />
-              <span className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[#858585] text-[14px] tracking-[-0.28px]">
-                Agregar
-              </span>
-            </button>
-          </div>
-        )}
+        <DailyWorkoutCard
+          onReservar={onReservar}
+          onOpenFab={onOpenFab}
+          onOpenDetail={isToday && todayReservedClass ? () => onOpenDetail(todayReservedClass) : undefined}
+          onOpenProgramming={isToday && todayReservedClass ? undefined : onOpenProgramming}
+          reservedClass={isToday ? (todayReservedClass ?? undefined) : undefined}
+          activities={activities}
+          cardVariant={cardVariant}
+          showMorning={!isRestDay}
+          showAfternoon={true}
+        />
       </div>
 
       {/* Thursday rest-day pill — future days only */}
-      {isFutureDay && selectedDate.getDay() === 4 && (
+      {isFutureDay && isRestDay && (
         <div className="w-full max-w-[388px] flex items-center gap-[10px] backdrop-blur-sm bg-[#6ab5ff]/15 border border-[#6ab5ff]/30 rounded-full px-[16px] py-[10px]">
           <Moon size={15} className="text-[#4a90d9] shrink-0" />
           <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[#4a6fa5] text-[13px] tracking-[-0.26px]">
             Día de descanso recomendado
+          </p>
+        </div>
+      )}
+
+      {/* Saturday — BIGG Run Clubs banner */}
+      {isSaturday && (
+        <div className="w-full max-w-[388px] flex items-center gap-[10px] backdrop-blur-sm bg-[#6ab5ff]/15 border border-[#6ab5ff]/30 rounded-full px-[16px] py-[10px]">
+          <Users size={15} className="text-[#4a90d9] shrink-0" />
+          <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[#4a6fa5] text-[13px] tracking-[-0.26px]">
+            Este sábado hay BIGG Run Club — sumate a correr con la comunidad
+          </p>
+        </div>
+      )}
+
+      {/* Sunday — BIGG Outdoors training banner (single-line, same pattern as "Dormiste bien") */}
+      {isSunday && (
+        <div className="w-full max-w-[388px] flex items-center gap-[10px] px-[16px] py-[14px] rounded-[16px]" style={{ background: "linear-gradient(135deg, rgba(255,183,46,0.16) 0%, rgba(255,183,46,0.08) 100%)" }}>
+          <Sun size={13} className="text-[#f8b32e] shrink-0" />
+          <p className="flex-1 font-['MessinaSansWeb:Regular',sans-serif] text-[13px] text-[#6b7280] tracking-[-0.26px] leading-[1.2]">
+            <span className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[#3d3d3d]">24°</span> — Día ideal para entrenar afuera. Ver bloques de BIGG Outdoors
           </p>
         </div>
       )}
@@ -1613,7 +1638,7 @@ export default function BiggDayScreen() {
   return (
     <div ref={scrollRef} onScroll={handleScroll} className={`bg-[#ededed] relative w-screen h-full overflow-x-hidden ${activeTab === "perfil" ? "overflow-y-hidden" : "overflow-y-auto"}`} data-name="BIGG Day">
       {/* Background image */}
-      <div className="absolute h-[780.001px] left-0 top-0 w-full" data-name="bg-home 1">
+      <div className="absolute h-[780.001px] left-0 top-0 w-full z-0" data-name="bg-home 1">
         <img alt="" className="absolute inset-0 max-w-none object-cover opacity-50 pointer-events-none size-full" src={imgBgHome1} />
       </div>
 
@@ -1661,7 +1686,7 @@ export default function BiggDayScreen() {
 
       {/* Tab content */}
       {(activeTab === "activity" || activeTab === "world") && (
-        <div className="pb-[93px]">
+        <div className="relative z-10 pb-[93px]">
           <MainContent
             onReservar={() => setReservarOpen(true)}
             onOpenFab={() => setFabOpen(true)}
