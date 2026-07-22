@@ -4,6 +4,14 @@
 
 ---
 
+## 2026-07-22 — PUSH: Actividad tab rebuild + daily screen iteration + profile/referral flows
+
+Committed and pushed to `origin/main` (`c5d1479`) all the work from 2026-07-21 that had accumulated uncommitted: Actividad tab rebuilt from the real app (`ActividadScreen.tsx`, new), `DayRecapSheet`, weekly NPS card removed from Train, Activity IA rework (`ProfileScreen.tsx`, new), daily screen iteration per Producto IT feedback (`ThankYouClassScreen.tsx`, `ReferralContainer.tsx`, new; `DailyWorkoutCard.tsx`, `BiggDayScreen.tsx`, `ClassDetailScreen.tsx` updated; `MonthlyNPSGrid.tsx` deleted). `pnpm build` clean before commit. Left `training-ux-research.html` (untracked, standalone research doc with no matching catchup entry) out of the commit — not part of this documented work.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
 ## 2026-07-21 — Corrección: el carousel Sueño/Pasos vuelve a Actividad, solo se sacó el título
 
 El cambio anterior ("Se sacó el carousel de recomendaciones de Actividad...") interpretó mal el pedido — el usuario aclaró: sacar solo el título "Recomendaciones basadas en tus hábitos", no las cards. Se reconstruyeron `ActividadSleepCard`/`ActividadStepsCard`/`ActividadRecommendationsCarousel` en `ActividadScreen.tsx` (mismo JSX exacto que existía antes — Sueño sin chip de Apple Health, Pasos con su chip de Garmin, mismo mecanismo de scroll-snap + dots que el `RecommendationsCarousel` de Train), y se las volvió a renderizar debajo de `MapaCorporalCard`, pero sin ningún heading arriba. Verificado en Chrome: Actividad ahora termina en Mapa corporal → carousel Sueño/Pasos directo, sin título de sección. `pnpm build` limpio, sin errores de consola.
