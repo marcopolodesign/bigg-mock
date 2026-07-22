@@ -102,6 +102,10 @@ Después de implementar cualquier cambio en un proyecto web o de UI, SIEMPRE ver
 
 <!-- Add a one-liner per session here, newest first -->
 
+- **2026-07-21:** Removed the "Recomendaciones basadas en tus hábitos" carousel from `ActividadScreen` (dead-code cleanup); added a "Ver mi actividad" CTA to Train's `SleepEntry` "Detalles de sueño" sheet, reusing `onCompleteDay` to switch to the Actividad tab (same pattern as `NutritionEntry`'s "Ver mi semana").
+- **2026-07-21:** `DayRecapSheet` — reused `DailyWorkoutCard`'s "Así fue tu día" recap pattern (now exported `NPSStatus`/`NPS_STATUS_META`) for any tapped day in `ActividadScreen`'s Semanal bars and Mensual calendar grid, with deterministic per-day mock status coloring.
+- **2026-07-21:** Activity page IA rework — Objetivo + Mis Pesos moved out of the daily timeline into a new `ProfileScreen` (opened via the header avatar, shared by Train + Actividad tabs); BIGG Benchmark moved to a new `BenchmarkContainer` on the Train tab only.
+- **2026-07-21:** Bottom nav reordered/relabeled (Train/Actividad/BIGG World/Comunidad); "Social" filter removed from timeline; Referral program moved out of daily screen into new `ThankYouClassScreen` (post-class, provisional trigger via "Finalizar clase" on `ClassDetailScreen`); `NutritionEntry` reworked (manual what/when fields, collapsible tags, Guardar → BIGG Nutrition upsell); today's timeline now defaults sleep to approved and chains nutrition-save → upsell → day-status recap → Actividad tab.
 - **2026-06-08:** `BlockCard` rediseñado para matchear Pádel — layout columna izq (Druk title + badge modalidad + movimientos) + columna der (SVG reloj de `svgPaths`). Removido pill de duración y badge "BLOQUE X" del card.
 - **2026-06-05:** Racha de actividad real-time — `buildWeekStrip()` desde `new Date()`; `ONBOARDING_TRAINING_DAYS` muestra dashed-lime en días futuros programados; V (hoy) con ring negro punteado; racha y texto motivacional dinámicos.
 - **2026-06-05:** Timeline unificado — se eliminó "Para completar tu día"; un solo timeline (10AM BIGG Class → 18:00hs Running pasadas → Afternoon Mobility); `WhyLine` estandarizado inline en todas las cards.

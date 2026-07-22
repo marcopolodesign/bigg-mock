@@ -14,7 +14,6 @@ import imgSocialImage3 from "../../imports/BiggDay/b292cbcf40664006c8d7417ba5e71
 import imgSocialImage4 from "../../imports/BiggDay/c7e91abf0983739fe423cb74e6d1c3b8d494aa30.png";
 import imgEllipse167 from "../../imports/BiggDay/0bdccca1063fe17c8030deb1278cb4c21c493290.png";
 import DailyWorkoutCard, { type ReservedClass, type ActivityEntry } from "../components/DailyWorkoutCard";
-import MonthlyNPSGrid from "../components/MonthlyNPSGrid";
 import SourceChip from "../components/SourceChip";
 import WhyLine from "../components/WhyLine";
 import BottomSheet from "../components/BottomSheet";
@@ -22,7 +21,10 @@ import ReservarSheet from "../components/ReservarSheet";
 import FloatingActionButton from "../components/FloatingActionButton";
 import ProgrammingScreen from "../components/ProgrammingScreen";
 import ClassDetailScreen from "../components/ClassDetailScreen";
+import ThankYouClassScreen from "../components/ThankYouClassScreen";
 import BiggWorldScreen from "../components/BiggWorldScreen";
+import ProfileScreen from "../components/ProfileScreen";
+import ActividadScreen from "../components/ActividadScreen";
 
 // ─── Today's scheduled activities ────────────────────────────────────────────
 
@@ -912,6 +914,45 @@ function MembershipContainer() {
   );
 }
 
+// ─── BIGG Benchmark — Train tab only ───────────────────────────────────────────
+// Ported from biggapp Components/Benchmark/BenchmarkActivity.js. In the real app this sits
+// half-width next to "Mis Pesos" inside the Activity tail; here it's promoted to its own
+// full-width section on the Train tab (see IA rework — Objetivo + Mis Pesos moved to
+// ProfileScreen, Benchmark stays on Train). Shows the "has a result" state — no equivalent
+// benchmark_small.png asset exists in this mock, so it reuses imgPerformanceImage1 (BIGG gym
+// wall photo, already imported below) for the dark/graphite textured background.
+
+function BenchmarkContainer() {
+  return (
+    <div
+      className="relative w-full min-h-[150px] rounded-[8px] overflow-hidden flex flex-col justify-between p-[20px]"
+      style={{ backgroundImage: `url(${imgPerformanceImage1})`, backgroundSize: "cover", backgroundPosition: "center" }}
+      data-name="Benchmark Container"
+    >
+      <div
+        className="absolute inset-0"
+        style={{ backgroundImage: "linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.4) 45%, rgba(0,0,0,0.65) 100%)" }}
+      />
+      <div className="relative z-10 flex flex-col gap-[4px]">
+        <p className="font-['MessinaSansWeb:Bold',sans-serif] text-white text-[13px] tracking-[-0.39px]">
+          BIGG Benchmark
+        </p>
+        <p className="font-['Druk_Wide:Medium',sans-serif] text-white text-[44px] leading-[0.9] tracking-[-2.2px]">
+          78%
+        </p>
+      </div>
+      <div className="relative z-10 flex flex-col gap-[2px]">
+        <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-white text-[13px] tracking-[-0.26px]">
+          14 Julio 2026
+        </p>
+        <p className="font-['MessinaSansWeb:Regular',sans-serif] text-white/70 text-[12px] tracking-[-0.24px]">
+          Último resultado del benchmark
+        </p>
+      </div>
+    </div>
+  );
+}
+
 // ─── Performance ──────────────────────────────────────────────────────────────
 
 function PerformanceButton() {
@@ -1042,58 +1083,6 @@ function PerformanceContainer() {
   );
 }
 
-// ─── Referral ─────────────────────────────────────────────────────────────────
-
-function ReferralIcon() {
-  return (
-    <div className="relative shrink-0 size-[31.166px]" data-name="Referral Icon">
-      <svg className="absolute block inset-0 size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 31.166 31.166">
-        <g id="Referral Icon">
-          <circle cx="15.583" cy="15.583" fill="#DEFFA3" id="Ellipse 313" r="15.583" />
-          <path d={svgPaths.p352b3e00} fill="#3D3D3D" id="Vector" />
-        </g>
-      </svg>
-    </div>
-  );
-}
-
-function ReferralText() {
-  return (
-    <div className="[word-break:break-word] content-stretch flex flex-col gap-[3px] items-start leading-[normal] not-italic relative shrink-0 text-[#3d3d3d] w-full" data-name="Referral Text">
-      <p className="font-['MessinaSansWeb:Bold',sans-serif] relative shrink-0 text-[16px] tracking-[-0.48px] w-full">Programa de referidos</p>
-      <p className="font-['MessinaSansWeb:Regular',sans-serif] relative shrink-0 text-[13px] tracking-[-0.39px] w-full">Invitá a un amigo/a a entrenar con vos y ganá premios</p>
-    </div>
-  );
-}
-
-function ReferralButton() {
-  return (
-    <div className="bg-[#adff19] content-stretch flex items-center justify-center px-[10px] py-[7.5px] relative rounded-[100px] shrink-0" data-name="Referral Button">
-      <p className="[word-break:break-word] font-['MessinaSansWeb:Bold',sans-serif] leading-[normal] not-italic relative shrink-0 text-[#3d3d3d] text-[13px] tracking-[-0.39px] whitespace-nowrap">Cambiale la vida a un amigo/a</p>
-    </div>
-  );
-}
-
-function ReferralContent() {
-  return (
-    <div className="content-stretch flex flex-col gap-[12px] items-start relative shrink-0 w-[285.771px]" data-name="Referral Content">
-      <ReferralText />
-      <ReferralButton />
-    </div>
-  );
-}
-
-function ReferralContainer() {
-  return (
-    <div className="bg-[rgba(255,255,255,0.5)] relative rounded-[8px] shrink-0 w-full" data-name="Referral Container">
-      <div className="content-stretch flex gap-[11px] items-start p-[20px] relative size-full">
-        <ReferralIcon />
-        <ReferralContent />
-      </div>
-    </div>
-  );
-}
-
 // ─── Social ───────────────────────────────────────────────────────────────────
 
 function SocialContent2() {
@@ -1215,7 +1204,7 @@ function SocialContainer() {
 
 // ─── Main scroll content ───────────────────────────────────────────────────────
 
-function MainContent({ onReservar, onOpenFab, onOpenDetail, onOpenProgramming, isToday, isFutureDay, selectedDate, todayReservedClass, cardVariant = 3, showMonthlyNPS = false }: { onReservar: () => void; onOpenFab: () => void; onOpenDetail: (rc: ReservedClass) => void; onOpenProgramming: () => void; isToday: boolean; isFutureDay: boolean; selectedDate: Date; todayReservedClass: ReservedClass | null; cardVariant?: 1 | 2 | 3 | 4; showMonthlyNPS?: boolean }) {
+function MainContent({ onReservar, onOpenFab, onOpenDetail, onOpenProgramming, onCompleteDay, isToday, isFutureDay, selectedDate, todayReservedClass, cardVariant = 3 }: { onReservar: () => void; onOpenFab: () => void; onOpenDetail: (rc: ReservedClass) => void; onOpenProgramming: () => void; onCompleteDay: () => void; isToday: boolean; isFutureDay: boolean; selectedDate: Date; todayReservedClass: ReservedClass | null; cardVariant?: 1 | 2 | 3 | 4 }) {
   const dateKey = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}`;
   const pastData = isToday ? undefined : PAST_DAYS[dateKey];
 
@@ -1242,13 +1231,6 @@ function MainContent({ onReservar, onOpenFab, onOpenDetail, onOpenProgramming, i
     // pt clears the fixed StickyHeader (greeting + week calendar, no status bar)
     <div className="flex flex-col gap-[16px] items-center w-full px-[20px] pt-[153px]">
 
-      {/* ── Monthly NPS recap — Actividad tab only ── */}
-      {showMonthlyNPS && (
-        <div className="w-full max-w-[388px] mb-[8px]">
-          <MonthlyNPSGrid />
-        </div>
-      )}
-
       {/* ── Timeline — same module every day ── */}
       <div className="w-full max-w-[388px] mb-[24px]">
         <DailyWorkoutCard
@@ -1263,11 +1245,12 @@ function MainContent({ onReservar, onOpenFab, onOpenDetail, onOpenProgramming, i
           showMorning={!isRestDay && !isSaturday}
           showAfternoon={true}
           isFutureDay={isFutureDay}
+          isToday={isToday}
+          onCompleteDay={onCompleteDay}
           blockTitles={blockTitles}
           weatherNote={isSunday ? { temp: "24°", caption: "Día ideal para entrenar afuera. Ver bloques de BIGG Outdoors" } : undefined}
           showRunClub={isWednesday || isSaturday}
           defaultLocation={isSunday ? "BIGG Outdoors" : undefined}
-          showWeeklyNPS={isSunday}
         />
       </div>
 
@@ -1297,6 +1280,12 @@ function MainContent({ onReservar, onOpenFab, onOpenDetail, onOpenProgramming, i
       <div className="w-full max-w-[388px]">
         <ActivityContainer />
       </div>
+      {/* BIGG Benchmark — Train tab only (moved here from the Activity tail, see IA rework) */}
+      {cardVariant === 3 && (
+        <div className="w-full max-w-[388px]">
+          <BenchmarkContainer />
+        </div>
+      )}
       <div className="w-full max-w-[388px]">
         <Group17 />
       </div>
@@ -1310,20 +1299,23 @@ function MainContent({ onReservar, onOpenFab, onOpenDetail, onOpenProgramming, i
       <div className="hidden w-full max-w-[388px]">
         <PerformanceContainer />
       </div>
-      <div className="w-full max-w-[388px]">
-        <ReferralContainer />
-      </div>
+      {/* Referral program moved to ThankYouClassScreen (post-class flow) — see ReferralContainer.tsx */}
     </div>
   );
 }
 
 // ─── Fixed header ─────────────────────────────────────────────────────────────
 
-function Frame43() {
+function Frame43({ onClick }: { onClick?: () => void }) {
   return (
-    <div className="relative shrink-0 size-[38px]">
-      <img alt="" className="absolute block inset-0 max-w-none size-full" height="38" src={imgEllipse167} width="38" />
-    </div>
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label="Abrir perfil"
+      className="relative shrink-0 size-[38px] rounded-full active:opacity-70 transition-opacity"
+    >
+      <img alt="" className="absolute block inset-0 max-w-none size-full rounded-full" height="38" src={imgEllipse167} width="38" />
+    </button>
   );
 }
 
@@ -1388,11 +1380,11 @@ function Frame5() {
   );
 }
 
-function Frame14() {
+function Frame14({ onOpenProfile }: { onOpenProfile?: () => void }) {
   return (
     <div className="flex items-center justify-between relative shrink-0 w-full">
       <div className="flex items-center gap-[12px]">
-        <Frame43 />
+        <Frame43 onClick={onOpenProfile} />
         <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] font-['MessinaSansWeb:Bold',sans-serif] leading-[normal] not-italic text-[#565656] text-[16px] tracking-[-0.4px] whitespace-nowrap">Hola Mateo!</p>
       </div>
       <Frame5 />
@@ -1487,7 +1479,7 @@ function WeekCalendar({
 }
 
 
-function StickyHeader({ today, selectedDate, onSelectDate, scrollY }: { today: Date; selectedDate: Date; onSelectDate: (d: Date) => void; scrollY: number }) {
+function StickyHeader({ today, selectedDate, onSelectDate, scrollY, onOpenProfile }: { today: Date; selectedDate: Date; onSelectDate: (d: Date) => void; scrollY: number; onOpenProfile?: () => void }) {
   const titleRowRef = useRef<HTMLDivElement>(null);
   const [maxCollapse, setMaxCollapse] = useState(62);
 
@@ -1510,7 +1502,7 @@ function StickyHeader({ today, selectedDate, onSelectDate, scrollY }: { today: D
       <div className="w-full max-w-[388px]">
         <div className="content-stretch flex flex-col gap-[12px] items-start relative shrink-0 w-full">
           <div ref={titleRowRef} className="w-full">
-            <Frame14 />
+            <Frame14 onOpenProfile={onOpenProfile} />
           </div>
           <WeekCalendar today={today} selectedDate={selectedDate} onSelectDate={onSelectDate} />
         </div>
@@ -1574,10 +1566,10 @@ function PlaceholderTabContent({ label }: { label: string }) {
 type BottomTabId = "activity" | "world" | "community" | "perfil";
 
 const BOTTOM_TABS: { id: BottomTabId; label: string; Icon: React.ElementType }[] = [
-  { id: "world",     label: "Opción 3",    Icon: Globe },
-  { id: "perfil",    label: "BIGG World",  Icon: Globe },
-  { id: "activity",  label: "Opción 2", Icon: Activity },
-  { id: "community", label: "Comunidad", Icon: Users },
+  { id: "world",     label: "Train",      Icon: Globe },
+  { id: "activity",  label: "Actividad",  Icon: Activity },
+  { id: "perfil",    label: "BIGG World", Icon: Globe },
+  { id: "community", label: "Comunidad",  Icon: Users },
 ];
 
 function BottomNav({ activeTab, onTabChange }: { activeTab: BottomTabId; onTabChange: (id: BottomTabId) => void }) {
@@ -1629,6 +1621,8 @@ export default function BiggDayScreen() {
   const [programmingOpen, setProgrammingOpen] = useState(false);
   const [classDetailOpen, setClassDetailOpen] = useState(false);
   const [detailClass, setDetailClass] = useState<ReservedClass | null>(null);
+  const [thankYouOpen, setThankYouOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const [todayReservedClass, setTodayReservedClass] = useState<ReservedClass | null>(null);
   const [headerScrollY, setHeaderScrollY] = useState(0);
   const [today] = useState(() => {
@@ -1701,20 +1695,25 @@ export default function BiggDayScreen() {
       </div>
 
       {/* Tab content */}
-      {(activeTab === "activity" || activeTab === "world") && (
+      {activeTab === "world" && (
         <div className="relative z-10 pb-[93px]">
           <MainContent
             onReservar={() => setReservarOpen(true)}
             onOpenFab={() => setFabOpen(true)}
             onOpenDetail={(rc) => { setDetailClass(rc); setClassDetailOpen(true); }}
             onOpenProgramming={() => setProgrammingOpen(true)}
+            onCompleteDay={() => setActiveTab("activity")}
             isToday={isToday}
             isFutureDay={isFutureDay}
             selectedDate={selectedDate}
             todayReservedClass={todayReservedClass}
-            cardVariant={activeTab === "activity" ? 2 : 3}
-            showMonthlyNPS={activeTab === "activity"}
+            cardVariant={3}
           />
+        </div>
+      )}
+      {activeTab === "activity" && (
+        <div className="relative z-10 pb-[93px]">
+          <ActividadScreen onOpenProfile={() => setProfileOpen(true)} onOpenFab={() => setFabOpen(true)} />
         </div>
       )}
       {activeTab === "perfil" && (
@@ -1725,7 +1724,7 @@ export default function BiggDayScreen() {
       {activeTab === "community" && <CommunityTabContent />}
 
       {/* Fixed overlays */}
-      {(activeTab === "activity" || activeTab === "world") && <StickyHeader today={today} selectedDate={selectedDate} onSelectDate={setSelectedDate} scrollY={headerScrollY} />}
+      {activeTab === "world" && <StickyHeader today={today} selectedDate={selectedDate} onSelectDate={setSelectedDate} scrollY={headerScrollY} onOpenProfile={() => setProfileOpen(true)} />}
       <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
       <FloatingActionButton open={fabOpen} onOpenChange={setFabOpen} onVerProgramacion={() => setProgrammingOpen(true)} />
 
@@ -1766,7 +1765,25 @@ export default function BiggDayScreen() {
             reservedClass={detailClass}
             onBack={() => setClassDetailOpen(false)}
             onOpenProgramming={() => { setClassDetailOpen(false); setProgrammingOpen(true); }}
+            onFinishClass={() => { setClassDetailOpen(false); setThankYouOpen(true); }}
           />
+        )}
+      </AnimatePresence>
+
+      {/* Thank-you / post-class screen — provisional trigger via "Finalizar clase" until a real class-completion flow exists */}
+      <AnimatePresence>
+        {thankYouOpen && (
+          <ThankYouClassScreen
+            reservedClass={detailClass}
+            onClose={() => setThankYouOpen(false)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Profile screen — triggered by the avatar button in StickyHeader (Train + Actividad tabs) */}
+      <AnimatePresence>
+        {profileOpen && (
+          <ProfileScreen onClose={() => setProfileOpen(false)} />
         )}
       </AnimatePresence>
 

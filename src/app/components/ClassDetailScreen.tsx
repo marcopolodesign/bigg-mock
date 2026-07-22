@@ -122,9 +122,11 @@ interface ClassDetailScreenProps {
   reservedClass: ReservedClass;
   onBack: () => void;
   onOpenProgramming?: () => void;
+  /** Provisional stand-in for a real "class finished" trigger — opens ThankYouClassScreen. */
+  onFinishClass?: () => void;
 }
 
-export default function ClassDetailScreen({ reservedClass, onBack, onOpenProgramming }: ClassDetailScreenProps) {
+export default function ClassDetailScreen({ reservedClass, onBack, onOpenProgramming, onFinishClass }: ClassDetailScreenProps) {
   const blocks = reservedClass.blocks.map(parseBlock);
 
   return (
@@ -239,12 +241,24 @@ export default function ClassDetailScreen({ reservedClass, onBack, onOpenProgram
       </div>
 
       {/* ── Fixed bottom CTA ── */}
-      <div className="shrink-0 px-[16px] pt-[10px] pb-[28px] bg-[#ededed] border-t border-[#e0e0e0]">
+      <div className="shrink-0 px-[16px] pt-[10px] pb-[28px] bg-[#ededed] border-t border-[#e0e0e0] flex flex-col gap-[10px]">
         <button className="w-full bg-[#adff19] rounded-[16px] py-[16px] flex items-center justify-center active:opacity-80 transition-opacity">
           <span className="font-['MessinaSansWeb:Bold',sans-serif] text-[#1a3d00] text-[16px] tracking-[-0.32px]">
             Iniciar clase
           </span>
         </button>
+        {/* Provisional — stands in for a real "class finished" trigger until that flow exists */}
+        {onFinishClass && (
+          <button
+            type="button"
+            onClick={onFinishClass}
+            className="w-full border border-[#3d3d3d] rounded-[16px] py-[14px] flex items-center justify-center active:opacity-70 transition-opacity"
+          >
+            <span className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[#3d3d3d] text-[14px] tracking-[-0.28px]">
+              Finalizar clase
+            </span>
+          </button>
+        )}
       </div>
 
     </motion.div>

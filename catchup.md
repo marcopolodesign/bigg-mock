@@ -4,6 +4,147 @@
 
 ---
 
+## 2026-07-21 — Corrección: el carousel Sueño/Pasos vuelve a Actividad, solo se sacó el título
+
+El cambio anterior ("Se sacó el carousel de recomendaciones de Actividad...") interpretó mal el pedido — el usuario aclaró: sacar solo el título "Recomendaciones basadas en tus hábitos", no las cards. Se reconstruyeron `ActividadSleepCard`/`ActividadStepsCard`/`ActividadRecommendationsCarousel` en `ActividadScreen.tsx` (mismo JSX exacto que existía antes — Sueño sin chip de Apple Health, Pasos con su chip de Garmin, mismo mecanismo de scroll-snap + dots que el `RecommendationsCarousel` de Train), y se las volvió a renderizar debajo de `MapaCorporalCard`, pero sin ningún heading arriba. Verificado en Chrome: Actividad ahora termina en Mapa corporal → carousel Sueño/Pasos directo, sin título de sección. `pnpm build` limpio, sin errores de consola.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-07-21 — Se sacó el carousel de recomendaciones de Actividad + CTA "Ver mi actividad" en el sheet de sueño de Train
+
+Dos cambios chicos y acotados:
+
+- **`ActividadScreen.tsx`** — se eliminó por completo la sección "Recomendaciones basadas en tus hábitos" (el `<ActividadRecommendationsCarousel />` con sus cards `ActividadSleepCard`/`ActividadStepsCard`, portado en la sesión anterior desde el patrón `RecommendationsCarousel` de Train). Se borraron también las 3 funciones y el array `ACTIVIDAD_RECOMMENDATION_ITEMS`, ya sin ningún consumidor tras confirmarlo con grep. Se limpiaron los imports que quedaron sin uso: `SourceChip` (solo lo usaba el chip Garmin de `ActividadStepsCard`) y `useCallback`/`useRef` (solo los usaba el scroll-handler del carousel). La página ahora termina en "Mapa corporal". El `RecommendationsCarousel`/`SleepCard`/`StepsCard` de Train (`BiggDayScreen.tsx`) no se tocaron — cleanup exclusivo de Actividad.
+- **`DailyWorkoutCard.tsx`** — el bottomsheet "Detalles de sueño" de `SleepEntry` (Train) no tenía ningún CTA de cierre, terminaba después de los tags de recuperación. Se agregó un botón "Ver mi actividad" al pie (fondo `#8b78e6`, mismo indigo/violeta que ya usa el sheet en "Ver todos" y en los tags seleccionados de recuperación; mismo patrón visual full-width/rounded-[16px]/py-[16px] que el CTA "Guardar" de `NutritionEntry`). Se agregó `onCompleteDay?: () => void` a la interfaz de `SleepEntry` (antes solo tenía `approval`/`onApprovalChange`) y se reusó — sin inventar un callback nuevo — el mismo `onCompleteDay` que ya recibe `DailyWorkoutCard` desde `BiggDayScreen` (`onCompleteDay={() => setActiveTab("activity")}`) y que `NutritionEntry` ya usaba para su "Ver mi semana". El único call site de `<SleepEntry>` dentro de `DailyWorkoutCard` ahora le pasa `onCompleteDay={onCompleteDay}`. Tap en el botón cierra el sheet y cambia el tab activo a Actividad.
+- **Verificado en Chrome (390×844):** Train → tap en "Dormiste 7h 12m — ¿Descansaste bien?" abre "Sueño de anoche" con el botón "Ver mi actividad" visible al pie; tap en el botón cierra el sheet y navega a Actividad (bottom nav resalta "Actividad", header muestra "Actividad" + Strike de Actividad + Mapa corporal). Actividad tab standalone confirmado sin el carousel de recomendaciones — scrolleando hasta el final la página termina en "Mapa corporal", sin huecos de layout. Sin errores de consola (solo un warning preexistente de vaul/Radix sobre `Description`/`aria-describedby` en `DialogContent`, presente en todos los `BottomSheet` del repo, no introducido por este cambio). `pnpm build` limpio, sin imports huérfanos ni variables sin uso.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-07-21 — DayRecapSheet: "Así fue tu día" reutilizable para cualquier día en Actividad
+
+Se llevó el patrón de bottomsheet de recap de día (hasta ahora hardcodeado a "hoy" dentro de `NutritionEntry` en `DailyWorkoutCard.tsx`) al tab Actividad, parametrizado por fecha, y se conectó a los dos toggles de `StrikeActividadModule` (Semanal/Mensual).
+
+- **`DailyWorkoutCard.tsx`** — `NPSStatus` y `NPS_STATUS_META` (antes privados del archivo) ahora se exportan, para que `ActividadScreen` los reutilice. Cambio puramente aditivo — el resto del archivo no se tocó.
+- **`ActividadScreen.tsx` (nuevo)**:
+  - `DayRecapSheet` — mismo patrón visual que el recap "Así fue tu día" de `NutritionEntry` (título Druk, dot + label de estado, checklist de 4 factores con círculo verde+Check o rojo+ThumbsDown), pero recibe `date: Date | null` en vez de estar atado a "hoy". Sin CTA al pie (dismiss-only vía drag-down/backdrop, igual que otros sheets del repo) — no hay a dónde navegar desde acá como sí lo había en el flujo de nutrición.
+  - `getMockDayFactors(date)` — factores mock deterministas por día del mes: `día%3≠0` (Entrenaste), `día%4≠0` (Actividad), `día%8≠0` (Dormiste), `día%2≠0` (Comiste). Elegidos así (en vez del `%5` sugerido para "Dormiste") para que el set mock de días activos (3,7,9,11,14,16) y la semana mock (20-26 jul) den variedad real de verde/amarillo/rojo — verificado 1:1 en Chrome: 3→amarillo, 7→verde, 9→amarillo, 11→verde, 14→amarillo, 16→rojo.
+  - **Semanal (`WeeklyBarChart`)** — cada columna de día (L-D) es un `<button>` tappable (incluidas las columnas en 0, para cubrir el recap de sueño/nutrición de un día de descanso); color de la barra = `NPS_STATUS_META[status].color` en vez de lime uniforme cuando hay minutos > 0, gris neutro si no. `WEEK_START` (nuevo const, 2026-07-20 lunes) ancla las 7 columnas a fechas reales dentro del rango mostrado ("Jul. 20 - 26"), consistentes con la grilla mensual si el mismo día aparece en ambas vistas.
+  - **Mensual (grilla de calendario)** — todo día del mes actual (no los de padding del mes adyacente, que quedan `disabled`) es tappable y abre `DayRecapSheet`; los círculos de los días "activos" (mock set 3,7,9,11,14,16) ahora usan el color de estado en vez de lime uniforme.
+  - Estado `recapDate: Date | null` vive en `StrikeActividadModule`, compartido por ambas vistas — un solo `<DayRecapSheet>` al final del componente.
+- **Verificado en Chrome (390×844):** Semanal — tap en la barra amarilla (martes 21/jul) abrió "Martes 21 de julio · Bien" con 3/4 factores positivos; tap en la barra verde (jueves 23/jul) abrió "Excelente" con 4/4; tap en una columna en 0 (viernes 24/jul, sin barra visible) igual abrió su recap, "A mejorar" con 0/4. Mensual — círculos ahora muestran colores distintos (3 amarillo, 7 verde, 9 amarillo, 11 verde, 14 amarillo, 16 rojo — se ven los 3 colores, no uniforme); tap en un día plano sin círculo (10) abrió su propio recap ("Bien"); confirmado via DOM que los días de padding del mes anterior (29/30 de junio) están `disabled` y no abren nada, mientras los días 29/30/31 dentro de julio sí responden. Sin errores de consola tras recargar la página completa.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-07-21 — Actividad tab reconstruida desde cero (referencia real de `biggapp`) + NPS semanal sacado de Train
+
+El usuario marcó que el tab Actividad estaba "todo mal" — reusaba el timeline diario de Train (`MainContent`/`DailyWorkoutCard`, "Tu BIGG day") más una grilla NPS mensual inventada, sin base en la app real. Se reconstruyó comparando contra `biggapp` (rama `newhome`, recién pulleada tras resolver el acceso al repo — ver nota de acceso más abajo) y contra screenshots reales del usuario.
+
+- **`src/app/components/ActividadScreen.tsx` (nuevo)** — pantalla standalone para el tab Actividad, ya NO comparte `StickyHeader` ni `MainContent` con Train:
+  - **Header propio** (no fijo, scrollea con el contenido): avatar (abre Profile vía `onOpenProfile`) + título "Actividad" centrado + botón circular "+" (abre el FAB vía `onOpenFab`).
+  - **`StrikeActividadModule`** — toggle Semanal/Mensual (pill lime en el activo). Semanal: card blanca con mini bar-chart (grid "1h 0m"/"0h 30m", barras L-M-M-J-V-S-D) + fila de stats BLOQUES/MÁS ELEGIDO/TIEMPO ACTIVO + banner degradé verde con ícono sparkle y copy motivacional, pegado sin gap debajo de la card. Mensual: número grande Druk + "Días de actividad" + grilla de calendario del mes actual (algoritmo portado 1:1 de `biggapp/Components/StrikeDays/StrikeMonth.js` — primer/último día del mes alineados a Lunes/Domingo con días del mes adyacente atenuados; días "con actividad" en círculo lime — mock: 3, 7, 9, 11, 14, 16).
+  - **`MapaCorporalCard`** — card blanca full-width con el SVG real del cuerpo, portado path-por-path de `biggapp/Components/StrikeDays/BodyMapFront.tsx` (mismo `viewBox`, mismos `d` de cada grupo muscular) — piernas (cuádriceps + gemelos/tibiales) coloreadas lime, resto de los grupos en gris neutro `#D6D6D6` (igual al color default real).
+  - **`ActividadRecommendationsCarousel`** — mismo mecanismo de scroll-snap + dots que el carousel de Train (`RecommendationsCarousel`), con 2 cards: `ActividadSleepCard` (copia de `SleepCard` de Train SIN el chip "Datos de Apple Health", pedido explícito del usuario) y `ActividadStepsCard` (copia de `StepsCard` de Train, con su chip "Datos de Garmin" intacto — el usuario solo pidió sacar el de sueño). Se duplicó el JSX en vez de exportar `SleepCard`/`StepsCard` desde `BiggDayScreen.tsx` para no romper la convención del repo (`components/` no importa de `screens/`).
+- **`BiggDayScreen.tsx`** — Train y Actividad dejaron de compartir el mismo render: `MainContent`/`StickyHeader` ahora solo montan en `activeTab === "world"` (Train); Actividad monta `<ActividadScreen>` en su propio branch. Se sacó `cardVariant={2}`/`showMonthlyNPS` de `MainContent` (ya sin uso) y el import de `MonthlyNPSGrid`.
+- **`src/app/components/MonthlyNPSGrid.tsx` — eliminado** (la grilla NPS inventada, ya sin ningún consumidor).
+- **`WeeklyNPSCard` + `WEEKLY_NPS_MOCK` eliminados de `DailyWorkoutCard.tsx`** (pedido explícito: sacar el NPS de Train) — `showWeeklyNPS` sacado de `DailyWorkoutCardProps` y de su único call site en `MainContent`. `NPSStatus`/`NPS_STATUS_META` se mantuvieron intactos: los sigue usando el bottomsheet de recap del día (feature distinta, no tocar).
+- **Nota de acceso:** `biggapp` vivía en Bitbucket (credencial de app-password deprecada, bloqueaba `git pull`) — el usuario corrigió el remote real a `git@github.com:biggfit/biggapp.git` y se sumó acceso al org; se re-clonó `origin`, se hizo checkout de `newhome` (rama activa real, más actualizada que el viejo `master` local) y se confirmó que `Weights.js`/`BenchmarkActivity.js` son idénticos a lo ya portado — solo `Objetives.js` tuvo un cambio interno sin impacto visual.
+- **Verificado en Chrome (390×844):** Actividad — header sin calendario semanal, Semanal↔Mensual togglea correctamente (grilla mensual matchea 1:1 el screenshot de referencia: "6 Días de actividad", días 3/7/9/11/14/16 en lime, 29-30 y 1-2 atenuados), Mapa corporal con piernas lime y resto gris, carousel Sueño (sin chip)/Pasos (con chip Garmin) con dots funcionando, avatar sigue abriendo Profile desde este tab. Train — domingo 26/07 sin "Tu NPS semanal" en ningún punto del timeline (confirmado scrolleando hasta el final: Racha → BIGG Benchmark → BIGG MOVE → Membership, sin card NPS). `pnpm build` limpio, sin errores de consola en ninguno de los 2 tabs.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-07-21 — Nutrición + Wind down: cards a opacidad completa
+
+- Card "¿Comiste bien hoy?" (`NutritionEntry` en `DailyWorkoutCard.tsx`): gradiente translúcido (`rgba(242,153,74,0.16→0.08)`) reemplazado por gradiente sólido `#fce8d8 → #fdf1e6` (mismo tono naranja, sin ver el fondo del timeline detrás).
+- Card "Wind down" (`WindDownCard`): gradiente `rgba(255,255,255,0.95)/rgba(235,231,255,0.95)` reemplazado por `#ffffff → #ebe7ff` sólido.
+- Verificado en Chrome (día actual, martes): ambas cards se ven opacas, sin transparencia de fondo.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-07-21 — Activity tail reorganizado: Objetivo + Mis Pesos → nueva Profile screen, BIGG Benchmark → Train tab
+
+Port de la IA rework pedida sobre `biggapp`'s Activity page: de sus 3 componentes "tail" (Objetivo, Mis Pesos, BIGG Benchmark), los dos primeros se movieron a una pantalla de Perfil nueva y el tercero pasó al tab Train.
+
+- **`src/app/components/ProfileScreen.tsx` (nuevo)** — full-screen overlay (mismo patrón spring que `ThankYouClassScreen`/`ClassDetailScreen`, z-index 67). Header: back nav "Volver" (mismo SVG chevron que `ClassDetailScreen`), avatar circular (reusa `imgEllipse167`) con badge de lápiz superpuesto (`Pencil` lime sobre círculo `#3d3d3d`), nombre "Mateo", línea "Miembro desde 2023 · 4 amigos", pill "Editar" (decorativo). Debajo: `ObjetivoCard` (ported de `biggapp/Components/Objetives/Objetives.js` — solo el estado "con objetivo", foto de fondo dimmed + "Objetivo" + "GANAR FUERZA" (Druk, uppercase) + chevron + "Plan de entrenamiento: **Fuerza & Hipertrofia 12 semanas**" subrayado) y `MisPesosCard` (ported de `Components/Weights/Weights.js` — medio ancho ya que no tiene pareja acá, `Dumbbell` icon + botón circular chevron + "Mis Pesos" / "Ver todos" en gris `#888`). Cierra con 2 filas decorativas estáticas (Idioma con bandera 🇦🇷, Cerrar sesión) + versión app, inspirado en el tail del `Profile.js` real (sin picker/i18n/sign-out real — fuera de alcance).
+- **`BiggDayScreen.tsx`** — `Frame43` (avatar del header) envuelto en `<button>` con `onClick` prop; prop threading `onOpenProfile` a través de `Frame14` → `StickyHeader` (que ya es compartido entre Train y Actividad, así que un solo wiring cubre ambos tabs). Nuevo estado `profileOpen`, renderizado como overlay `AnimatePresence` igual que `thankYouOpen`/`classDetailOpen`.
+- **`BenchmarkContainer` (nueva función en `BiggDayScreen.tsx`)** — ported de `biggapp/Components/Benchmark/BenchmarkActivity.js`, estado "con resultado": "BIGG Benchmark" label + "78%" (Druk, blanco) sobre foto oscura (`imgPerformanceImage1`, ya importada — pared de gimnasio con pesas, no hay equivalente al `benchmark_small.png` real) con scrim oscuro para legibilidad, más "14 Julio 2026" + "Último resultado del benchmark". Renderizada en `MainContent`'s common sections, gateada `cardVariant === 3` (Train únicamente) — `MainContent` es compartido con Actividad (`cardVariant === 2`) así que el gate evita que aparezca ahí.
+- **Judgment calls:** (1) Objetivo usa `imgPerformanceImage` (foto de persona haciendo deadlift) en vez de `imgRectangle1025` (ya usada por `Group17`/BIGG MOVE en el mismo Train tab) para evitar repetir la misma foto en pantalla. (2) Benchmark usa texto blanco sobre scrim oscuro (no texto oscuro como en el diseño real) porque la foto sustituta no tiene una zona clara — consistente con el tratamiento de Objetivo/BIGG MOVE en este mock. (3) Mis Pesos quedó a `w-[47%]` (media-ancho aproximado) ya que no tiene pareja en Profile.
+- **Verificado en Chrome (390×844):** avatar abre Profile desde Train y desde Actividad, Objetivo + Mis Pesos se ven correctamente, "Volver" cierra y devuelve al tab de origen (probado ambos). BIGG Benchmark aparece en Train (arriba de BIGG MOVE) y NO aparece en Actividad (Racha de actividad → BIGG MOVE directo, confirmado con screenshot). Sin errores de consola.
+- **Nota:** el dev server quedó corriendo en el puerto 5175 con `--strictPort` — había 2 instancias vieja/stale (5173, 5174) de sesiones previas que maté antes de levantar la correcta.
+- **Flag para el usuario:** detecté HMR updates y mtime reciente en `DailyWorkoutCard.tsx` y un diff de +280 líneas en ese archivo (más `ClassDetailScreen.tsx`) que yo no toqué — parece indicar otra sesión de Claude Code activa en paralelo sobre este mismo repo (hay ~9 procesos `claude` corriendo en la máquina). No interferí con esos archivos; mis cambios están acotados a `ProfileScreen.tsx` (nuevo) y las secciones puntuales editadas en `BiggDayScreen.tsx` listadas arriba.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-07-21 — Bottom nav reorder/relabel + placeholder labels fijados
+
+- `BOTTOM_TABS` en `BiggDayScreen.tsx` reordenado y relabeleado: **Train** (Globe, `id: "world"`) → **Actividad** (Activity, `id: "activity"`) → **BIGG World** (Globe, `id: "perfil"`) → **Comunidad** (Users, `id: "community"`). Antes tenía placeholders "Opción 3"/"Opción 2" y el orden world→perfil→activity→community. Solo se tocó el array — ningún `id` ni `activeTab === "..."` condicional cambió, así que es cero-riesgo de comportamiento.
+- Verificado en Chrome: nav lee "Train / Actividad / BIGG World / Comunidad" en ese orden, tabs siguen funcionando igual.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-07-21 — Se quitó el filtro "Social" del timeline
+
+- `TIMELINE_FILTERS` en `DailyWorkoutCard.tsx` — eliminada la entrada `{ key: "social", label: "Social" }`; el tipo `TimelineFilter` también perdió `"social"` (no tenía otros usos fuera del archivo, confirmado con grep global). El bottom sheet de filtro ahora muestra 4 opciones: Todos / Entrenamiento y actividad / Sueño / Nutrición.
+- `showRunClubContent` (BIGG Run Club, Mié/Sáb) ya no depende de `selectedFilter === "social"` — ahora es simplemente `showRunClub && showTrainingContent`, visible en "Todos" y "Entrenamiento y actividad" como cualquier otro contenido de entrenamiento.
+- `isFilterEmpty` / el empty-state ("Todavía no hay actividad de...") se mantuvo intacto — sigue siendo alcanzable para Sueño/Nutrición en días futuros (`isFutureDay`), no era exclusivo de Social.
+- Verificado en Chrome: bottom sheet de filtro muestra 4 opciones, Run Club sigue apareciendo miércoles/sábado en Todos/Entrenamiento.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-07-21 — Programa de referidos movido a nueva pantalla "ThankYouClass" (post-clase)
+
+- Se sacó `<ReferralContainer />` del final de `MainContent` en `BiggDayScreen.tsx` (ya no vive en el timeline diario).
+- `ReferralIcon`/`ReferralText`/`ReferralButton`/`ReferralContent`/`ReferralContainer` se extrajeron a un componente nuevo y reusable: `src/app/components/ReferralContainer.tsx` (export default `ReferralContainer`) — en vez de duplicar el JSX o dejarlo muerto en `BiggDayScreen.tsx`, se movió una sola vez y ahora lo importa `ThankYouClassScreen`.
+- **Nueva pantalla `src/app/components/ThankYouClassScreen.tsx`** — full-screen "clase finalizada": header con check en círculo oscuro + "¡Entrenamiento completado!" + nombre/hora/ubicación de la clase (mismo lenguaje visual que `ClassDetailScreen`, gradient blanco→lime, borde `#a3a3a3`), seguido del `ReferralContainer` como CTA principal de la pantalla. Botón "Cerrar" (arriba a la derecha) vuelve a la pantalla diaria.
+- **Trigger PROVISORIO**: todavía no existe un flujo real de "clase terminada" en la app. Se agregó un botón "Finalizar clase" (`onFinishClass` prop) en `ClassDetailScreen.tsx`, debajo del CTA "Iniciar clase" existente, que abre `ThankYouClassScreen`. Esto es un stand-in — cuando exista un trigger real de fin de clase, reemplazar este botón por esa lógica.
+- `BiggDayScreen.tsx`: nuevo estado `thankYouOpen`, wireado igual que `classDetailOpen`/`programmingOpen` (`AnimatePresence` + z-index 66, arriba de `ClassDetailScreen` en 65 aunque nunca coexisten).
+- Verificado en Chrome: reservar clase → tap en la card → `ClassDetailScreen` → "Finalizar clase" → `ThankYouClassScreen` desliza con el mensaje + programa de referidos → "Cerrar" vuelve al timeline diario. Sin errores de consola.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-07-21 — Rework del check-in de nutrición: log manual, tags colapsables, upsell BIGG Nutrition
+
+- **Se sacó el `SourceChip source="myfitnesspal"`** del sheet de detalles — el check-in de nutrición pasa a ser 100% manual (no viene de ninguna integración).
+- **Nuevos campos "¿Qué comiste?" (texto) y "Hora" (`input type="time"`)** arriba de los tags, mismo estilo de input que `AddLocationScreen` (borde `#e0e0e0`, radio 14px). Estado local, no persiste (es mock).
+- **Tags de digestión/energía colapsados por default** — nuevo toggle "Tags de digestión y energía" + `ChevronDown` que rota 180° al abrir (mismo patrón spring que el acordeón de `FlapItem`/`showAllStats` de `SleepEntry`), en vez de mostrar los 5 chips siempre.
+- **CTA "Guardar"** al final del sheet de detalles → encadena: cierra el sheet de detalles → abre un sheet nuevo **"BIGG Nutrition"** (imagen/gradient full-width con ícono `Utensils` arriba — no había ningún asset de comida en el proyecto, así que se usó un gradient naranja con el ícono en vez de una foto — + título "Llevá tu nutrición al siguiente nivel" + copy + CTA lime "Descubrí BIGG Nutrition"). Es un promo estático — el CTA por ahora solo cierra el sheet (**provisorio**, no navega a ningún lado todavía).
+- **`NutritionEntry` se movió a un bloque standalone ARRIBA del conector vertical del timeline** (antes vivía dentro del `<div className="relative w-full">` que tiene la línea de conexión) — ahora es hermano del header "Tu BIGG day", con un título nuevo "Nutrición" (`font-Bold text-[15px]`, mismo peso que "Tu semana" en `WeeklyNPSCard`) arriba de la card. `SleepEntry` no se tocó, sigue dentro del timeline como siempre.
+- Verificado en Chrome: sheet muestra los campos nuevos + tags colapsados + Guardar; Guardar abre el sheet BIGG Nutrition con la imagen arriba; Nutrición aparece como bloque separado arriba de la línea del timeline, con su título.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
+## 2026-07-21 — Hoy: sueño pre-aprobado + flujo de cierre de día (nutrición → upsell → recap → Actividad)
+
+- **`SleepEntry` ahora es controlado** (`approval`/`onApprovalChange` props en vez de `useState` interno) — el estado vive en `DailyWorkoutCard` (`sleepApproval`) para poder leerlo desde `NutritionEntry` en el recap de fin de día. Para `isToday`, `sleepApproval` arranca en `"approved"` (el timeline de hoy se lee como si el usuario ya hubiera dicho "sí, dormí bien"), pero se puede seguir tocando/editando igual que antes.
+- El entrenamiento del día se dejó tal cual — no hay una señal limpia de "entrenamiento completado" en el mock, y forzar un indicador visual ahí hubiese sido inventar estado que no existe en ningún otro lado del código.
+- **Cadena completa, solo para HOY**: al tocar "Guardar" en el check-in de nutrición → sheet "BIGG Nutrition" (ver entrada anterior) → al cerrarlo, si `isToday`, se abre un tercer sheet **"Así fue tu día"** con: label de status (Excelente/Bien/A mejorar, reusando `NPS_STATUS_META`) + 4 filas (Entrenaste lo recomendado / Hiciste actividad / Dormiste bien / Comiste bien) con check verde o ✕ roja. "Dormiste bien" lee `sleepApproval` real; "Comiste bien" lee la aprobación de nutrición real (tratando `null` como positivo, ya que guardar el check-in implica que no hubo problema salvo que el usuario haya tocado explícitamente el thumbs-down). **"Entrenaste lo recomendado" e "Hiciste actividad" están hardcodeados en `true`** — no hay señal real de completitud de entrenamiento/actividad en este mock todavía; queda documentado acá como simplificación a resolver cuando exista ese tracking.
+- CTA final "Ver mi semana" cierra el sheet y llama `onCompleteDay()`, que sube por `NutritionEntry` → `DailyWorkoutCard` → `MainContent` → `BiggDayScreen`, donde hace `setActiveTab("activity")` (cambia a la pestaña Actividad, que muestra `MonthlyNPSGrid`).
+- **Días que no son hoy**: el sheet "BIGG Nutrition" se sigue mostrando (se ve bien como touchpoint de monetización recurrente), pero el recap "Así fue tu día" NUNCA se dispara — cerrar el upsell simplemente cierra todo y vuelve al timeline. Esto es intencional (instrucción explícita: el recap es exclusivamente de hoy).
+- Verificado en Chrome: hoy, "Dormiste... ¿Descansaste bien?" arranca con el thumb-up ya resaltado; Guardar nutrición → BIGG Nutrition → "Así fue tu día" con 4/4 verde "Excelente" → "Ver mi semana" → aterriza en pestaña Actividad con la grilla mensual visible. En un día pasado (no hoy), Guardar nutrición → BIGG Nutrition → cerrar vuelve directo al timeline sin recap ni cambio de tab.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
 ## 2026-07-14 — NPS diario/semanal/mensual (verde/amarillo/rojo)
 
 Decisiones confirmadas con el usuario antes de implementar (`AskUserQuestion`): score = conteo simple de 4 factores (entrenaste lo recomendado / hiciste actividad / dormiste bien / comiste bien) → 4/4 verde, 2-3 amarillo, 0-1 rojo; datos históricos mockeados con variedad realista (no hay tracking real de cumplimiento por día todavía); vista mensual en formato grilla de calendario.

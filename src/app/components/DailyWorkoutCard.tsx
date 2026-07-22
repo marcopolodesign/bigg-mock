@@ -14,13 +14,12 @@ const BASE_CHIPS = ["FBA", "Upper Body", "HIIT", "Midline"];
 const RECOVERY_TAGS = ["Piernas cargadas", "Espalda tensa", "Hombros", "Fatiga general", "Sin molestias"];
 const NUTRITION_TAGS = ["Hinchazón", "Con energía", "Antojos", "Buena digestión", "Pesadez"];
 
-type TimelineFilter = "todos" | "entrenamiento" | "sueno" | "nutricion" | "social";
+type TimelineFilter = "todos" | "entrenamiento" | "sueno" | "nutricion";
 const TIMELINE_FILTERS: { key: TimelineFilter; label: string }[] = [
   { key: "todos", label: "Todos" },
   { key: "entrenamiento", label: "Entrenamiento y actividad" },
   { key: "sueno", label: "Sueño" },
   { key: "nutricion", label: "Nutrición" },
-  { key: "social", label: "Social" },
 ];
 const BIGG_LOCATIONS = new Set(["BIGG Recoleta", "BIGG Tortuguitas"]);
 
@@ -38,60 +37,13 @@ const CONNECTED_PILL_STYLE: CSSProperties = {
 // Weekly NPS recap — mocked variety since there's no real per-day completion tracking yet.
 // Score = count of 4 factors (trained recommended / did activity / slept well / ate well):
 // 4/4 green, 2-3 yellow, 0-1 red. Today's own day is always "pending" (not finished yet).
-type NPSStatus = "green" | "yellow" | "red" | "pending";
-const NPS_STATUS_META: Record<NPSStatus, { color: string; label: string }> = {
+export type NPSStatus = "green" | "yellow" | "red" | "pending";
+export const NPS_STATUS_META: Record<NPSStatus, { color: string; label: string }> = {
   green: { color: "#3ecf5f", label: "Excelente" },
   yellow: { color: "#f8b32e", label: "Bien" },
   red: { color: "#ff5c5c", label: "A mejorar" },
   pending: { color: "#c4c4c4", label: "En curso" },
 };
-const WEEKLY_NPS_MOCK: { day: string; status: NPSStatus }[] = [
-  { day: "Lunes", status: "green" },
-  { day: "Martes", status: "green" },
-  { day: "Miércoles", status: "yellow" },
-  { day: "Jueves", status: "green" },
-  { day: "Viernes", status: "yellow" },
-  { day: "Sábado", status: "red" },
-  { day: "Domingo", status: "pending" },
-];
-
-function WeeklyNPSCard() {
-  return (
-    <div className="relative z-10 w-full rounded-[16px] overflow-hidden bg-white" style={{ border: "1px solid rgba(0,0,0,0.08)" }}>
-      <div className="flex flex-col gap-[2px] p-[16px]">
-        <p className="font-['MessinaSansWeb:Bold',sans-serif] text-[15px] text-[#3d3d3d] tracking-[-0.3px]">
-          Tu semana
-        </p>
-        <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[12px] text-[#6b7280] tracking-[-0.24px]">
-          Entrenamiento, actividad, sueño y nutrición combinados
-        </p>
-      </div>
-      <div className="flex flex-col">
-        {WEEKLY_NPS_MOCK.map((row, i) => {
-          const meta = NPS_STATUS_META[row.status];
-          return (
-            <div
-              key={row.day}
-              className="flex items-center justify-between px-[16px] py-[12px]"
-              style={{ borderTop: i > 0 ? "1px solid rgba(0,0,0,0.06)" : "none" }}
-            >
-              <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[14px] text-[#3d3d3d] tracking-[-0.28px]">
-                {row.day}
-              </p>
-              <div className="flex items-center gap-[8px]">
-                <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[13px]" style={{ color: meta.color }}>
-                  {meta.label}
-                </p>
-                <div className="rounded-full size-[10px] shrink-0" style={{ background: meta.color }} />
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
 const DAY_BLOCKS: StimulusBlock[] = [
   { id: "day-fba", stimulus: "FBA", modality: "Superset · 3 sets", duration: "15'",
     movements: ["SA DB Press 3 × 10 c/lado", "Nordic Curl 3 × 8", "Copenhagen Plank 3 × 30''", "Bulgarian Split 3 × 10 c/lado"],
@@ -228,9 +180,17 @@ function TimePill({ label, style }: { label: string; style?: CSSProperties }) {
   );
 }
 
-// Sleep summary at top of timeline — quality approve/disapprove + details sheet
-function SleepEntry() {
-  const [approval, setApproval] = useState<"approved" | "rejected" | null>(null);
+// Sleep summary at top of timeline — quality approve/disapprove + details sheet.
+// Approval is controlled by the parent (DailyWorkoutCard) so it can default to
+// "approved" for today and be read elsewhere (e.g. the end-of-day status recap).
+interface SleepEntryProps {
+  approval: "approved" | "rejected" | null;
+  onApprovalChange: (value: "approved" | "rejected") => void;
+  /** Bubbles up to BiggDayScreen so "Ver mi actividad" can switch to the Actividad tab. */
+  onCompleteDay?: () => void;
+}
+
+function SleepEntry({ approval, onApprovalChange, onCompleteDay }: SleepEntryProps) {
   const [showToast, setShowToast] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -243,7 +203,7 @@ function SleepEntry() {
 
   const handleApproval = (e: MouseEvent, value: "approved" | "rejected") => {
     e.stopPropagation();
-    setApproval(value);
+    onApprovalChange(value);
     setShowToast(true);
     if (toastTimeout.current) clearTimeout(toastTimeout.current);
     toastTimeout.current = setTimeout(() => setShowToast(false), 4000);
@@ -253,6 +213,12 @@ function SleepEntry() {
     if (toastTimeout.current) clearTimeout(toastTimeout.current);
     setShowToast(false);
     setShowDetails(true);
+  };
+
+  // "Ver mi actividad" CTA — close the sheet and switch to the Actividad tab.
+  const handleViewActivity = () => {
+    setShowDetails(false);
+    onCompleteDay?.();
   };
 
   return (
@@ -372,18 +338,44 @@ function SleepEntry() {
               })}
             </div>
           </div>
+          <button
+            type="button"
+            onClick={handleViewActivity}
+            className="w-full mt-[4px] rounded-[16px] py-[16px] flex items-center justify-center active:opacity-80 transition-opacity"
+            style={{ background: "#8b78e6" }}
+          >
+            <span className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[15px] text-white tracking-[-0.3px]">
+              Ver mi actividad
+            </span>
+          </button>
         </div>
       </BottomSheet>
     </>
   );
 }
 
-// Nutrition check-in — same pattern as SleepEntry (approve/disapprove + toast + details sheet)
-function NutritionEntry() {
+// Nutrition check-in — same pattern as SleepEntry (approve/disapprove + toast + details sheet),
+// plus a manual "what/when" log, collapsible digestion tags, and a Guardar CTA that chains into
+// a BIGG Nutrition upsell sheet and (today only) an end-of-day status recap.
+interface NutritionEntryProps {
+  /** Chains Guardar → upsell → day-status recap, and enables the "Ver mi semana" CTA. */
+  isToday?: boolean;
+  /** Today's sleep-approval state, read into the day-status recap's "Dormiste bien" row. */
+  sleepApproval?: "approved" | "rejected" | null;
+  /** Bubbles up to BiggDayScreen so "Ver mi semana" can switch to the Actividad tab. */
+  onCompleteDay?: () => void;
+}
+
+function NutritionEntry({ isToday = false, sleepApproval = null, onCompleteDay }: NutritionEntryProps) {
   const [approval, setApproval] = useState<"approved" | "rejected" | null>(null);
   const [showToast, setShowToast] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [tagsOpen, setTagsOpen] = useState(false);
+  const [whatEaten, setWhatEaten] = useState("");
+  const [mealTime, setMealTime] = useState("");
+  const [showUpsell, setShowUpsell] = useState(false);
+  const [showDayStatus, setShowDayStatus] = useState(false);
   const toastTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const toggleTag = (tag: string) => {
@@ -404,6 +396,35 @@ function NutritionEntry() {
     setShowDetails(true);
   };
 
+  // Guardar → close details, open the BIGG Nutrition upsell promo sheet
+  const handleSaveDetails = () => {
+    setShowDetails(false);
+    setShowUpsell(true);
+  };
+
+  // Upsell sheet closes (CTA tap or swipe) → today only, chain into the day-status recap
+  const handleCloseUpsell = () => {
+    setShowUpsell(false);
+    if (isToday) setShowDayStatus(true);
+  };
+
+  const handleViewWeek = () => {
+    setShowDayStatus(false);
+    onCompleteDay?.();
+  };
+
+  // Day-status factors — sleep/nutrition read real local state; training/activity have no
+  // clean per-day completion signal yet in this mock, so they're hardcoded positive (demo-only).
+  const dayFactors: { label: string; positive: boolean }[] = [
+    { label: "Entrenaste lo recomendado", positive: true },
+    { label: "Hiciste actividad", positive: true },
+    { label: "Dormiste bien", positive: sleepApproval !== "rejected" },
+    { label: "Comiste bien", positive: approval !== "rejected" },
+  ];
+  const positiveCount = dayFactors.filter((f) => f.positive).length;
+  const dayStatus: NPSStatus = positiveCount === 4 ? "green" : positiveCount >= 2 ? "yellow" : "red";
+  const dayStatusMeta = NPS_STATUS_META[dayStatus];
+
   return (
     <>
       <motion.div
@@ -412,7 +433,7 @@ function NutritionEntry() {
         whileTap={{ scale: 0.98 }}
         onClick={openDetails}
         className="relative z-10 flex items-center gap-[10px] w-full px-[16px] py-[14px] rounded-[16px] cursor-pointer"
-        style={{ background: "linear-gradient(135deg, rgba(242,153,74,0.16) 0%, rgba(242,153,74,0.08) 100%)" }}
+        style={{ background: "linear-gradient(135deg, #fce8d8 0%, #fdf1e6 100%)" }}
       >
         <Utensils size={13} className="text-[#f2994a] shrink-0" />
         <p className="flex-1 font-['MessinaSansWeb:Regular',sans-serif] text-[13px] text-[#6b7280] tracking-[-0.26px] leading-[1.2]">
@@ -466,38 +487,169 @@ function NutritionEntry() {
           <p className="font-['Druk_Wide:Medium',sans-serif] text-[20px] text-[#3d3d3d] tracking-[-0.6px] uppercase">
             Nutrición de hoy
           </p>
-          <SourceChip source="myfitnesspal" prefix="Tomado desde" />
-          <div className="flex flex-col gap-[10px]">
-            <div className="flex flex-col gap-[2px]">
-              <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[13px] text-[#3d3d3d] tracking-[-0.26px]">
-                ¿Cómo te cayó la comida?
+
+          {/* What + when — manual log, no integration */}
+          <div className="flex gap-[10px]">
+            <div className="flex-1 flex flex-col gap-[8px]">
+              <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[11px] text-[#a3a3a3] uppercase tracking-[0.8px]">
+                ¿Qué comiste?
               </p>
-              <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[12px] text-[#6b7280] tracking-[-0.24px]">
-                Sumá tags para trackear tu digestión y energía
-              </p>
+              <input
+                type="text"
+                placeholder="Ej: Pollo con arroz y ensalada"
+                value={whatEaten}
+                onChange={(e) => setWhatEaten(e.target.value)}
+                className="w-full border border-[#e0e0e0] rounded-[14px] px-[16px] py-[14px] font-['MessinaSansWeb:Regular',sans-serif] text-[15px] text-[#3d3d3d] placeholder:text-[#c4c4c4] outline-none focus:border-[#f2994a] transition-colors bg-white"
+              />
             </div>
-            <div className="flex flex-wrap gap-[8px]">
-              {NUTRITION_TAGS.map((tag) => {
-                const isSelected = selectedTags.includes(tag);
-                return (
-                  <button
-                    key={tag}
-                    type="button"
-                    onClick={() => toggleTag(tag)}
-                    className="px-[14px] py-[8px] rounded-full transition-colors active:opacity-80"
-                    style={{ background: isSelected ? "#f2994a" : "rgba(242,153,74,0.1)" }}
-                  >
-                    <span
-                      className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[13px] tracking-[-0.26px]"
-                      style={{ color: isSelected ? "#fff" : "#f2994a" }}
-                    >
-                      {tag}
-                    </span>
-                  </button>
-                );
-              })}
+            <div className="w-[104px] flex flex-col gap-[8px]">
+              <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[11px] text-[#a3a3a3] uppercase tracking-[0.8px]">
+                Hora
+              </p>
+              <input
+                type="time"
+                value={mealTime}
+                onChange={(e) => setMealTime(e.target.value)}
+                className="w-full border border-[#e0e0e0] rounded-[14px] px-[12px] py-[14px] font-['MessinaSansWeb:Regular',sans-serif] text-[15px] text-[#3d3d3d] outline-none focus:border-[#f2994a] transition-colors bg-white"
+              />
             </div>
           </div>
+
+          {/* Digestion/energy tags — collapsed behind a chevron toggle */}
+          <div className="flex flex-col gap-[10px]">
+            <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[13px] text-[#3d3d3d] tracking-[-0.26px]">
+              ¿Cómo te cayó la comida?
+            </p>
+            <button
+              type="button"
+              onClick={() => setTagsOpen((v) => !v)}
+              className="w-full flex items-center justify-between active:opacity-70 transition-opacity"
+            >
+              <span className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[13px] text-[#f2994a] tracking-[-0.26px]">
+                Tags de digestión y energía
+              </span>
+              <motion.div animate={{ rotate: tagsOpen ? 180 : 0 }} transition={{ duration: 0.18 }}>
+                <ChevronDown size={16} className="text-[#f2994a]" strokeWidth={2} />
+              </motion.div>
+            </button>
+            <AnimatePresence initial={false}>
+              {tagsOpen && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ type: "spring", stiffness: 380, damping: 38 }}
+                  style={{ overflow: "hidden" }}
+                >
+                  <div className="flex flex-wrap gap-[8px] pt-[2px]">
+                    {NUTRITION_TAGS.map((tag) => {
+                      const isSelected = selectedTags.includes(tag);
+                      return (
+                        <button
+                          key={tag}
+                          type="button"
+                          onClick={() => toggleTag(tag)}
+                          className="px-[14px] py-[8px] rounded-full transition-colors active:opacity-80"
+                          style={{ background: isSelected ? "#f2994a" : "rgba(242,153,74,0.1)" }}
+                        >
+                          <span
+                            className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[13px] tracking-[-0.26px]"
+                            style={{ color: isSelected ? "#fff" : "#f2994a" }}
+                          >
+                            {tag}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleSaveDetails}
+            className="w-full mt-[4px] rounded-[16px] py-[16px] flex items-center justify-center active:opacity-80 transition-opacity"
+            style={{ background: "#adff19" }}
+          >
+            <span className="font-['MessinaSansWeb:Bold',sans-serif] text-[15px] text-[#1a3d00] tracking-[-0.3px]">
+              Guardar
+            </span>
+          </button>
+        </div>
+      </BottomSheet>
+
+      {/* BIGG Nutrition upsell — static promo, CTA is a no-op (provisional, no destination yet) */}
+      <BottomSheet open={showUpsell} onClose={handleCloseUpsell} title="BIGG Nutrition">
+        <div className="flex flex-col pb-[32px]">
+          <div
+            className="w-full aspect-[390/180] flex items-center justify-center"
+            style={{ background: "linear-gradient(135deg, #ffdcb0 0%, #f2994a 100%)" }}
+          >
+            <Utensils size={48} className="text-white/90" strokeWidth={1.5} />
+          </div>
+          <div className="flex flex-col gap-[10px] px-[20px] pt-[20px]">
+            <p className="font-['Druk_Wide:Medium',sans-serif] text-[22px] text-[#3d3d3d] tracking-[-0.5px] uppercase leading-[1.15]">
+              Llevá tu nutrición al siguiente nivel
+            </p>
+            <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[14px] text-[#6b7280] tracking-[-0.28px] leading-[1.4]">
+              Un coach de nutrición diseña tu plan de comidas semana a semana, alineado con tu entrenamiento.
+            </p>
+            <button
+              type="button"
+              onClick={handleCloseUpsell}
+              className="w-full mt-[8px] rounded-[16px] py-[16px] flex items-center justify-center active:opacity-80 transition-opacity"
+              style={{ background: "#adff19" }}
+            >
+              <span className="font-['MessinaSansWeb:Bold',sans-serif] text-[15px] text-[#1a3d00] tracking-[-0.3px]">
+                Descubrí BIGG Nutrition
+              </span>
+            </button>
+          </div>
+        </div>
+      </BottomSheet>
+
+      {/* End-of-day status recap — today only */}
+      <BottomSheet open={showDayStatus} onClose={() => setShowDayStatus(false)} title="Así fue tu día">
+        <div className="flex flex-col gap-[16px] px-[20px] pb-[32px]">
+          <p className="font-['Druk_Wide:Medium',sans-serif] text-[20px] text-[#3d3d3d] tracking-[-0.6px] uppercase">
+            Así fue tu día
+          </p>
+          <div className="flex items-center gap-[8px]">
+            <div className="rounded-full size-[10px] shrink-0" style={{ background: dayStatusMeta.color }} />
+            <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[14px]" style={{ color: dayStatusMeta.color }}>
+              {dayStatusMeta.label}
+            </p>
+          </div>
+          <div className="flex flex-col">
+            {dayFactors.map((f) => (
+              <div key={f.label} className="flex items-center justify-between py-[12px]" style={{ borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
+                <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[14px] text-[#3d3d3d] tracking-[-0.28px]">
+                  {f.label}
+                </p>
+                <div
+                  className="rounded-full size-[24px] flex items-center justify-center shrink-0"
+                  style={{ background: f.positive ? "#3ecf5f" : "#ff5c5c" }}
+                >
+                  {f.positive
+                    ? <Check size={13} strokeWidth={2.5} className="text-white" />
+                    : <ThumbsDown size={12} strokeWidth={2} className="text-white" />
+                  }
+                </div>
+              </div>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={handleViewWeek}
+            className="w-full mt-[4px] rounded-[16px] py-[16px] flex items-center justify-center active:opacity-80 transition-opacity"
+            style={{ background: "#3d3d3d" }}
+          >
+            <span className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[15px] text-white tracking-[-0.3px]">
+              Ver mi semana
+            </span>
+          </button>
         </div>
       </BottomSheet>
     </>
@@ -513,7 +665,7 @@ function WindDownCard() {
         <TimePill label="Wind down" style={CONNECTED_PILL_STYLE} />
       </div>
       <div className="relative z-10 w-full rounded-[16px] overflow-hidden"
-        style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(235,231,255,0.95) 100%)", border: "1px solid #3d3d3d", borderTopLeftRadius: "7px", transform: "translateY(-15px)" }}>
+        style={{ background: "linear-gradient(135deg, #ffffff 0%, #ebe7ff 100%)", border: "1px solid #3d3d3d", borderTopLeftRadius: "7px", transform: "translateY(-15px)" }}>
         <div className="flex items-center justify-between px-[16px] py-[14px] gap-[12px]">
           <div className="flex flex-col gap-[2px] flex-1 min-w-0">
             <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[14px] text-[#3d3d3d] tracking-[-0.28px] leading-[1.3]">
@@ -846,11 +998,13 @@ interface DailyWorkoutCardProps {
   showRunClub?: boolean;
   /** Pre-selects a location in "Donde vas a entrenar?" instead of defaulting to BIGG Recoleta. */
   defaultLocation?: string;
-  /** Shows the weekly NPS recap at the end of the timeline — Sundays only. */
-  showWeeklyNPS?: boolean;
+  /** True for the current calendar day — defaults SleepEntry to "approved" and enables the nutrition → day-status completion flow. */
+  isToday?: boolean;
+  /** Bubbles up from the day-status recap's "Ver mi semana" CTA so the screen can switch to the Actividad tab. */
+  onCompleteDay?: () => void;
 }
 
-export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, onOpenProgramming, reservedClass, activities, showMorning = true, showAfternoon = true, cardVariant = 1, isFutureDay = false, blockTitles, weatherNote, showRunClub = false, defaultLocation = "BIGG Recoleta", showWeeklyNPS = false }: DailyWorkoutCardProps) {
+export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, onOpenProgramming, reservedClass, activities, showMorning = true, showAfternoon = true, cardVariant = 1, isFutureDay = false, blockTitles, weatherNote, showRunClub = false, defaultLocation = "BIGG Recoleta", isToday = false, onCompleteDay }: DailyWorkoutCardProps) {
   const [selectedLocation, setSelectedLocation] = useState(defaultLocation);
   const [showLocationSheet, setShowLocationSheet] = useState(false);
   const [locationSheetFromCta, setLocationSheetFromCta] = useState(false);
@@ -860,6 +1014,8 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
   const [openFlapId, setOpenFlapId] = useState<string | null>(null);
   const [selectedFilter, setSelectedFilter] = useState<TimelineFilter>("todos");
   const [showFilterSheet, setShowFilterSheet] = useState(false);
+  // Today's timeline reads as already complete except nutrition — sleep defaults to "approved".
+  const [sleepApproval, setSleepApproval] = useState<"approved" | "rejected" | null>(isToday ? "approved" : null);
   const isBiggLocation = BIGG_LOCATIONS.has(selectedLocation);
   const isOutdoorsLocation = selectedLocation === "BIGG Outdoors";
   const activeFilterLabel = TIMELINE_FILTERS.find((f) => f.key === selectedFilter)?.label ?? "Todos";
@@ -867,8 +1023,8 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
   // Sleep/nutrition check-ins report on last night / today — never valid for a day that hasn't happened yet
   const showSleepContent = !isFutureDay && (selectedFilter === "todos" || selectedFilter === "sueno");
   const showNutritionContent = !isFutureDay && (selectedFilter === "todos" || selectedFilter === "nutricion");
-  // Run Club also counts as "Social" content, in addition to training days (Wed/Sat)
-  const showRunClubContent = showRunClub && (showTrainingContent || selectedFilter === "social");
+  // Run Club appears on training days (Wed/Sat) whenever training content is visible
+  const showRunClubContent = showRunClub && showTrainingContent;
   const isFilterEmpty = !showTrainingContent && !showSleepContent && !showNutritionContent && !showRunClubContent;
 
   const handleLocationSelect = (loc: string) => {
@@ -940,12 +1096,13 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
         <ChevronDown size={14} className="text-[#565656] shrink-0" strokeWidth={2} />
       </button>
     </div>
+
     <div className="relative w-full">
       <div className="absolute left-[22px] top-0 bottom-0 w-[2.5px] bg-[#3d3d3d] z-0" />
       <div className="flex flex-col items-start gap-[24px]">
 
         {/* Sleep summary — timeline starts here */}
-        {showSleepContent && <SleepEntry />}
+        {showSleepContent && <SleepEntry approval={sleepApproval} onApprovalChange={setSleepApproval} onCompleteDay={onCompleteDay} />}
 
         {/* BIGG Class at 10AM */}
         {showMorning && showTrainingContent && (
@@ -1241,7 +1398,7 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
           </div>
         ))}
 
-        {/* Run Club recommendation — Wed/Sat, above Mobility; also counts as "Social" content */}
+        {/* Run Club recommendation — Wed/Sat, above Mobility */}
         {showRunClubContent && (
           <div className="relative z-10 flex flex-col items-start w-full">
             <div className="relative z-10 flex flex-row items-center gap-[10px]">
@@ -1265,25 +1422,22 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
           </div>
         )}
 
-        {/* Nutrition check-in */}
-        {showNutritionContent && <NutritionEntry />}
-
-        {/* Wind-down recommendation */}
-        {showSleepContent && <WindDownCard />}
-
-        {/* Weekly NPS recap — end of day, Sundays only */}
-        {showWeeklyNPS && (
+        {/* Nutrition check-in — same connected tab-pill treatment as Wind down, always directly above it */}
+        {showNutritionContent && (
           <div className="relative z-10 flex flex-col items-start w-full">
             <div className="relative z-10 flex flex-row items-center gap-[10px]">
-              <TimePill label="Tu NPS semanal" style={CONNECTED_PILL_STYLE} />
+              <TimePill label="Nutrición" style={CONNECTED_PILL_STYLE} />
             </div>
             <div className="relative z-10 w-full" style={{ transform: "translateY(-15px)" }}>
-              <WeeklyNPSCard />
+              <NutritionEntry isToday={isToday} sleepApproval={sleepApproval} onCompleteDay={onCompleteDay} />
             </div>
           </div>
         )}
 
-        {/* Empty state for filters with no matching content yet (Social) */}
+        {/* Wind-down recommendation */}
+        {showSleepContent && <WindDownCard />}
+
+        {/* Empty state for filters with no matching content yet (e.g. sueño/nutrición on a future day) */}
         {isFilterEmpty && (
           <div className="relative z-10 w-full py-[40px] flex flex-col items-center gap-[6px]">
             <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[14px] text-[#a3a3a3] tracking-[-0.28px]">
