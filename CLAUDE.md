@@ -102,7 +102,8 @@ Después de implementar cualquier cambio en un proyecto web o de UI, SIEMPRE ver
 
 <!-- Add a one-liner per session here, newest first -->
 
-- **2026-07-28:** La fila del timeline ahora es Nutrición + **Pasos de hoy** (`StepsEntry`); `WindDownCard` se mudó al carrusel de recomendaciones de Train reemplazando a `SleepCard` (borrada). ⚠️ Pasos quedó duplicado con el `StepsCard` del carrusel — pendiente de decisión.
+- **2026-07-28:** Sacado el `StepsCard` del carrusel de recomendaciones (duplicaba el `StepsEntry` del timeline); el carrusel queda Padel → Wind down → Lower Body y `SourceChip` dejó de importarse en `BiggDayScreen`.
+- **2026-07-28:** La fila del timeline ahora es Nutrición + **Pasos de hoy** (`StepsEntry`); `WindDownCard` se mudó al carrusel de recomendaciones de Train reemplazando a `SleepCard` (borrada).
 - **2026-07-28:** Nutrición y Wind down ahora comparten una fila 50/50 al final del timeline (`flex-1` por columna, así el que sobrevive al filtro activo ocupa el ancho completo solo).
 - **2026-07-28:** `DailyWorkoutCard` variant 3 — sólo el **contenido** del card del día sin clase cambió: acordeones `FlapItem` → título Druk "ENTRENAMIENTO DE BIGG" + grilla 2×2 de chips chicos no expandibles. El card en sí (wrapper oscuro, header, indicador de adaptación, CTA con sede) quedó igual. `FlapItem`/`FLAP_OVERLAP`/`openFlapId` borrados por quedar sin uso.
 - **2026-07-22:** Pushed to `origin/main` (`c5d1479`) all accumulated 2026-07-21 work: Actividad tab rebuild, DayRecapSheet, Activity IA rework, daily screen iteration.

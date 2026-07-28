@@ -14,7 +14,6 @@ import imgSocialImage3 from "../../imports/BiggDay/b292cbcf40664006c8d7417ba5e71
 import imgSocialImage4 from "../../imports/BiggDay/c7e91abf0983739fe423cb74e6d1c3b8d494aa30.png";
 import imgEllipse167 from "../../imports/BiggDay/0bdccca1063fe17c8030deb1278cb4c21c493290.png";
 import DailyWorkoutCard, { type ReservedClass, type ActivityEntry } from "../components/DailyWorkoutCard";
-import SourceChip from "../components/SourceChip";
 import WhyLine from "../components/WhyLine";
 import BottomSheet from "../components/BottomSheet";
 import ReservarSheet from "../components/ReservarSheet";
@@ -336,58 +335,6 @@ function WindDownCard() {
   );
 }
 
-function StepsCard() {
-  const current = 3200;
-  const goal = 10000;
-  const pct = Math.min((current / goal) * 100, 100);
-
-  return (
-    <div className="relative rounded-[20px] shrink-0 w-full">
-      <div
-        className="overflow-clip relative rounded-[20px] w-full"
-        style={{ backgroundImage: "linear-gradient(70.32deg, rgb(237, 237, 237) 1.58%, rgb(222, 255, 163) 73.75%)" }}
-      >
-        <div className="flex flex-col h-[260px] p-[15px] gap-[10px]">
-          {/* Label */}
-          <p className="font-['MessinaSansWeb:Bold',sans-serif] text-[#585858] text-[8px] tracking-[-0.08px] uppercase whitespace-nowrap shrink-0">
-            PASOS DE HOY
-          </p>
-
-          {/* Big count */}
-          <div className="flex items-baseline gap-[6px] flex-1">
-            <p className="font-['Druk_Wide:Medium',sans-serif] text-[#3d3d3d] text-[48px] leading-[1] tracking-[-2px]">
-              3.200
-            </p>
-            <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[#585858] text-[18px] leading-[1] tracking-[-0.5px]">
-              / 10.000
-            </p>
-          </div>
-
-          {/* Progress bar */}
-          <div className="shrink-0 flex flex-col gap-[6px]">
-            <div className="w-full h-[8px] rounded-full bg-black/10 overflow-hidden">
-              <div
-                className="h-full rounded-full"
-                style={{ width: `${pct}%`, background: '#3d6b00' }}
-              />
-            </div>
-            <div className="flex justify-between">
-              <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[#585858] text-[9px]">0</p>
-              <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[#585858] text-[9px]">10.000</p>
-            </div>
-          </div>
-
-          {/* Recommendation */}
-          <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[#585858] text-[11px] leading-[1.4] tracking-[-0.22px] shrink-0">
-            Caminá 6.800 pasos más para alcanzar tu objetivo diario
-          </p>
-          <SourceChip source="garmin" prefix="Datos de" />
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // ─── Recommendations carousel ─────────────────────────────────────────────────
 
 const RECOMMENDATION_ITEMS = [
@@ -413,7 +360,6 @@ const RECOMMENDATION_ITEMS = [
     ),
   },
   { subtitle: "Preparate para descansar mejor", card: <WindDownCard /> },
-  { subtitle: "Movete más durante el día", card: <StepsCard /> },
   {
     subtitle: "Balanceá tu entrenamiento",
     card: (

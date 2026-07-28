@@ -4,6 +4,20 @@
 
 ---
 
+## 2026-07-28 — Sacado el `StepsCard` del carrusel de recomendaciones
+
+Cierre de la duplicación marcada en la entrada anterior: los pasos aparecían dos veces en Train — el `StepsEntry` nuevo del timeline y el `StepsCard` del carrusel ("Movete más durante el día"), con los mismos 3.200/10.000 a un scroll de distancia. Mateo pidió sacar el del carrusel.
+
+Borrado `StepsCard` de `BiggDayScreen.tsx` junto con su item de `RECOMMENDATION_ITEMS`. El carrusel queda en 3 items: Padel → Wind down → Lower Body. Con eso `SourceChip` dejó de usarse en el archivo (era su única referencia después de haber borrado `SleepCard`), así que también se sacó el import — el componente sigue vivo, lo usan `ActivityCard`/`StepsEntry` en `DailyWorkoutCard` y `ActividadStepsCard` en `ActividadScreen`.
+
+Nota: el carrusel ya estaba gateado por `isToday` en `MainContent`, así que "de las recomendaciones de hoy" no requirió condicional nuevo — es el único lugar donde se renderiza.
+
+Verificado en Chrome a 390×844: 3 dots en el carrusel, Wind down seguido directo por Lower Body, sin card de pasos. `pnpm build` limpio.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
 ## 2026-07-28 — Pasos del día en el timeline; Wind down movido a las recomendaciones
 
 Dos cambios encadenados, a pedido de Mateo:
@@ -16,7 +30,7 @@ Cambió también el gate: Wind down colgaba de `showSleepContent`, pero los paso
 
 Hubo que agregar `motion` (de `motion/react`) y `Plus` (de `lucide-react`) a los imports de `BiggDayScreen.tsx` — no estaban, y la card nueva los usa.
 
-**⚠️ Pendiente de decisión de Mateo:** el carrusel ya tenía un `StepsCard` ("Movete más durante el día", mismos 3.200/10.000). Ahora los pasos aparecen dos veces en la pestaña Train, a un scroll de distancia. No se tocó porque no estaba en el pedido — la salida natural sería sacar el `StepsCard` del carrusel ahora que el timeline cubre el dato.
+**Duplicación de pasos:** el carrusel ya tenía un `StepsCard` ("Movete más durante el día", mismos 3.200/10.000), así que los pasos quedaron dos veces en Train. Se dejó así en este commit y se marcó — resuelto en la entrada de arriba (Mateo pidió sacar el del carrusel).
 
 Verificado en Chrome a 390×844: fila Nutrición+Pasos pareja, card de Wind down completa dentro de los 260px con el botón visible, y el toggle de agregar funcionando. `pnpm build` limpio.
 
