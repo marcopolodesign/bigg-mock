@@ -267,8 +267,46 @@ function WorkoutCard({ gradient, title, badge, exercises, drawerBadge, drawerBod
 // the Nutrición check-in (that slot now shows the day's step count). Replaces the old
 // SleepCard in the carousel; last night's sleep is still reported by the timeline's
 // own SleepEntry, so the two weren't both needed here.
+//
+// The recommendation is derived from tomorrow's first session rather than being a fixed
+// 22:00 nudge: the whole point of winding down tonight is the training you have tomorrow,
+// so the card names that session and works backwards to the window that protects it.
+// Mock stand-in for "tomorrow's first booked/planned session" — set to null to see the
+// generic fallback copy (no session tomorrow).
+const NEXT_SESSION: { time: string; label: string; location: string } | null = {
+  time: "08:00",
+  label: "BIGG Class",
+  location: "BIGG Recoleta",
+};
+/** Hours of sleep the window is built to protect. */
+const SLEEP_TARGET_H = 8;
+/** Time to be up and moving before the session starts (wake → eat → travel). */
+const PRE_SESSION_BUFFER_MIN = 60;
+/** How long before lights-out the wind-down routine should start. */
+const WIND_DOWN_MIN = 45;
+
+const toMin = (t: string) => {
+  const [h, m] = t.split(":").map(Number);
+  return h * 60 + m;
+};
+const fromMin = (n: number) => {
+  const x = ((n % 1440) + 1440) % 1440;
+  return `${String(Math.floor(x / 60)).padStart(2, "0")}:${String(x % 60).padStart(2, "0")}`;
+};
+
+/**
+ * Session time → the window to start winding down. Walks backwards: wake early enough to
+ * get to the session, sleep SLEEP_TARGET_H before that, and begin the routine
+ * WIND_DOWN_MIN before lights-out. An 08:00 session yields 22:15–23:00.
+ */
+function windDownWindow(sessionTime: string) {
+  const sleepBy = toMin(sessionTime) - PRE_SESSION_BUFFER_MIN - SLEEP_TARGET_H * 60;
+  return { start: fromMin(sleepBy - WIND_DOWN_MIN), end: fromMin(sleepBy) };
+}
+
 function WindDownCard() {
   const [added, setAdded] = useState(false);
+  const windDown = NEXT_SESSION ? windDownWindow(NEXT_SESSION.time) : null;
 
   return (
     <div className="relative rounded-[20px] shrink-0 w-full">
@@ -277,18 +315,20 @@ function WindDownCard() {
         style={{ background: "linear-gradient(70deg, #241a40 2%, #4a2e6e 74%)" }}
       >
         <div className="flex flex-col h-[260px] p-[15px]">
-          {/* Top row: labels + total duration */}
-          <div className="flex items-start justify-between shrink-0">
-            <div className="flex flex-col gap-[4px]">
+          {/* Top row: labels + the hour to start winding down (the actionable number) */}
+          <div className="flex items-start justify-between shrink-0 gap-[10px]">
+            <div className="flex flex-col gap-[4px] min-w-0">
               <p className="font-['MessinaSansWeb:Bold',sans-serif] text-[rgba(255,255,255,0.5)] text-[8px] tracking-[-0.08px] uppercase whitespace-nowrap">
                 RUTINA NOCTURNA
               </p>
-              <p className="font-['MessinaSansWeb:Bold',sans-serif] text-[rgba(255,255,255,0.5)] text-[8px] tracking-[-0.08px] uppercase whitespace-nowrap">
-                HOY 22:00HS
+              <p className="font-['MessinaSansWeb:Bold',sans-serif] text-[rgba(255,255,255,0.5)] text-[8px] tracking-[-0.08px] uppercase truncate">
+                {NEXT_SESSION ? `MAÑANA ${NEXT_SESSION.label} ${NEXT_SESSION.time}HS` : "SIN ENTRENAMIENTO MAÑANA"}
               </p>
             </div>
-            <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] font-['Druk_Wide:Medium',sans-serif] text-white text-[40px] leading-[1] tracking-[-2px] shrink-0">
-              10&apos;
+            {/* 34px, not the 40px the old `10'` used: a HH:MM value is ~5 glyphs wide and at 40px it
+                crowded the session label next to it into truncating. */}
+            <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] font-['Druk_Wide:Medium',sans-serif] text-white text-[34px] leading-[1] tracking-[-1.7px] shrink-0">
+              {windDown ? windDown.start : "10'"}
             </p>
           </div>
           {/* Single description line — the per-step routine breakdown was dropped 2026-07-28
@@ -296,7 +336,14 @@ function WindDownCard() {
               Content stays grouped at the top and the CTA is pinned to the bottom by the spacer
               below, so the freed space reads as deliberate air rather than a gap mid-card. */}
           <p className="mt-[10px] shrink-0 font-['MessinaSansWeb:Regular',sans-serif] text-[rgba(255,255,255,0.55)] text-[11px] leading-[1.4] tracking-[-0.22px]">
-            Respiración + stretching para bajar revoluciones antes de dormir
+            {windDown ? (
+              <>
+                Ventana ideal <span className="font-['MessinaSansWeb:SemiBold',sans-serif] text-white">{windDown.start} a {windDown.end}</span>.
+                {" "}10&apos; de respiración + stretching para dormir {SLEEP_TARGET_H}h y llegar entero a {NEXT_SESSION!.location}.
+              </>
+            ) : (
+              <>10&apos; de respiración + stretching para bajar revoluciones antes de dormir</>
+            )}
           </p>
           <div className="flex-1" />
           <motion.button
@@ -323,7 +370,10 @@ function WindDownCard() {
 // ─── Recommendations carousel ─────────────────────────────────────────────────
 
 const RECOMMENDATION_ITEMS = [
-  { subtitle: "Preparate para descansar mejor", card: <WindDownCard /> },
+  {
+    subtitle: NEXT_SESSION ? `Mañana entrenás ${NEXT_SESSION.time}` : "Preparate para descansar mejor",
+    card: <WindDownCard />,
+  },
   {
     subtitle: "Llegá mejor preparado a la cancha",
     card: (

@@ -4,6 +4,25 @@
 
 ---
 
+## 2026-07-28 — Wind down atado al entrenamiento de mañana
+
+Mateo marcó que el wind down tiene que estar relacionado con el entrenamiento: si el usuario tiene clase mañana a las 8, la card lo tiene que señalar y decir la ventana ideal de wind down. Antes era un recordatorio fijo de "HOY 22:00HS" sin ninguna relación con lo que venía después.
+
+Ahora la card se deriva de la sesión de mañana. `windDownWindow(sessionTime)` va para atrás: resta `PRE_SESSION_BUFFER_MIN` (60' para levantarse, desayunar y viajar), después `SLEEP_TARGET_H` (8h de sueño) y por último `WIND_DOWN_MIN` (45' de rutina antes de apagar la luz). Para una clase a las 08:00 da **22:15 a 23:00**.
+
+Render: sub-label "MAÑANA BIGG CLASS 08:00HS", número grande = hora de inicio de la ventana (22:15), y el cuerpo dice el rango completo — "Ventana ideal **22:15 a 23:00**. 10' de respiración + stretching para dormir 8h y llegar entero a BIGG Recoleta". El subtítulo del carrusel pasó a ser `Mañana entrenás {hora}`, que es el motivo real de la recomendación.
+
+Detalles de implementación:
+- `NEXT_SESSION` es el mock de la sesión de mañana. **Poniéndolo en `null` se ve el fallback** sin entrenamiento: copy genérico, número `10'` y subtítulo "Preparate para descansar mejor". Los tres branches están escritos, no sólo el camino feliz.
+- El número grande bajó de 40 a 34px: un valor HH:MM son ~5 glifos y a 40px apretaba el label de la sesión hasta truncarlo. Es un ajuste puntual, no el achique general de cards que se revirtió antes.
+- La variable local se llama `windDown` y no `window` — la primera versión sombreaba el objeto global.
+
+Verificado en Chrome a 390×844. `pnpm build` limpio.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
 ## 2026-07-28 — Wind down primero en el carrusel (y revertido el achique de cards)
 
 Dos pedidos encadenados que terminaron en uno solo.
