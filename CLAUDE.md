@@ -102,6 +102,7 @@ Después de implementar cualquier cambio en un proyecto web o de UI, SIEMPRE ver
 
 <!-- Add a one-liner per session here, newest first -->
 
+- **2026-07-28:** Cards del timeline = indicadores, explicación al sheet: `StepsEntry` sin `SourceChip` + sheet "Detalles de pasos" (por qué el objetivo, de dónde salen los datos). Pill renombrado a **"Actividad del día"**, ese card pasó a ser el primero del timeline (sueño debajo), y Wind down se movió al final del carrusel con menos contenido.
 - **2026-07-28:** Sacado el `StepsCard` del carrusel de recomendaciones (duplicaba el `StepsEntry` del timeline); el carrusel queda Padel → Wind down → Lower Body y `SourceChip` dejó de importarse en `BiggDayScreen`.
 - **2026-07-28:** La fila del timeline ahora es Nutrición + **Pasos de hoy** (`StepsEntry`); `WindDownCard` se mudó al carrusel de recomendaciones de Train reemplazando a `SleepCard` (borrada).
 - **2026-07-28:** Nutrición y Wind down ahora comparten una fila 50/50 al final del timeline (`flex-1` por columna, así el que sobrevive al filtro activo ocupa el ancho completo solo).

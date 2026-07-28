@@ -23,7 +23,7 @@ const TIMELINE_FILTERS: { key: TimelineFilter; label: string }[] = [
 ];
 const BIGG_LOCATIONS = new Set(["BIGG Recoleta", "BIGG Tortuguitas"]);
 
-// TimePill style shared by every non-"Entrenamiento del día" milestone — squares off
+// TimePill style shared by every non-"Actividad del día" milestone — squares off
 // the pill's bottom corners and extends it downward so the card below (pulled up via
 // translateY(-15px) on its wrapper) reads as plugged into the pill, like a folder tab.
 const CONNECTED_PILL_STYLE: CSSProperties = {
@@ -560,43 +560,109 @@ function NutritionEntry({ isToday = false, sleepApproval = null, onCompleteDay }
   );
 }
 
-// Daily step count — shares a 50/50 row with the Nutrición check-in, so it sizes
-// with `flex-1` rather than `w-full`. Imported data (hence the Garmin chip), unlike
-// the self-reported nutrition check-in beside it.
+// Daily step count. Like the Nutrición check-in beside it, the card itself is only an
+// indicator — count, goal and what's left — and everything explanatory (where the data
+// comes from, why the goal is what it is) lives in the sheet it opens on tap. That's why
+// there's no SourceChip on the card: provenance belongs in the sheet, not the indicator.
 const STEPS_TODAY = 3200;
 const STEPS_GOAL = 10000;
+const STEPS_WEEK_AVG = 6400;
 
-function StepsEntry() {
+function StepsEntry({ onCompleteDay }: { onCompleteDay?: () => void }) {
+  const [showDetails, setShowDetails] = useState(false);
   const pct = Math.min((STEPS_TODAY / STEPS_GOAL) * 100, 100);
   const remaining = Math.max(STEPS_GOAL - STEPS_TODAY, 0);
   const fmt = (n: number) => n.toLocaleString("es-AR");
 
+  const handleViewActivity = () => {
+    setShowDetails(false);
+    onCompleteDay?.();
+  };
+
   return (
-    <div className="relative z-10 flex flex-1 min-w-0 flex-col items-start">
-      <div className="relative z-10 flex flex-row items-center gap-[10px]">
-        <TimePill label="Pasos de hoy" style={CONNECTED_PILL_STYLE} />
-      </div>
-      <div className="relative z-10 w-full flex-1 rounded-[16px] overflow-hidden"
-        style={{ background: "linear-gradient(135deg, #ffffff 0%, #deffa3 100%)", border: "1px solid #3d3d3d", borderTopLeftRadius: "7px", transform: "translateY(-15px)" }}>
-        <div className="flex h-full flex-col justify-center gap-[8px] px-[16px] py-[14px]">
-          <div className="flex items-baseline gap-[4px] flex-wrap">
-            <p className="font-['Druk_Wide:Medium',sans-serif] text-[24px] text-[#3d3d3d] leading-[1] tracking-[-1px]">
-              {fmt(STEPS_TODAY)}
-            </p>
-            <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[12px] text-[#6b7280] tracking-[-0.24px]">
-              / {fmt(STEPS_GOAL)}
-            </p>
-          </div>
-          <div className="w-full h-[6px] rounded-full bg-black/10 overflow-hidden">
-            <div className="h-full rounded-full" style={{ width: `${pct}%`, background: "#3d6b00" }} />
-          </div>
-          <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[12px] text-[#6b7280] tracking-[-0.24px] leading-[1.3]">
-            Te faltan {fmt(remaining)} para tu objetivo
-          </p>
-          <SourceChip source="garmin" />
+    <>
+      <div className="relative z-10 flex flex-1 min-w-0 flex-col items-start">
+        <div className="relative z-10 flex flex-row items-center gap-[10px]">
+          <TimePill label="Pasos de hoy" style={CONNECTED_PILL_STYLE} />
         </div>
+        <motion.div
+          role="button"
+          tabIndex={0}
+          whileTap={{ scale: 0.98 }}
+          onClick={() => setShowDetails(true)}
+          className="relative z-10 w-full flex-1 rounded-[16px] overflow-hidden cursor-pointer"
+          style={{ background: "linear-gradient(135deg, #ffffff 0%, #deffa3 100%)", border: "1px solid #3d3d3d", borderTopLeftRadius: "7px", transform: "translateY(-15px)" }}
+        >
+          <div className="flex h-full flex-col justify-center gap-[8px] px-[16px] py-[14px]">
+            <div className="flex items-baseline gap-[4px] flex-wrap">
+              <p className="font-['Druk_Wide:Medium',sans-serif] text-[24px] text-[#3d3d3d] leading-[1] tracking-[-1px]">
+                {fmt(STEPS_TODAY)}
+              </p>
+              <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[12px] text-[#6b7280] tracking-[-0.24px]">
+                / {fmt(STEPS_GOAL)}
+              </p>
+            </div>
+            <div className="w-full h-[6px] rounded-full bg-black/10 overflow-hidden">
+              <div className="h-full rounded-full" style={{ width: `${pct}%`, background: "#3d6b00" }} />
+            </div>
+            <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[12px] text-[#6b7280] tracking-[-0.24px] leading-[1.3]">
+              Te faltan {fmt(remaining)}
+            </p>
+          </div>
+        </motion.div>
       </div>
-    </div>
+
+      <BottomSheet open={showDetails} onClose={() => setShowDetails(false)} title="Detalles de pasos">
+        <div className="flex flex-col gap-[16px] px-[20px] pb-[32px]">
+          <p className="font-['Druk_Wide:Medium',sans-serif] text-[20px] text-[#3d3d3d] tracking-[-0.6px] uppercase">
+            Pasos de hoy
+          </p>
+          <SourceChip source="garmin" prefix="Tomado desde" />
+          <div className="flex flex-col">
+            {[
+              { label: "Pasos de hoy", value: fmt(STEPS_TODAY) },
+              { label: "Objetivo diario", value: fmt(STEPS_GOAL) },
+              { label: "Te faltan", value: fmt(remaining) },
+              { label: "Promedio últimos 7 días", value: fmt(STEPS_WEEK_AVG) },
+            ].map((row) => (
+              <div key={row.label} className="flex items-center justify-between py-[12px]" style={{ borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
+                <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[14px] text-[#6b7280] tracking-[-0.28px]">{row.label}</p>
+                <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[14px] text-[#3d3d3d] tracking-[-0.28px]">{row.value}</p>
+              </div>
+            ))}
+          </div>
+          <div className="flex flex-col gap-[6px]">
+            <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[13px] text-[#3d3d3d] tracking-[-0.26px]">
+              ¿Por qué {fmt(STEPS_GOAL)} pasos?
+            </p>
+            <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[13px] text-[#6b7280] tracking-[-0.26px] leading-[1.4]">
+              Tu objetivo se calcula sobre tu promedio de las últimas semanas y el volumen de tu plan.
+              En días de fuerza lo bajamos para que la caminata no compita con tu recuperación, y en
+              días livianos lo subimos para sostener el gasto diario.
+            </p>
+          </div>
+          <div className="flex flex-col gap-[6px]">
+            <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[13px] text-[#3d3d3d] tracking-[-0.26px]">
+              ¿De dónde salen estos datos?
+            </p>
+            <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[13px] text-[#6b7280] tracking-[-0.26px] leading-[1.4]">
+              Se sincronizan desde Garmin durante el día. BIGG no cuenta pasos por su cuenta: si
+              desconectás la fuente, esta tarjeta deja de actualizarse.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={handleViewActivity}
+            className="w-full mt-[4px] rounded-[16px] py-[16px] flex items-center justify-center active:opacity-80 transition-opacity"
+            style={{ background: "#adff19" }}
+          >
+            <span className="font-['MessinaSansWeb:Bold',sans-serif] text-[15px] text-[#1a3d00] tracking-[-0.3px]">
+              Ver mi actividad
+            </span>
+          </button>
+        </div>
+      </BottomSheet>
+    </>
   );
 }
 
@@ -897,9 +963,9 @@ interface DailyWorkoutCardProps {
   cardVariant?: 1 | 2 | 3 | 4;
   /** Sleep check-in reports on last night — never shown for days that haven't happened yet. */
   isFutureDay?: boolean;
-  /** Overrides the 4 "Entrenamiento del día" block titles (defaults to FBA/Upper Body/HIIT/Midline). */
+  /** Overrides the 4 "Actividad del día" block titles (defaults to FBA/Upper Body/HIIT/Midline). */
   blockTitles?: string[];
-  /** Weather context merged into the "Entrenamiento del día" milestone, between the pill and the blocks. */
+  /** Weather context merged into the "Actividad del día" milestone, between the pill and the blocks. */
   weatherNote?: { temp: string; caption: string };
   /** Shows the "Run Club" recommendation milestone, above Mobility & recovery. */
   showRunClub?: boolean;
@@ -1007,9 +1073,6 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
       <div className="absolute left-[22px] top-0 bottom-0 w-[2.5px] bg-[#3d3d3d] z-0" />
       <div className="flex flex-col items-start gap-[24px]">
 
-        {/* Sleep summary — timeline starts here */}
-        {showSleepContent && <SleepEntry approval={sleepApproval} onApprovalChange={setSleepApproval} onCompleteDay={onCompleteDay} />}
-
         {/* BIGG Class at 10AM */}
         {showMorning && showTrainingContent && (
           <div
@@ -1018,7 +1081,7 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
           >
             <div className="relative z-10 flex flex-row items-center justify-between w-full">
               <TimePill
-                label="Entrenamiento del día"
+                label="Actividad del día"
                 style={cardVariant === 3 ? { padding: "12.5px 20px", backgroundColor: "unset" } : undefined}
               />
               <button
@@ -1288,6 +1351,9 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
           </div>
         )}
 
+        {/* Sleep check-in — sits below the day's activity card, which leads the timeline */}
+        {showSleepContent && <SleepEntry approval={sleepApproval} onApprovalChange={setSleepApproval} onCompleteDay={onCompleteDay} />}
+
         {/* Additional scheduled activities (e.g. Running pasadas) */}
         {showTrainingContent && activities?.map((activity, i) => (
           <div key={i} className="relative z-10 flex flex-col items-start w-full">
@@ -1339,7 +1405,7 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
                 </div>
               </div>
             )}
-            {showTrainingContent && <StepsEntry />}
+            {showTrainingContent && <StepsEntry onCompleteDay={onCompleteDay} />}
           </div>
         )}
 

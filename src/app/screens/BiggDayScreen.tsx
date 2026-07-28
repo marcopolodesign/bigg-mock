@@ -37,7 +37,7 @@ const TODAY_ACTIVITIES: ActivityEntry[] = [
   },
 ];
 
-// ─── Rotating "Entrenamiento del día" block titles — a different training focus each day ──
+// ─── Rotating "Actividad del día" block titles — a different training focus each day ──
 
 const DAY_BLOCK_TITLE_POOL = ["Strength", "Hyrox", "Cardio", "Lower Body", "Hypertrophy", "Full Body", "Pilates"];
 
@@ -269,11 +269,6 @@ function WorkoutCard({ gradient, title, badge, exercises, drawerBadge, drawerBod
 // own SleepEntry, so the two weren't both needed here.
 function WindDownCard() {
   const [added, setAdded] = useState(false);
-  const routine = [
-    { label: "Respiración guiada", detail: "4'" },
-    { label: "Stretching suave", detail: "4'" },
-    { label: "Luz baja / sin pantallas", detail: "2'" },
-  ];
 
   return (
     <div className="relative rounded-[20px] shrink-0 w-full">
@@ -296,24 +291,14 @@ function WindDownCard() {
               10&apos;
             </p>
           </div>
-          {/* Routine steps */}
-          <div className="flex flex-col justify-center gap-[7px] flex-1 py-[10px]">
-            {routine.map((step) => (
-              <div key={step.label} className="flex items-center gap-[8px]">
-                <div className="size-[5px] rounded-full shrink-0" style={{ background: "#8b78e6" }} />
-                <p className="flex-1 min-w-0 font-['MessinaSansWeb:Regular',sans-serif] text-[rgba(255,255,255,0.85)] text-[11px] tracking-[-0.22px] truncate">
-                  {step.label}
-                </p>
-                <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[rgba(255,255,255,0.45)] text-[10px] shrink-0">
-                  {step.detail}
-                </p>
-              </div>
-            ))}
-          </div>
-          {/* Recommendation */}
-          <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[rgba(255,255,255,0.55)] text-[11px] leading-[1.4] tracking-[-0.22px] shrink-0">
-            Bajá revoluciones antes de dormir para descansar mejor
+          {/* Single description line — the per-step routine breakdown was dropped 2026-07-28
+              at the user's request to make this card lighter than the workout cards beside it.
+              Content stays grouped at the top and the CTA is pinned to the bottom by the spacer
+              below, so the freed space reads as deliberate air rather than a gap mid-card. */}
+          <p className="mt-[10px] shrink-0 font-['MessinaSansWeb:Regular',sans-serif] text-[rgba(255,255,255,0.55)] text-[11px] leading-[1.4] tracking-[-0.22px]">
+            Respiración + stretching para bajar revoluciones antes de dormir
           </p>
+          <div className="flex-1" />
           <motion.button
             type="button"
             onClick={() => setAdded((v) => !v)}
@@ -359,7 +344,6 @@ const RECOMMENDATION_ITEMS = [
       />
     ),
   },
-  { subtitle: "Preparate para descansar mejor", card: <WindDownCard /> },
   {
     subtitle: "Balanceá tu entrenamiento",
     card: (
@@ -381,6 +365,7 @@ const RECOMMENDATION_ITEMS = [
       />
     ),
   },
+  { subtitle: "Preparate para descansar mejor", card: <WindDownCard /> },
 ];
 
 function RecommendationsCarousel() {

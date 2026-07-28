@@ -4,6 +4,24 @@
 
 ---
 
+## 2026-07-28 — Cards del timeline como indicadores + sheet; reordenes y rename
+
+Tanda de ajustes sobre lo anterior, todos pedidos por Mateo en la misma vuelta:
+
+**Concepto: card = indicador, sheet = explicación.** Las cards de la fila del timeline (Nutrición y Pasos) tienen que mostrar sólo el dato, y todo lo explicativo va en un bottom sheet al tocarlas. Nutrición ya funcionaba así (tap → cargar qué comiste). `StepsEntry` se adaptó: la card quedó con conteo / objetivo / barra / "Te faltan 6.800" y **se le sacó el `SourceChip` de Garmin** — la procedencia no va en el indicador. Se le agregó sheet "Detalles de pasos" con: chip de Garmin, tabla de 4 filas (hoy / objetivo / faltan / promedio últimos 7 días), "¿Por qué 10.000 pasos?" explicando que el objetivo sale del promedio de las últimas semanas y del volumen del plan (baja en días de fuerza, sube en días livianos), "¿De dónde salen estos datos?" aclarando que se sincroniza desde Garmin y que BIGG no cuenta pasos por su cuenta, y CTA "Ver mi actividad" que reusa `onCompleteDay` (mismo patrón que el sheet de sueño). Se agregó la const `STEPS_WEEK_AVG` y se threadeó `onCompleteDay` a `StepsEntry`.
+
+**Wind down al final del carrusel y con menos contenido.** El pedido fue "move the final block to the end of the list" — ambiguo, porque Lower Body ya estaba último; se interpretó como el bloque de fin de día (wind down) al final de la lista, y se avisó explícitamente por si era otra cosa. Orden nuevo: Padel → Lower Body → Wind down. Además se le sacaron las tres filas de rutina (respiración/stretching/luz baja con sus duraciones) y quedó una sola línea descriptiva. Como eso dejaba un hueco grande en el medio de los 260px, el contenido se agrupó arriba y el CTA quedó pegado abajo con un spacer `flex-1`.
+
+**Rename:** el pill del card principal pasó de "Entrenamiento del día" a **"Actividad del día"** (también se actualizaron los comentarios que lo referenciaban por nombre en `DailyWorkoutCard.tsx` y `BiggDayScreen.tsx`).
+
+**Reorden del timeline:** el card de "Actividad del día" pasó a ser el primero y el check-in de sueño ("Dormiste 7h 12m — ¿Descansaste bien?") quedó debajo. Antes el timeline abría con el sueño.
+
+Verificado en Chrome a 390×844: orden nuevo del timeline, sheet de pasos completo, wind down último en el carrusel con el CTA abajo, y el pill renombrado. `pnpm build` limpio.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
 ## 2026-07-28 — Sacado el `StepsCard` del carrusel de recomendaciones
 
 Cierre de la duplicación marcada en la entrada anterior: los pasos aparecían dos veces en Train — el `StepsEntry` nuevo del timeline y el `StepsCard` del carrusel ("Movete más durante el día"), con los mismos 3.200/10.000 a un scroll de distancia. Mateo pidió sacar el del carrusel.
