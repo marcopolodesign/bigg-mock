@@ -1,8 +1,10 @@
-import { motion } from "motion/react";
+import { useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
 import { Pencil, ChevronRight, Dumbbell } from "lucide-react";
 import imgEllipse167 from "../../imports/BiggDay/0bdccca1063fe17c8030deb1278cb4c21c493290.png";
 import imgObjetivoPhoto from "../../imports/BiggDay/f40c659e63fd5fa932f8372e95797919cca4e6f9.png";
 import imgBenchmarkPhoto from "../../imports/BiggDay/8cade1b4c1d3008a22f39d72876291dacbe66283.png";
+import ObjetivosScreen from "./ObjetivosScreen";
 
 // Profile screen — ported from biggapp's Screens/Profile/Profile.js (light version, for design
 // iteration only). Real screen has image-picker, i18n switching, sign-out/delete-account logic —
@@ -13,10 +15,12 @@ import imgBenchmarkPhoto from "../../imports/BiggDay/8cade1b4c1d3008a22f39d72876
 // ─── Objetivo card — ported from biggapp Components/Objetives/Objetives.js ────────────────────
 // Always shows the "has an objective" state (skips the empty state — more interesting visually).
 
-function ObjetivoCard() {
+function ObjetivoCard({ onOpen }: { onOpen: () => void }) {
   return (
-    <div
-      className="relative w-full min-h-[250px] rounded-[12px] overflow-hidden flex flex-col justify-end"
+    <button
+      type="button"
+      onClick={onOpen}
+      className="relative w-full min-h-[250px] rounded-[12px] overflow-hidden flex flex-col justify-end text-left active:opacity-90 transition-opacity"
       style={{ backgroundImage: `url(${imgObjetivoPhoto})`, backgroundSize: "cover", backgroundPosition: "center 20%" }}
     >
       <div className="absolute inset-0 bg-black/40" />
@@ -34,7 +38,7 @@ function ObjetivoCard() {
           Plan de entrenamiento: <span className="underline">Fuerza &amp; Hipertrofia 12 semanas</span>
         </p>
       </div>
-    </div>
+    </button>
   );
 }
 
@@ -44,7 +48,7 @@ function ObjetivoCard() {
 
 function MisPesosCard() {
   return (
-    <div className="bg-[rgba(255,255,255,0.5)] rounded-[12px] p-[20px] flex flex-col gap-[40px] w-[47%]">
+    <div className="bg-[rgba(255,255,255,0.5)] rounded-[12px] p-[20px] flex flex-col gap-[40px] flex-1 min-w-0">
       <div className="flex items-center justify-between w-full">
         <Dumbbell size={22} strokeWidth={1.75} className="text-[#3d3d3d]" />
         <div className="size-[26px] rounded-full bg-white border border-[#e0e0e0] flex items-center justify-center shrink-0">
@@ -57,6 +61,46 @@ function MisPesosCard() {
         </p>
         <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[#888888] text-[13px] tracking-[-0.26px]">
           Ver todos
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ─── BIGG Friends card ───────────────────────────────────────────────────────────────────────
+// Same shell as Mis Pesos (half-width pair), but the icon slot holds a stack of overlapping
+// avatar bubbles instead — the same treatment the reserved-class card uses for attendees.
+
+function BiggFriendsCard() {
+  const visible = 4;
+  const size = 26;
+  const overlap = 9;
+
+  return (
+    <div className="bg-[rgba(255,255,255,0.5)] rounded-[12px] p-[20px] flex flex-col gap-[40px] flex-1 min-w-0">
+      <div className="flex items-center justify-between w-full gap-[8px]">
+        <div
+          className="relative shrink-0"
+          style={{ width: `${size + (visible - 1) * (size - overlap)}px`, height: `${size}px` }}
+        >
+          {Array.from({ length: visible }).map((_, i) => (
+            <div
+              key={i}
+              className="absolute top-0 rounded-full bg-[#c8c8c8] border-[2px] border-white"
+              style={{ left: `${i * (size - overlap)}px`, width: `${size}px`, height: `${size}px` }}
+            />
+          ))}
+        </div>
+        <div className="size-[26px] rounded-full bg-white border border-[#e0e0e0] flex items-center justify-center shrink-0">
+          <ChevronRight size={13} strokeWidth={2} className="text-[#3d3d3d]" />
+        </div>
+      </div>
+      <div className="flex flex-col gap-[2px]">
+        <p className="font-['MessinaSansWeb:Bold',sans-serif] text-[#3d3d3d] text-[16px] tracking-[-0.48px]">
+          BIGG Friends
+        </p>
+        <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[#888888] text-[13px] tracking-[-0.26px]">
+          4 amigos
         </p>
       </div>
     </div>
@@ -107,7 +151,10 @@ function BenchmarkContainer() {
 }
 
 export default function ProfileScreen({ onClose }: ProfileScreenProps) {
+  const [showObjetivos, setShowObjetivos] = useState(false);
+
   return (
+    <>
     <motion.div
       className="fixed inset-0 z-[67] bg-[#ededed] flex flex-col overflow-hidden"
       initial={{ x: "100%" }}
@@ -164,12 +211,13 @@ export default function ProfileScreen({ onClose }: ProfileScreenProps) {
             </button>
           </div>
 
-          {/* ── Objetivo (moved from Activity tail) ── */}
-          <ObjetivoCard />
+          {/* ── Objetivo (moved from Activity tail) — opens the Objetivos screen ── */}
+          <ObjetivoCard onOpen={() => setShowObjetivos(true)} />
 
-          {/* ── Mis Pesos (moved from Activity tail) ── */}
-          <div className="flex w-full">
+          {/* ── Mis Pesos + BIGG Friends — half-width pair ── */}
+          <div className="flex w-full gap-[12px] items-stretch">
             <MisPesosCard />
+            <BiggFriendsCard />
           </div>
 
           {/* ── BIGG Benchmark (moved from the Train tab 2026-07-28) ── */}
@@ -206,5 +254,10 @@ export default function ProfileScreen({ onClose }: ProfileScreenProps) {
         </div>
       </div>
     </motion.div>
+
+    <AnimatePresence>
+      {showObjetivos && <ObjetivosScreen onClose={() => setShowObjetivos(false)} />}
+    </AnimatePresence>
+    </>
   );
 }
