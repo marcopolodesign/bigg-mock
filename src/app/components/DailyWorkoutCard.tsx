@@ -336,7 +336,7 @@ function NutritionEntry({ isToday = false, sleepApproval = null, onCompleteDay }
         tabIndex={0}
         whileTap={{ scale: 0.98 }}
         onClick={openDetails}
-        className="relative z-10 flex items-center gap-[10px] w-full px-[16px] py-[14px] rounded-[16px] cursor-pointer"
+        className="relative z-10 flex h-full items-center gap-[10px] w-full px-[16px] py-[14px] rounded-[16px] cursor-pointer"
         style={{ background: "linear-gradient(135deg, #fce8d8 0%, #fdf1e6 100%)" }}
       >
         <Utensils size={13} className="text-[#f2994a] shrink-0" />
@@ -560,17 +560,18 @@ function NutritionEntry({ isToday = false, sleepApproval = null, onCompleteDay }
   );
 }
 
-// Wind-down recommendation at bottom of timeline
+// Wind-down recommendation — shares a 50/50 row with the Nutrición check-in, so it
+// sizes with `flex-1` rather than `w-full`.
 function WindDownCard() {
   const [added, setAdded] = useState(false);
   return (
-    <div className="relative z-10 flex flex-col items-start w-full">
+    <div className="relative z-10 flex flex-1 min-w-0 flex-col items-start">
       <div className="relative z-10 flex flex-row items-center gap-[10px]">
         <TimePill label="Wind down" style={CONNECTED_PILL_STYLE} />
       </div>
-      <div className="relative z-10 w-full rounded-[16px] overflow-hidden"
+      <div className="relative z-10 w-full flex-1 rounded-[16px] overflow-hidden"
         style={{ background: "linear-gradient(135deg, #ffffff 0%, #ebe7ff 100%)", border: "1px solid #3d3d3d", borderTopLeftRadius: "7px", transform: "translateY(-15px)" }}>
-        <div className="flex items-center justify-between px-[16px] py-[14px] gap-[12px]">
+        <div className="flex h-full items-center justify-between px-[16px] py-[14px] gap-[12px]">
           <div className="flex flex-col gap-[2px] flex-1 min-w-0">
             <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[14px] text-[#3d3d3d] tracking-[-0.28px] leading-[1.3]">
               Rutina nocturna · 22:00hs
@@ -1321,20 +1322,23 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
           </div>
         )}
 
-        {/* Nutrition check-in — same connected tab-pill treatment as Wind down, always directly above it */}
-        {showNutritionContent && (
-          <div className="relative z-10 flex flex-col items-start w-full">
-            <div className="relative z-10 flex flex-row items-center gap-[10px]">
-              <TimePill label="Nutrición" style={CONNECTED_PILL_STYLE} />
-            </div>
-            <div className="relative z-10 w-full" style={{ transform: "translateY(-15px)" }}>
-              <NutritionEntry isToday={isToday} sleepApproval={sleepApproval} onCompleteDay={onCompleteDay} />
-            </div>
+        {/* Nutrición + Wind down — side by side at 50% each. `flex-1` (not a hard 50%)
+            so whichever one survives the active filter still fills the row on its own. */}
+        {(showNutritionContent || showSleepContent) && (
+          <div className="relative z-10 flex flex-row items-stretch gap-[10px] w-full">
+            {showNutritionContent && (
+              <div className="relative z-10 flex flex-1 min-w-0 flex-col items-start">
+                <div className="relative z-10 flex flex-row items-center gap-[10px]">
+                  <TimePill label="Nutrición" style={CONNECTED_PILL_STYLE} />
+                </div>
+                <div className="relative z-10 w-full flex-1" style={{ transform: "translateY(-15px)" }}>
+                  <NutritionEntry isToday={isToday} sleepApproval={sleepApproval} onCompleteDay={onCompleteDay} />
+                </div>
+              </div>
+            )}
+            {showSleepContent && <WindDownCard />}
           </div>
         )}
-
-        {/* Wind-down recommendation */}
-        {showSleepContent && <WindDownCard />}
 
         {/* Empty state for filters with no matching content yet (e.g. sueño/nutrición on a future day) */}
         {isFilterEmpty && (

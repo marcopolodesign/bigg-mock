@@ -4,6 +4,22 @@
 
 ---
 
+## 2026-07-28 — Nutrición y Wind down lado a lado (50/50) al final del timeline
+
+Los dos check-ins del final del timeline (`NutritionEntry` con su pill "Nutrición" y `WindDownCard`) pasaron de apilarse verticalmente a compartir una fila: wrapper `flex flex-row items-stretch gap-[10px]`, cada columna al 50%.
+
+Se usó `flex-1 min-w-0` en cada columna en vez de un `w-1/2` fijo, porque los dos se muestran condicionalmente y con distintos filtros: con el filtro "Sueño" sólo queda Wind down y con "Nutrición" sólo queda Nutrición — con `flex-1` el que sobrevive ocupa el ancho completo solo, sin necesidad de un caso especial. Verificado los tres estados (Todos / Sueño / Nutrición).
+
+Para que queden a la misma altura: `items-stretch` en la fila + `flex-1` en el wrapper interno de cada card, más `h-full` en la card de `NutritionEntry` y en la fila interna de `WindDownCard`. Sin eso la card más corta (Nutrición) flotaba arriba de su columna estirada. `WindDownCard` ahora dimensiona con `flex-1` en lugar de `w-full`.
+
+A 390px cada columna queda en ~170px, así que "¿Comiste bien hoy?" wrappea a 2 líneas y la descripción del wind down a 3 — se ve bien y ambas cards quedan parejas, pero es el límite: si se le suma texto a cualquiera de las dos conviene revisar este bloque.
+
+Verificado en Chrome a 390×844. `pnpm build` limpio.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
 ## 2026-07-28 — "Entrenamiento de BIGG" + bloques chicos dentro del card del día sin clase
 
 Cambio acotado al **contenido de los bloques** del card "Entrenamiento del día" en `DailyWorkoutCard.tsx` (`cardVariant === 3`, el único que la app realmente renderiza — 1/2/4 son opciones de comparación legacy de `comparacion-opciones.html`). El resto del card queda **exactamente igual que antes**: wrapper oscuro `#3d3d3d`, header "Entrenamiento del día" + chevron, card interno claro, indicador "Bloque cambiado para esta ubicación", y el bloque de CTA superpuesto con "Donde vas a entrenar? / {sede}" + "Reservar clase" (lime) / "Iniciar entrenamiento" (oscuro).
