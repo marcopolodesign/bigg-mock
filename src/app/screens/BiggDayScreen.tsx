@@ -1187,7 +1187,10 @@ function MainContent({ onReservar, onOpenFab, onOpenDetail, onOpenProgramming, o
           activities={activities}
           cardVariant={cardVariant}
           showMorning={!isRestDay && !isSaturday}
-          showAfternoon={true}
+          // "Mobility & recovery" hidden 2026-07-28 at the user's request — temporary, so the
+          // milestone and AfternoonRecommendationCard are left intact. Flip back to `true` to
+          // restore it on every day, or `!isToday` to keep it off today only.
+          showAfternoon={false}
           isFutureDay={isFutureDay}
           isToday={isToday}
           onCompleteDay={onCompleteDay}

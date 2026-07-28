@@ -4,6 +4,22 @@
 
 ---
 
+## 2026-07-28 — Oculto "Mobility & recovery" del timeline (temporal)
+
+Mateo pidió sacar el hito "Mobility & recovery" del timeline "por ahora". Como ya existía el prop `showAfternoon` que lo gatea, alcanzó con pasar `showAfternoon={false}` desde `MainContent` en `BiggDayScreen.tsx` — **no se borró nada**: el bloque del timeline y `AfternoonRecommendationCard` quedan intactos, así que volver atrás es cambiar una palabra. Queda un comentario en el call site explicando cómo restaurarlo (`true` para todos los días, `!isToday` para dejarlo apagado sólo hoy).
+
+Nota de interpretación: el pedido decía "for now, for today", que admite dos lecturas — apagarlo temporalmente en todos los días, o apagarlo sólo en el día de hoy. Se tomó la primera (todos los días) por ser la más simple y trivialmente reversible, y se le avisó a Mateo por si quería la otra.
+
+Detalle técnico menor: el comentario en el call site va con `//` entre atributos del JSX, no con `{/* */}` — esa forma sólo es válida entre children, no en la lista de atributos de un opening tag.
+
+Timeline resultante: Actividad del día → Dormiste bien → Running pasadas → Nutrición + Pasos → Agregar.
+
+Verificado en Chrome a 390×844. `pnpm build` limpio.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
 ## 2026-07-28 — Cards del timeline como indicadores + sheet; reordenes y rename
 
 Tanda de ajustes sobre lo anterior, todos pedidos por Mateo en la misma vuelta:
