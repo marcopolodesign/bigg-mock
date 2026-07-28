@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
-import { AnimatePresence } from "motion/react";
-import { Activity, Globe, Users, Moon, Flame, Check } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import { Activity, Globe, Users, Moon, Flame, Check, Plus } from "lucide-react";
 import { Drawer } from "vaul";
 import svgPaths from "../../imports/BiggDay/svg-03sgvqmew7";
 import imgBgHome1 from "../../imports/BiggDay/ec32944a87885236431eaada4b00483f53237695.png";
@@ -264,59 +264,72 @@ function WorkoutCard({ gradient, title, badge, exercises, drawerBadge, drawerBod
 
 // ─── Recommendation cards ─────────────────────────────────────────────────────
 
-function SleepCard() {
-  const sleepData = [7.5, 6.5, 8, 7, 8, 7, 6];
-  const sleepDays = ["L", "M", "M", "J", "V", "S", "D"];
-  const sleepMax = 9;
-  const maxBarH = 62;
+// Wind-down routine — moved here from the daily timeline, where it used to sit beside
+// the Nutrición check-in (that slot now shows the day's step count). Replaces the old
+// SleepCard in the carousel; last night's sleep is still reported by the timeline's
+// own SleepEntry, so the two weren't both needed here.
+function WindDownCard() {
+  const [added, setAdded] = useState(false);
+  const routine = [
+    { label: "Respiración guiada", detail: "4'" },
+    { label: "Stretching suave", detail: "4'" },
+    { label: "Luz baja / sin pantallas", detail: "2'" },
+  ];
 
   return (
     <div className="relative rounded-[20px] shrink-0 w-full">
       <div
         className="overflow-clip relative rounded-[20px] w-full"
-        style={{ background: "linear-gradient(70deg, #1a2040 2%, #2e1e6e 74%)" }}
+        style={{ background: "linear-gradient(70deg, #241a40 2%, #4a2e6e 74%)" }}
       >
         <div className="flex flex-col h-[260px] p-[15px]">
-          {/* Top row: labels + big number */}
+          {/* Top row: labels + total duration */}
           <div className="flex items-start justify-between shrink-0">
             <div className="flex flex-col gap-[4px]">
               <p className="font-['MessinaSansWeb:Bold',sans-serif] text-[rgba(255,255,255,0.5)] text-[8px] tracking-[-0.08px] uppercase whitespace-nowrap">
-                SUEÑO ANOCHE
+                RUTINA NOCTURNA
               </p>
               <p className="font-['MessinaSansWeb:Bold',sans-serif] text-[rgba(255,255,255,0.5)] text-[8px] tracking-[-0.08px] uppercase whitespace-nowrap">
-                OBJETIVO: 8 HORAS
+                HOY 22:00HS
               </p>
             </div>
             <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] font-['Druk_Wide:Medium',sans-serif] text-white text-[40px] leading-[1] tracking-[-2px] shrink-0">
-              6h
+              10&apos;
             </p>
           </div>
-          {/* Full-width bar chart */}
-          <div className="flex items-end flex-1 pb-[6px] pt-[8px]">
-            <div className="flex items-end w-full" style={{ gap: '4px' }}>
-              {sleepData.map((v, i) => (
-                <div key={i} className="flex flex-col items-center gap-[4px] flex-1">
-                  <div
-                    className="w-full rounded-[4px]"
-                    style={{
-                      height: `${(v / sleepMax) * maxBarH}px`,
-                      background: i === sleepData.length - 1 ? '#7b9de8' : 'rgba(255,255,255,0.2)',
-                    }}
-                  />
-                  <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[rgba(255,255,255,0.3)] text-[7px]">
-                    {sleepDays[i]}
-                  </p>
-                </div>
-              ))}
-            </div>
+          {/* Routine steps */}
+          <div className="flex flex-col justify-center gap-[7px] flex-1 py-[10px]">
+            {routine.map((step) => (
+              <div key={step.label} className="flex items-center gap-[8px]">
+                <div className="size-[5px] rounded-full shrink-0" style={{ background: "#8b78e6" }} />
+                <p className="flex-1 min-w-0 font-['MessinaSansWeb:Regular',sans-serif] text-[rgba(255,255,255,0.85)] text-[11px] tracking-[-0.22px] truncate">
+                  {step.label}
+                </p>
+                <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[rgba(255,255,255,0.45)] text-[10px] shrink-0">
+                  {step.detail}
+                </p>
+              </div>
+            ))}
           </div>
           {/* Recommendation */}
           <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[rgba(255,255,255,0.55)] text-[11px] leading-[1.4] tracking-[-0.22px] shrink-0">
-            Dormite temprano hoy para alcanzar tu objetivo mañana
+            Bajá revoluciones antes de dormir para descansar mejor
           </p>
-          <div className="shrink-0 mt-[8px]">
-            <SourceChip source="apple-health" prefix="Datos de" onDark />
-          </div>
+          <motion.button
+            type="button"
+            onClick={() => setAdded((v) => !v)}
+            whileTap={{ scale: 0.97 }}
+            className="shrink-0 mt-[8px] w-full rounded-full py-[9px] flex items-center justify-center gap-[6px] transition-colors"
+            style={{ background: added ? "#8b78e6" : "rgba(255,255,255,0.15)" }}
+          >
+            {added
+              ? <Check size={13} strokeWidth={2.5} className="text-white" />
+              : <Plus size={13} strokeWidth={2.5} className="text-white" />
+            }
+            <span className="font-['MessinaSansWeb:SemiBold',sans-serif] text-white text-[12px] tracking-[-0.24px]">
+              {added ? "Agregada a tu día" : "Agregar a mi día"}
+            </span>
+          </motion.button>
         </div>
       </div>
     </div>
@@ -399,7 +412,7 @@ const RECOMMENDATION_ITEMS = [
       />
     ),
   },
-  { subtitle: "Dormiste menos de lo ideal", card: <SleepCard /> },
+  { subtitle: "Preparate para descansar mejor", card: <WindDownCard /> },
   { subtitle: "Movete más durante el día", card: <StepsCard /> },
   {
     subtitle: "Balanceá tu entrenamiento",

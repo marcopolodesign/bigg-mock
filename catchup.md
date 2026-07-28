@@ -4,6 +4,26 @@
 
 ---
 
+## 2026-07-28 — Pasos del día en el timeline; Wind down movido a las recomendaciones
+
+Dos cambios encadenados, a pedido de Mateo:
+
+**1. Timeline (`DailyWorkoutCard.tsx`).** En la fila 50/50 del final, `WindDownCard` se reemplazó por `StepsEntry`: pill "Pasos de hoy" + conteo diario (`3.200 / 10.000` en Druk 24px), barra de progreso, "Te faltan 6.800 para tu objetivo" y chip de Garmin (sin prefijo — a ~170px de ancho "Datos de Garmin" no entra). Constantes `STEPS_TODAY`/`STEPS_GOAL` arriba del componente.
+
+Cambió también el gate: Wind down colgaba de `showSleepContent`, pero los pasos son dato de actividad, así que `StepsEntry` sigue `showTrainingContent`. Consecuencia práctica: con el filtro "Sueño" la fila desaparece por completo (queda sólo el `SleepEntry` de arriba), y con "Entrenamiento y actividad" aparece sólo Pasos a ancho completo.
+
+**2. Recomendaciones (`BiggDayScreen.tsx`).** Se borró `SleepCard` y `WindDownCard` ocupó su lugar en `RECOMMENDATION_ITEMS` (subtítulo "Preparate para descansar mejor"). Es una card nueva de 260px acorde al carrusel: gradiente violeta oscuro (`#241a40 → #4a2e6e`), labels RUTINA NOCTURNA / HOY 22:00HS, `10'` en Druk 40px, tres filas de rutina (respiración 4' / stretching 4' / luz baja 2') y un toggle "Agregar a mi día" que pasa a "Agregada a tu día" en violeta. Borrar `SleepCard` no deja hueco de contenido: el sueño de anoche lo sigue reportando el `SleepEntry` del timeline, y `ActividadScreen` conserva su propio `ActividadSleepCard`.
+
+Hubo que agregar `motion` (de `motion/react`) y `Plus` (de `lucide-react`) a los imports de `BiggDayScreen.tsx` — no estaban, y la card nueva los usa.
+
+**⚠️ Pendiente de decisión de Mateo:** el carrusel ya tenía un `StepsCard` ("Movete más durante el día", mismos 3.200/10.000). Ahora los pasos aparecen dos veces en la pestaña Train, a un scroll de distancia. No se tocó porque no estaba en el pedido — la salida natural sería sacar el `StepsCard` del carrusel ahora que el timeline cubre el dato.
+
+Verificado en Chrome a 390×844: fila Nutrición+Pasos pareja, card de Wind down completa dentro de los 260px con el botón visible, y el toggle de agregar funcionando. `pnpm build` limpio.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
 ## 2026-07-28 — Nutrición y Wind down lado a lado (50/50) al final del timeline
 
 Los dos check-ins del final del timeline (`NutritionEntry` con su pill "Nutrición" y `WindDownCard`) pasaron de apilarse verticalmente a compartir una fila: wrapper `flex flex-row items-stretch gap-[10px]`, cada columna al 50%.

@@ -560,38 +560,40 @@ function NutritionEntry({ isToday = false, sleepApproval = null, onCompleteDay }
   );
 }
 
-// Wind-down recommendation — shares a 50/50 row with the Nutrición check-in, so it
-// sizes with `flex-1` rather than `w-full`.
-function WindDownCard() {
-  const [added, setAdded] = useState(false);
+// Daily step count — shares a 50/50 row with the Nutrición check-in, so it sizes
+// with `flex-1` rather than `w-full`. Imported data (hence the Garmin chip), unlike
+// the self-reported nutrition check-in beside it.
+const STEPS_TODAY = 3200;
+const STEPS_GOAL = 10000;
+
+function StepsEntry() {
+  const pct = Math.min((STEPS_TODAY / STEPS_GOAL) * 100, 100);
+  const remaining = Math.max(STEPS_GOAL - STEPS_TODAY, 0);
+  const fmt = (n: number) => n.toLocaleString("es-AR");
+
   return (
     <div className="relative z-10 flex flex-1 min-w-0 flex-col items-start">
       <div className="relative z-10 flex flex-row items-center gap-[10px]">
-        <TimePill label="Wind down" style={CONNECTED_PILL_STYLE} />
+        <TimePill label="Pasos de hoy" style={CONNECTED_PILL_STYLE} />
       </div>
       <div className="relative z-10 w-full flex-1 rounded-[16px] overflow-hidden"
-        style={{ background: "linear-gradient(135deg, #ffffff 0%, #ebe7ff 100%)", border: "1px solid #3d3d3d", borderTopLeftRadius: "7px", transform: "translateY(-15px)" }}>
-        <div className="flex h-full items-center justify-between px-[16px] py-[14px] gap-[12px]">
-          <div className="flex flex-col gap-[2px] flex-1 min-w-0">
-            <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[14px] text-[#3d3d3d] tracking-[-0.28px] leading-[1.3]">
-              Rutina nocturna · 22:00hs
+        style={{ background: "linear-gradient(135deg, #ffffff 0%, #deffa3 100%)", border: "1px solid #3d3d3d", borderTopLeftRadius: "7px", transform: "translateY(-15px)" }}>
+        <div className="flex h-full flex-col justify-center gap-[8px] px-[16px] py-[14px]">
+          <div className="flex items-baseline gap-[4px] flex-wrap">
+            <p className="font-['Druk_Wide:Medium',sans-serif] text-[24px] text-[#3d3d3d] leading-[1] tracking-[-1px]">
+              {fmt(STEPS_TODAY)}
             </p>
-            <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[12px] text-[#6b7280] tracking-[-0.24px] leading-[1.3]">
-              10 min de respiración + stretching para mejorar tu sueño
+            <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[12px] text-[#6b7280] tracking-[-0.24px]">
+              / {fmt(STEPS_GOAL)}
             </p>
           </div>
-          <motion.button
-            type="button"
-            onClick={() => setAdded((v) => !v)}
-            whileTap={{ scale: 0.92 }}
-            className="shrink-0 w-[32px] h-[32px] rounded-full flex items-center justify-center transition-colors"
-            style={{ background: added ? "#8b78e6" : "rgba(139,120,230,0.15)" }}
-          >
-            {added
-              ? <Check size={15} strokeWidth={2.5} className="text-white" />
-              : <Plus size={15} strokeWidth={2.5} className="text-[#8b78e6]" />
-            }
-          </motion.button>
+          <div className="w-full h-[6px] rounded-full bg-black/10 overflow-hidden">
+            <div className="h-full rounded-full" style={{ width: `${pct}%`, background: "#3d6b00" }} />
+          </div>
+          <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[12px] text-[#6b7280] tracking-[-0.24px] leading-[1.3]">
+            Te faltan {fmt(remaining)} para tu objetivo
+          </p>
+          <SourceChip source="garmin" />
         </div>
       </div>
     </div>
@@ -1322,9 +1324,10 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
           </div>
         )}
 
-        {/* Nutrición + Wind down — side by side at 50% each. `flex-1` (not a hard 50%)
-            so whichever one survives the active filter still fills the row on its own. */}
-        {(showNutritionContent || showSleepContent) && (
+        {/* Nutrición + Pasos — side by side at 50% each. `flex-1` (not a hard 50%)
+            so whichever one survives the active filter still fills the row on its own.
+            Steps are activity data, so they follow the training filter, not the sleep one. */}
+        {(showNutritionContent || showTrainingContent) && (
           <div className="relative z-10 flex flex-row items-stretch gap-[10px] w-full">
             {showNutritionContent && (
               <div className="relative z-10 flex flex-1 min-w-0 flex-col items-start">
@@ -1336,7 +1339,7 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
                 </div>
               </div>
             )}
-            {showSleepContent && <WindDownCard />}
+            {showTrainingContent && <StepsEntry />}
           </div>
         )}
 
