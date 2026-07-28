@@ -27,6 +27,19 @@ import ActividadScreen from "../components/ActividadScreen";
 
 // ─── Today's scheduled activities ────────────────────────────────────────────
 
+/**
+ * Today (Tue 28) opens with the class already booked, so the card lands in its
+ * reserved state rather than the recommendation state. Shared with the Reservar
+ * flow's onConfirm so the seeded booking and a user-made one can't drift apart.
+ */
+const TODAY_RESERVED_CLASS: ReservedClass = {
+  time: "10:00AM",
+  location: "BIGG Recoleta",
+  classType: "BIGG Class",
+  blocks: ["1. UPPER BODY", "2. STRENGTH", "3. FBA", "4. MIDLINE"],
+  attendeeCount: 26,
+};
+
 const TODAY_ACTIVITIES: ActivityEntry[] = [
   {
     time: "18:00hs",
@@ -1620,7 +1633,7 @@ export default function BiggDayScreen() {
   const [detailClass, setDetailClass] = useState<ReservedClass | null>(null);
   const [thankYouOpen, setThankYouOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
-  const [todayReservedClass, setTodayReservedClass] = useState<ReservedClass | null>(null);
+  const [todayReservedClass, setTodayReservedClass] = useState<ReservedClass | null>(TODAY_RESERVED_CLASS);
   const [headerScrollY, setHeaderScrollY] = useState(0);
   const [today] = useState(() => {
     const d = new Date();
@@ -1733,13 +1746,7 @@ export default function BiggDayScreen() {
       >
         <ReservarSheet
           onConfirm={() => {
-            setTodayReservedClass({
-              time: "10:00AM",
-              location: "BIGG Recoleta",
-              classType: "BIGG Class",
-              blocks: ["1. UPPER BODY", "2. STRENGTH", "3. FBA", "4. MIDLINE"],
-              attendeeCount: 26,
-            });
+            setTodayReservedClass(TODAY_RESERVED_CLASS);
             setReservarOpen(false);
           }}
         />
