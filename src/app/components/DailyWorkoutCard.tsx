@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import type { CSSProperties, MouseEvent } from "react";
-import { ChevronDown, ChevronRight, MapPin, Plus, Check, Pencil, Sparkles, Moon, ThumbsUp, ThumbsDown, Utensils, Sun, Clock, CalendarPlus } from "lucide-react";
+import { ChevronDown, ChevronRight, MapPin, Plus, Check, Sparkles, Moon, ThumbsUp, ThumbsDown, Utensils, Sun, Clock, CalendarPlus } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import SourceChip, { type DataSource } from "./SourceChip";
 import WhyLine from "./WhyLine";
@@ -870,33 +870,6 @@ function AttendeeAvatars({ total = 20 }: { total?: number }) {
   );
 }
 
-function ReservedClassCard({ data, onTap }: { data: ReservedClass; onTap?: () => void }) {
-  return (
-    <button
-      onClick={onTap}
-      className="backdrop-blur-[50px] border border-[#a3a3a3] border-solid flex gap-[20px] items-start p-[20px] relative rounded-[20px] w-full text-left active:opacity-80 transition-opacity"
-      style={{ backgroundImage: "linear-gradient(105.33deg, rgba(255,255,255,0.9) 37%, rgba(222,255,163,0.9) 114%)" }}
-    >
-      <div className="flex flex-1 flex-col gap-[16px] items-start min-w-0">
-        <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] font-['Druk_Wide:Medium',sans-serif] leading-[normal] text-[26px] text-[#565656] tracking-[-1.3px] whitespace-nowrap">
-          {data.classType}
-        </p>
-        <AttendeeAvatars total={data.attendeeCount ?? 20} />
-        <div className="flex flex-wrap gap-[8px]">
-          {data.blocks.map((block) => (
-            <div key={block} className="bg-[#ededed] flex items-center justify-center px-[10px] py-[4px] rounded-[3px]">
-              <p className="font-['MessinaSansWeb:Bold',sans-serif] text-[11px] text-[#565656] tracking-[-0.11px] uppercase whitespace-nowrap">
-                {block}
-              </p>
-            </div>
-          ))}
-        </div>
-      </div>
-      <Pencil size={16} className="text-[#565656] opacity-40 shrink-0 mt-[2px]" />
-    </button>
-  );
-}
-
 export interface ActivityEntry {
   time: string;
   timeRange?: string;
@@ -1008,49 +981,9 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
     }
   };
 
-  if (reservedClass) {
-    return (
-      <motion.div key="reserved" className="relative w-full" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: "easeOut" }}>
-        <div className="absolute left-[22px] top-0 bottom-0 w-[2.5px] bg-[#3d3d3d] z-0" />
-        <div className="flex flex-col items-start gap-[24px]">
-          <div className="relative z-10 flex flex-col items-start gap-[10px] w-full">
-            <div className="relative z-10 flex flex-row items-center gap-[10px]">
-              <TimePill label={reservedClass.time} />
-              <p className="font-['MessinaSansWeb:Regular',sans-serif] italic text-[#a3a3a3] text-[13px] tracking-[-0.26px]">
-                {reservedClass.location}
-              </p>
-            </div>
-            <div className="relative z-10 w-full">
-              <ReservedClassCard data={reservedClass} onTap={onOpenDetail} />
-            </div>
-          </div>
-          {/* Additional activity entries */}
-          {activities?.map((activity, i) => (
-            <div key={i} className="relative z-10 flex flex-col items-start gap-[10px] w-full">
-              <div className="relative z-10 flex flex-row items-center gap-[10px]">
-                <TimePill label={activity.time} />
-              </div>
-              <div className="relative z-10 w-full">
-                <ActivityCard entry={activity} />
-              </div>
-            </div>
-          ))}
-
-          <button
-            onClick={onOpenFab}
-            className="relative z-10 w-full rounded-[16px] border border-dashed border-[#858585] py-[16px] flex items-center justify-center gap-[8px] active:opacity-60 transition-opacity"
-          >
-            <Plus size={16} strokeWidth={2} className="text-[#858585]" />
-            <span className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[#858585] text-[14px] tracking-[-0.28px]">
-              Agregar
-            </span>
-          </button>
-        </div>
-      </motion.div>
-    );
-  }
-
-  // ── Single unified timeline (recommendation state) ──
+  // ── Single unified timeline. The reserved class does NOT get its own separate
+  //    timeline: the header, filters, sleep/nutrition/steps and the "Actividad del día"
+  //    card shell all stay put, and only that card's *contents* switch. ──
   return (
     <>
     <div className="relative z-10 flex items-center justify-between w-full mb-[16px] gap-[8px]">
@@ -1086,7 +1019,7 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
               />
               <button
                 type="button"
-                onClick={onOpenProgramming}
+                onClick={reservedClass ? onOpenDetail : onOpenProgramming}
                 className="shrink-0 p-[8px] active:opacity-60 transition-opacity"
               >
                 <ChevronRight size={16} strokeWidth={2} className={cardVariant === 3 ? "text-white" : "text-[#565656]"} />
@@ -1143,8 +1076,33 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
                     </div>
                   )}
 
+                  {/* Variant 3, class already booked — the card shell, header and timeline stay
+                      identical; only these contents swap for the reserved class. */}
+                  {cardVariant === 3 && reservedClass && (
+                    <div className="flex flex-col gap-[14px] w-full p-[20px]">
+                      <div className="flex flex-col gap-[6px]">
+                        <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] font-['Druk_Wide:Medium',sans-serif] text-[26px] text-[#565656] tracking-[-1.3px] leading-[1.05]">
+                          {reservedClass.classType}
+                        </p>
+                        <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[13px] text-[#6b7280] tracking-[-0.26px]">
+                          {reservedClass.time} · {reservedClass.location}
+                        </p>
+                      </div>
+                      <AttendeeAvatars total={reservedClass.attendeeCount ?? 20} />
+                      <div className="grid grid-cols-2 gap-[6px] w-full">
+                        {reservedClass.blocks.map((block) => (
+                          <div key={block} className="flex items-center justify-center px-[12px] py-[10px] rounded-[8px] bg-[#ededed]">
+                            <p className="font-['MessinaSansWeb:Bold',sans-serif] text-[15px] text-[#3d3d3d] tracking-[-0.3px] uppercase truncate">
+                              {block}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Variant 3 — "Entrenamiento de BIGG" title + small non-expandable block chips */}
-                  {cardVariant === 3 && (
+                  {cardVariant === 3 && !reservedClass && (
                     <div className="flex flex-col gap-[16px] w-full p-[20px]">
                       <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] font-['Druk_Wide:Medium',sans-serif] text-[26px] text-[#565656] tracking-[-1.3px] leading-[1.05]">
                         Entrenamiento de BIGG
@@ -1281,6 +1239,34 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
                     {isBiggLocation ? "Reservar clase" : "Iniciar entrenamiento"}
                   </span>
                 </button>
+              ) : cardVariant === 3 && reservedClass ? (
+                /* Booked: no location picker (the class has one) and no "Reservar" — the
+                   footer confirms the booking and leads into the class detail instead. */
+                <div
+                  className="relative z-[1] w-full rounded-b-[16px] pt-[150px] pb-[18px] px-[20px] flex flex-col gap-[6px] items-center mb-[-150px]"
+                  style={{
+                    background: "#adff19",
+                    transform: "translateY(-150px)",
+                    transition: "background 0.3s ease-in-out, opacity 0.2s",
+                  }}
+                >
+                  <div className="flex items-center gap-[6px] mt-[10px]">
+                    <Check size={15} strokeWidth={2.5} className="text-[#3d3d3d]" />
+                    <span className="font-['MessinaSansWeb:Regular',sans-serif] text-[14px] text-[#3d3d3d] tracking-[-0.28px]">
+                      Tenés tu lugar reservado
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={onOpenDetail}
+                    className="active:opacity-70 transition-opacity rounded-full px-[16px] py-[6px]"
+                    style={{ background: "#3d3d3d" }}
+                  >
+                    <span className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[17px] text-white tracking-[-0.34px]">
+                      Ver mi clase
+                    </span>
+                  </button>
+                </div>
               ) : cardVariant === 3 ? (
                 <div
                   className="relative z-[1] w-full rounded-b-[16px] pt-[150px] pb-[18px] px-[20px] flex flex-col items-start gap-[4px] mb-[-150px]"
