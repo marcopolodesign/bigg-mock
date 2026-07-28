@@ -4,15 +4,19 @@
 
 ---
 
-## 2026-07-28 — Wind down al principio del carrusel + todas las cards más chicas
+## 2026-07-28 — Wind down primero en el carrusel (y revertido el achique de cards)
 
-**Orden:** Wind down pasó al primer lugar del carrusel de recomendaciones (queda Wind down → Padel → Lower Body). Notar que hace un rato lo habíamos mandado al final, por mi lectura de "move the final block to the end of the list" — Mateo ahora lo quiso al principio, así que esa interpretación quedó revertida.
+Dos pedidos encadenados que terminaron en uno solo.
 
-**Tamaño:** se achicaron todas las cards del carrusel para acercarlas al formato compacto del `StepsEntry` del timeline. En `WorkoutCard`: cuerpo `h-[214px]` → `h-[150px]`, título 22→17px, ejercicios 13→11px con gap 6→4, badge `h-[18px]`→`h-[16px]`, SVG del reloj 38×67→28×50, padding más ajustado y el ícono de info 20→17px. En `AgregarButton`: `pt-[45px]`/`pb-[15px]` → `pt-[38px]`/`pb-[13px]`, ícono 24→20px, texto 15→13px. `WindDownCard` quedó en `h-[193px]` (su `10'` de 40→30px) para igualar la altura total nueva de las workout cards.
+Primero se pidió mover Wind down al principio del carrusel **y** achicar todas las cards de recomendaciones para acercarlas al formato compacto del `StepsEntry` del timeline. Se hizo todo (commit `d6bbd73`): `WorkoutCard` de 214→150px con tipografía escalada, `AgregarButton` más chico, `WindDownCard` 260→193px.
 
-**Cuidado con el overlap:** el `AgregarButton` se mete debajo del card con un margen negativo (`mb-[-34px]` → `mb-[-28px]`). Ese valor tiene que quedar ~10px por debajo del `pt` del botón, si no el texto "Agregar a mi entrenamiento" queda tapado por el card. Verificado que no se corta.
+Mateo lo vio y pidió revertir el achique, quedándose sólo con el reorden. Se restauró `BiggDayScreen.tsx` (y los tres archivos de doc) al estado previo con `git checkout 7aba386 -- ...` y se volvió a aplicar únicamente el movimiento del item en `RECOMMENDATION_ITEMS`. Las cards vuelven a su tamaño original: `WorkoutCard` 214px con título 22px, `WindDownCard` 260px con su `10'` en 40px, `AgregarButton` con `pt-[45px]`/`mb-[-34px]`.
 
-Verificado en Chrome a 390×844: las tres cards a la misma altura, botón sin clipping, orden nuevo. `pnpm build` limpio.
+Orden final del carrusel: **Wind down → Padel → Lower Body**.
+
+Nota: en el correr del día este item se movió al final (por mi lectura de "move the final block to the end of the list") y ahora al principio — el estado bueno es al principio.
+
+Verificado en Chrome a 390×844: cards al tamaño original, Wind down primero. `pnpm build` limpio.
 
 **Source:** Claude Code — Macbook Pro
 

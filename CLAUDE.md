@@ -102,7 +102,7 @@ Después de implementar cualquier cambio en un proyecto web o de UI, SIEMPRE ver
 
 <!-- Add a one-liner per session here, newest first -->
 
-- **2026-07-28:** Wind down al principio del carrusel y todas las cards de recomendaciones achicadas (`WorkoutCard` 214→150px + tipografía escalada, `WindDownCard` 260→193px). Ojo con el `mb-` negativo del `AgregarButton`: tiene que quedar ~10px por debajo de su `pt` o se corta el texto.
+- **2026-07-28:** Wind down al principio del carrusel de recomendaciones. El achique de todas las cards que se había hecho en `d6bbd73` fue **revertido** a pedido — las cards mantienen su tamaño original.
 - **2026-07-28:** Card de nutrición apilada en `flex-col` (ícono / pregunta / pulgares), espejando la de Pasos. ⚠️ Detectado bug pre-existente: el toast `fixed` de nutrición se posiciona contra el wrapper con `transform`, no contra el viewport — marcado, sin arreglar.
 - **2026-07-28:** "Mobility & recovery" oculto del timeline vía `showAfternoon={false}` (temporal, nada borrado — volver a `true` lo restaura).
 - **2026-07-28:** Cards del timeline = indicadores, explicación al sheet: `StepsEntry` sin `SourceChip` + sheet "Detalles de pasos" (por qué el objetivo, de dónde salen los datos). Pill renombrado a **"Actividad del día"**, ese card pasó a ser el primero del timeline (sueño debajo), y Wind down se movió al final del carrusel con menos contenido.

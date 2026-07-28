@@ -141,15 +141,15 @@ function AgregarButton() {
   return (
     <div className="bg-[rgba(255,255,255,0.8)] relative shrink-0 w-full z-[1]">
       <div className="flex flex-row items-center justify-center size-full">
-        <div className="content-stretch flex gap-[10px] items-center justify-center pb-[13px] pt-[38px] px-[10px] relative size-full">
-          <div className="overflow-clip relative shrink-0 size-[20px]">
+        <div className="content-stretch flex gap-[10px] items-center justify-center pb-[15px] pt-[45px] px-[10px] relative size-full">
+          <div className="overflow-clip relative shrink-0 size-[24px]">
             <div className="absolute inset-[8.33%_8.33%_0.78%_8.73%]">
               <svg className="absolute block inset-0 size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 19.9067 21.8139">
                 <path d={svgPaths.p3d8e2800} fill="#F8B32E" />
               </svg>
             </div>
           </div>
-          <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] font-['MessinaSansWeb:SemiBold',sans-serif] leading-[1.13] not-italic relative shrink-0 text-[#f8b32e] text-[13px] tracking-[-0.15px] whitespace-nowrap">
+          <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] font-['MessinaSansWeb:SemiBold',sans-serif] leading-[1.13] not-italic relative shrink-0 text-[#f8b32e] text-[15px] tracking-[-0.15px] whitespace-nowrap">
             Agregar a mi entrenamiento
           </p>
         </div>
@@ -176,22 +176,22 @@ function WorkoutCard({ gradient, title, badge, exercises, drawerBadge, drawerBod
         <div className="content-stretch flex flex-col isolate items-center overflow-clip relative rounded-[inherit] size-full">
           {/* Main gradient card */}
           <div
-            className="content-stretch flex flex-col items-end mb-[-28px] overflow-clip relative rounded-bl-[20px] rounded-br-[20px] rounded-tl-[8px] rounded-tr-[8px] shrink-0 w-full z-[2]"
+            className="content-stretch flex flex-col items-end mb-[-34px] overflow-clip relative rounded-bl-[20px] rounded-br-[20px] rounded-tl-[8px] rounded-tr-[8px] shrink-0 w-full z-[2]"
             style={{ backgroundImage: gradient }}
           >
-            <div className="h-[150px] relative shrink-0 w-full">
+            <div className="h-[214px] relative shrink-0 w-full">
               <div className="flex flex-col justify-center size-full">
-                <div className="content-stretch flex flex-col items-start justify-center pb-[14px] pl-[16px] pt-[8px] relative size-full">
+                <div className="content-stretch flex flex-col items-start justify-center pb-[20px] pl-[20px] pt-[10px] relative size-full">
                   <div className="content-stretch flex items-start justify-between relative shrink-0 w-full">
                     {/* Left: title, badge, exercises */}
-                    <div className="content-stretch flex flex-col gap-[7px] items-start flex-1 min-w-0">
+                    <div className="content-stretch flex flex-col gap-[10px] items-start flex-1 min-w-0">
                       <div className="flex items-center gap-[8px]">
-                        <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] font-['Druk_Wide:Medium',sans-serif] leading-[normal] not-italic relative shrink-0 text-[#565656] text-[17px] tracking-[-0.8px] whitespace-nowrap">
+                        <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] font-['Druk_Wide:Medium',sans-serif] leading-[normal] not-italic relative shrink-0 text-[#565656] text-[22px] tracking-[-1px] whitespace-nowrap">
                           {title}
                         </p>
                         <Drawer.Trigger asChild>
                           <button
-                            className="flex items-center justify-center size-[17px] opacity-50 hover:opacity-80 active:opacity-100 transition-opacity shrink-0"
+                            className="flex items-center justify-center size-[20px] opacity-50 hover:opacity-80 active:opacity-100 transition-opacity shrink-0"
                             aria-label="¿Por qué te recomendamos esto?"
                           >
                             <svg viewBox="0 0 256 256" fill="currentColor" className="size-full text-[#565656]">
@@ -200,22 +200,22 @@ function WorkoutCard({ gradient, title, badge, exercises, drawerBadge, drawerBod
                           </button>
                         </Drawer.Trigger>
                       </div>
-                      <div className="backdrop-blur-[100px] bg-white flex items-center h-[16px] px-[6px] py-[2px] relative rounded-[3px] self-start">
+                      <div className="backdrop-blur-[100px] bg-white flex items-center h-[18px] px-[6px] py-[3px] relative rounded-[3px] self-start">
                         <p className="font-['MessinaSansWeb:Bold',sans-serif] leading-[normal] not-italic relative shrink-0 text-[#565656] text-[8px] tracking-[-0.08px] uppercase whitespace-nowrap">
                           {badge}
                         </p>
                       </div>
-                      <div className="flex flex-col gap-[4px] w-full">
+                      <div className="flex flex-col gap-[6px] w-full">
                         {exercises.map((ex, i) => (
-                          <p key={i} className="font-['MessinaSansWeb:Regular',sans-serif] leading-[133.75%] not-italic relative shrink-0 text-[#565656] text-[11px]">
+                          <p key={i} className="font-['MessinaSansWeb:Regular',sans-serif] leading-[133.75%] not-italic relative shrink-0 text-[#565656] text-[13px]">
                             {ex}
                           </p>
                         ))}
                       </div>
                     </div>
                     {/* Right: clock SVG */}
-                    <div className="content-stretch flex flex-col items-end relative shrink-0 w-[38px]">
-                      <div className="h-[50px] relative shrink-0 w-[28px]">
+                    <div className="content-stretch flex flex-col items-end relative shrink-0 w-[50px]">
+                      <div className="h-[67px] relative shrink-0 w-[38px]">
                         <div className="absolute inset-[0_-10.53%_-11.94%_-10.53%]">
                           <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 46 75">
                             <path d={svgPaths.p3b47a200} fill="white" shapeRendering="crispEdges" />
@@ -276,7 +276,7 @@ function WindDownCard() {
         className="overflow-clip relative rounded-[20px] w-full"
         style={{ background: "linear-gradient(70deg, #241a40 2%, #4a2e6e 74%)" }}
       >
-        <div className="flex flex-col h-[193px] p-[15px]">
+        <div className="flex flex-col h-[260px] p-[15px]">
           {/* Top row: labels + total duration */}
           <div className="flex items-start justify-between shrink-0">
             <div className="flex flex-col gap-[4px]">
@@ -287,7 +287,7 @@ function WindDownCard() {
                 HOY 22:00HS
               </p>
             </div>
-            <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] font-['Druk_Wide:Medium',sans-serif] text-white text-[30px] leading-[1] tracking-[-1.5px] shrink-0">
+            <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] font-['Druk_Wide:Medium',sans-serif] text-white text-[40px] leading-[1] tracking-[-2px] shrink-0">
               10&apos;
             </p>
           </div>
