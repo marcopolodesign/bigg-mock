@@ -102,6 +102,7 @@ Después de implementar cualquier cambio en un proyecto web o de UI, SIEMPRE ver
 
 <!-- Add a one-liner per session here, newest first -->
 
+- **2026-07-28:** `DailyWorkoutCard` variant 3 — sólo el **contenido** del card del día sin clase cambió: acordeones `FlapItem` → título Druk "ENTRENAMIENTO DE BIGG" + grilla 2×2 de chips chicos no expandibles. El card en sí (wrapper oscuro, header, indicador de adaptación, CTA con sede) quedó igual. `FlapItem`/`FLAP_OVERLAP`/`openFlapId` borrados por quedar sin uso.
 - **2026-07-22:** Pushed to `origin/main` (`c5d1479`) all accumulated 2026-07-21 work: Actividad tab rebuild, DayRecapSheet, Activity IA rework, daily screen iteration.
 - **2026-07-21:** Removed the "Recomendaciones basadas en tus hábitos" carousel from `ActividadScreen` (dead-code cleanup); added a "Ver mi actividad" CTA to Train's `SleepEntry` "Detalles de sueño" sheet, reusing `onCompleteDay` to switch to the Actividad tab (same pattern as `NutritionEntry`'s "Ver mi semana").
 - **2026-07-21:** `DayRecapSheet` — reused `DailyWorkoutCard`'s "Así fue tu día" recap pattern (now exported `NPSStatus`/`NPS_STATUS_META`) for any tapped day in `ActividadScreen`'s Semanal bars and Mensual calendar grid, with deterministic per-day mock status coloring.

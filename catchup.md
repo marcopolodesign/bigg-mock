@@ -4,6 +4,22 @@
 
 ---
 
+## 2026-07-28 — "Entrenamiento de BIGG" + bloques chicos dentro del card del día sin clase
+
+Cambio acotado al **contenido de los bloques** del card "Entrenamiento del día" en `DailyWorkoutCard.tsx` (`cardVariant === 3`, el único que la app realmente renderiza — 1/2/4 son opciones de comparación legacy de `comparacion-opciones.html`). El resto del card queda **exactamente igual que antes**: wrapper oscuro `#3d3d3d`, header "Entrenamiento del día" + chevron, card interno claro, indicador "Bloque cambiado para esta ubicación", y el bloque de CTA superpuesto con "Donde vas a entrenar? / {sede}" + "Reservar clase" (lime) / "Iniciar entrenamiento" (oscuro).
+
+Dentro del card interno, los acordeones expandibles (`FlapItem`: FBA / Upper Body / HIIT / Midline, cada uno desplegable con su modalidad y movimientos) se reemplazaron por: título Druk "ENTRENAMIENTO DE BIGG" (26px, wrappea a 2 líneas) + grilla 2×2 de chips chicos no expandibles `{n}. {estímulo}` (`bg-[#ededed]`), tomados de `V4_BLOCKS` con la misma lógica de swap BIGG/away que ya existía (`blockTitles` override / `vb.away`). Referencia: captura que pasó Mateo de una versión anterior; el patrón "1. NOMBRE" coincide con `WorkoutBlockRow.tsx` de `biggapp`, que lo usa con datos reales del backend.
+
+Eliminado el código que quedó muerto: componente `FlapItem`, constante `FLAP_OVERLAP` y estado `openFlapId` (sin referencias; recuperable del historial de git si se quiere volver al acordeón). `DAY_BLOCKS` se mantiene — lo sigue usando la variante 2. `isOutdoorsLocation` se mantiene — lo sigue usando el CTA de la variante 3.
+
+Nota de proceso: la primera pasada se fue de alcance (rehizo el card entero en versión clara, con header propio "Entrenamiento sugerido" fuera del card y footer compartido con las variantes 1/2). Mateo lo corrigió — "keep the ENTIRE card as it was before, we only needed to change the content of the bloques" — así que se revirtió el archivo completo con `git checkout` y se rehizo sólo el cambio de bloques. Diff final: +19 / −120.
+
+Verificado en Chrome a 390×844: BIGG Recoleta (chips 1. FBA / 2. Upper Body / 3. HIIT / 4. Midline + CTA lime "Reservar clase") y "En mi casa" (chips adaptados a 2. Push Pull / 3. Cardio + indicador "Bloque cambiado para esta ubicación" + CTA oscuro "Iniciar entrenamiento"). `pnpm build` limpio.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
 ## 2026-07-22 — PUSH: Actividad tab rebuild + daily screen iteration + profile/referral flows
 
 Committed and pushed to `origin/main` (`c5d1479`) all the work from 2026-07-21 that had accumulated uncommitted: Actividad tab rebuilt from the real app (`ActividadScreen.tsx`, new), `DayRecapSheet`, weekly NPS card removed from Train, Activity IA rework (`ProfileScreen.tsx`, new), daily screen iteration per Producto IT feedback (`ThankYouClassScreen.tsx`, `ReferralContainer.tsx`, new; `DailyWorkoutCard.tsx`, `BiggDayScreen.tsx`, `ClassDetailScreen.tsx` updated; `MonthlyNPSGrid.tsx` deleted). `pnpm build` clean before commit. Left `training-ux-research.html` (untracked, standalone research doc with no matching catchup entry) out of the commit — not part of this documented work.

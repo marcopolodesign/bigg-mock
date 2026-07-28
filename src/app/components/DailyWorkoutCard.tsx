@@ -59,8 +59,6 @@ const DAY_BLOCKS: StimulusBlock[] = [
     gradient: "linear-gradient(135deg, #f9f9f9 0%, #f5f0ff 100%)" },
 ];
 
-const FLAP_OVERLAP = 12;
-
 // ── Variant 4 block definitions ──────────────────────────────────────────────
 interface V4BlockDef {
   id: string;
@@ -74,100 +72,6 @@ const V4_BLOCKS: V4BlockDef[] = [
   { id: "v4-hiit", bigg: { stimulus: "HIIT",        modality: "AMRAP · 12'",           duration: "12'" }, away: { stimulus: "Cardio",     modality: "Intervalos · 3 rondas",  duration: "12'" }, exercisesAdapt: false },
   { id: "v4-mid",  bigg: { stimulus: "Midline",     modality: "For Quality · 3 sets",  duration: "12'" }, away: null,                                                              exercisesAdapt: false },
 ];
-
-function FlapItem({ block, isOpen, onToggle, index, total, displayStimulus, stimulusKey, showAdaptIcon = false, duration }: { block: StimulusBlock; isOpen: boolean; onToggle: () => void; index: number; total: number; displayStimulus?: string; stimulusKey?: string; showAdaptIcon?: boolean; duration?: string }) {
-  const isLast = index === total - 1;
-  const titleText = displayStimulus ?? block.stimulus;
-  const titleKey = stimulusKey ?? block.stimulus;
-  return (
-    <div
-      className="w-full"
-      style={{
-        borderTop: "1px solid rgba(0,0,0,0.09)",
-        borderLeft: "1px solid rgba(0,0,0,0.09)",
-        borderRight: "1px solid rgba(0,0,0,0.09)",
-        borderBottom: "none",
-        borderTopLeftRadius: isLast ? 0 : "14px",
-        borderTopRightRadius: isLast ? 0 : "14px",
-        borderBottomLeftRadius: 0,
-        borderBottomRightRadius: 0,
-        paddingBottom: isLast ? 0 : FLAP_OVERLAP,
-        marginTop: index > 0 ? -FLAP_OVERLAP : 0,
-        position: "relative",
-        zIndex: total - index,
-      }}
-    >
-      <button
-        type="button"
-        onClick={(e) => { e.stopPropagation(); onToggle(); }}
-        className="w-full flex items-center justify-between px-[16px] py-[14px] active:opacity-70 transition-opacity"
-        style={isLast ? { borderRadius: 0 } : undefined}
-      >
-        <div style={{ height: "21px", overflow: "hidden", position: "relative", flex: 1 }}>
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.p
-              key={titleKey}
-              initial={{ opacity: 0, y: 7 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -9 }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
-              style={{ position: "absolute", lineHeight: "21px" }}
-              className="font-['Druk_Wide:Medium',sans-serif] text-[17px] text-[#3d3d3d] tracking-[-0.5px] uppercase"
-            >
-              {titleText}
-            </motion.p>
-          </AnimatePresence>
-        </div>
-        <div className="flex items-center gap-[8px] shrink-0">
-          {duration && (
-            <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[12px] text-[#a3a3a3] tracking-[-0.24px]">
-              {duration}
-            </p>
-          )}
-          <AnimatePresence initial={false}>
-            {showAdaptIcon && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.5 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.5 }}
-                transition={{ duration: 0.22 }}
-              >
-                <Sparkles size={13} className="text-[#2ab3cc]" strokeWidth={2} />
-              </motion.div>
-            )}
-          </AnimatePresence>
-          <motion.div animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.18 }}>
-            <ChevronDown size={14} className="text-[#a3a3a3]" strokeWidth={2} />
-          </motion.div>
-        </div>
-      </button>
-      <AnimatePresence initial={false}>
-        {isOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ type: "spring", stiffness: 380, damping: 38 }}
-            style={{ overflow: "hidden" }}
-          >
-            <div className="px-[16px] pb-[16px] flex flex-col gap-[10px]">
-              <p className="font-['MessinaSansWeb:Bold',sans-serif] text-[10px] text-[#a3a3a3] tracking-[0.6px] uppercase">
-                {block.modality}
-              </p>
-              <div className="flex flex-col gap-[6px]">
-                {block.movements.map((mv, i) => (
-                  <p key={i} className="font-['MessinaSansWeb:Regular',sans-serif] text-[13px] text-[#3d3d3d] leading-[1.35]">
-                    {mv}
-                  </p>
-                ))}
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
 
 // Dark time pill used as the timeline node label (e.g. "10AM", "18:00hs").
 function TimePill({ label, style }: { label: string; style?: CSSProperties }) {
@@ -1011,7 +915,6 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
   const [showAddLocation, setShowAddLocation] = useState(false);
   const [customLocations, setCustomLocations] = useState<string[]>([]);
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
-  const [openFlapId, setOpenFlapId] = useState<string | null>(null);
   const [selectedFilter, setSelectedFilter] = useState<TimelineFilter>("todos");
   const [showFilterSheet, setShowFilterSheet] = useState(false);
   // Today's timeline reads as already complete except nutrition — sleep defaults to "approved".
@@ -1174,30 +1077,26 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
                     </div>
                   )}
 
-                  {/* Variant 3 — accordion flaps */}
+                  {/* Variant 3 — "Entrenamiento de BIGG" title + small non-expandable block chips */}
                   {cardVariant === 3 && (
-                    <div className="flex flex-col w-full">
-                      {DAY_BLOCKS.map((block, i) => {
-                        const vb = V4_BLOCKS[i];
-                        const current = isBiggLocation
-                          ? { ...vb.bigg, stimulus: blockTitles?.[i] ?? vb.bigg.stimulus }
-                          : (vb.away ?? vb.bigg);
-                        const showAdaptIcon = !isBiggLocation && vb.away === null && vb.exercisesAdapt;
-                        return (
-                          <FlapItem
-                            key={block.id}
-                            block={block}
-                            isOpen={openFlapId === block.id}
-                            onToggle={() => setOpenFlapId(openFlapId === block.id ? null : block.id)}
-                            index={i}
-                            total={DAY_BLOCKS.length}
-                            displayStimulus={current.stimulus}
-                            stimulusKey={current.stimulus}
-                            showAdaptIcon={showAdaptIcon}
-                            duration={current.duration}
-                          />
-                        );
-                      })}
+                    <div className="flex flex-col gap-[16px] w-full p-[20px]">
+                      <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] font-['Druk_Wide:Medium',sans-serif] text-[26px] text-[#3d3d3d] tracking-[-1.3px] uppercase leading-[1.05]">
+                        Entrenamiento de BIGG
+                      </p>
+                      <div className="grid grid-cols-2 gap-[6px] w-full">
+                        {V4_BLOCKS.map((vb, i) => {
+                          const current = isBiggLocation
+                            ? { ...vb.bigg, stimulus: blockTitles?.[i] ?? vb.bigg.stimulus }
+                            : (vb.away ?? vb.bigg);
+                          return (
+                            <div key={vb.id} className="flex items-center justify-center px-[12px] py-[10px] rounded-[8px] bg-[#ededed]">
+                              <p className="font-['MessinaSansWeb:Bold',sans-serif] text-[15px] text-[#3d3d3d] tracking-[-0.3px] uppercase truncate">
+                                {i + 1}. {current.stimulus}
+                              </p>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
                   )}
 
