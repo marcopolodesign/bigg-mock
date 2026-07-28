@@ -336,14 +336,14 @@ function NutritionEntry({ isToday = false, sleepApproval = null, onCompleteDay }
         tabIndex={0}
         whileTap={{ scale: 0.98 }}
         onClick={openDetails}
-        className="relative z-10 flex h-full items-center gap-[10px] w-full px-[16px] py-[14px] rounded-[16px] cursor-pointer"
+        className="relative z-10 flex h-full flex-col justify-center gap-[8px] w-full px-[16px] py-[14px] rounded-[16px] cursor-pointer"
         style={{ background: "linear-gradient(135deg, #fce8d8 0%, #fdf1e6 100%)" }}
       >
-        <Utensils size={13} className="text-[#f2994a] shrink-0" />
-        <p className="flex-1 font-['MessinaSansWeb:Regular',sans-serif] text-[13px] text-[#6b7280] tracking-[-0.26px] leading-[1.2]">
+        <Utensils size={16} className="text-[#f2994a] shrink-0" />
+        <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[13px] text-[#6b7280] tracking-[-0.26px] leading-[1.25]">
           ¿Comiste bien hoy?
         </p>
-        <div className="flex items-center gap-[6px] shrink-0">
+        <div className="flex items-center gap-[6px]">
           <motion.button
             type="button"
             whileTap={{ scale: 0.9 }}

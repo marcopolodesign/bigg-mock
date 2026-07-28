@@ -4,6 +4,20 @@
 
 ---
 
+## 2026-07-28 — Card de nutrición apilada en columna
+
+A pedido de Mateo, el contenido de la card de nutrición pasó de fila a columna: el contenedor es ahora `flex h-full flex-col justify-center gap-[8px]` y sus tres hijos (ícono `Utensils`, la pregunta "¿Comiste bien hoy?", y el par de botones pulgar arriba/abajo) se apilan. El ícono subió de 13 a 16px para que no quede como un punto suelto arriba de todo.
+
+Efecto lateral bueno: a 50% de ancho la pregunta ya no wrappea a dos líneas, y la card queda estructuralmente igual a la de Pasos que tiene al lado (tres elementos apilados, mismo `justify-center`), que era el objetivo del patrón indicador.
+
+**⚠️ Bug pre-existente detectado (no introducido acá, no arreglado):** el toast "Nutrición guardada" usa `position: fixed` con `bottom-[86px]`, pero se renderiza dentro del wrapper del timeline que tiene `transform: translateY(-15px)`. Un ancestro con `transform` hace que `fixed` se resuelva contra ese ancestro y no contra el viewport, así que el toast aparece al lado de la card en vez de flotando abajo de la pantalla. El `transform` viene del commit `2ac0720`, bastante anterior a esta sesión. El arreglo sería portalear el toast fuera del árbol transformado — se dejó marcado, no se tocó porque excede el pedido.
+
+Verificado en Chrome a 390×844, incluyendo que los pulgares siguen funcionando. `pnpm build` limpio.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
 ## 2026-07-28 — Oculto "Mobility & recovery" del timeline (temporal)
 
 Mateo pidió sacar el hito "Mobility & recovery" del timeline "por ahora". Como ya existía el prop `showAfternoon` que lo gatea, alcanzó con pasar `showAfternoon={false}` desde `MainContent` en `BiggDayScreen.tsx` — **no se borró nada**: el bloque del timeline y `AfternoonRecommendationCard` quedan intactos, así que volver atrás es cambiar una palabra. Queda un comentario en el call site explicando cómo restaurarlo (`true` para todos los días, `!isToday` para dejarlo apagado sólo hoy).
