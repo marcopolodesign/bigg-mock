@@ -1080,7 +1080,7 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
                   {/* Variant 3 — "Entrenamiento de BIGG" title + small non-expandable block chips */}
                   {cardVariant === 3 && (
                     <div className="flex flex-col gap-[16px] w-full p-[20px]">
-                      <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] font-['Druk_Wide:Medium',sans-serif] text-[26px] text-[#3d3d3d] tracking-[-1.3px] uppercase leading-[1.05]">
+                      <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] font-['Druk_Wide:Medium',sans-serif] text-[26px] text-[#565656] tracking-[-1.3px] leading-[1.05]">
                         Entrenamiento de BIGG
                       </p>
                       <div className="grid grid-cols-2 gap-[6px] w-full">
