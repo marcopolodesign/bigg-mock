@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { Activity, Globe, Users, Moon, Flame, Check, Plus } from "lucide-react";
+import { Activity, Globe, Users, Flame, Check, Plus } from "lucide-react";
 import { Drawer } from "vaul";
 import svgPaths from "../../imports/BiggDay/svg-03sgvqmew7";
 import imgBgHome1 from "../../imports/BiggDay/ec32944a87885236431eaada4b00483f53237695.png";
@@ -921,45 +921,6 @@ function MembershipContainer() {
   );
 }
 
-// ─── BIGG Benchmark — Train tab only ───────────────────────────────────────────
-// Ported from biggapp Components/Benchmark/BenchmarkActivity.js. In the real app this sits
-// half-width next to "Mis Pesos" inside the Activity tail; here it's promoted to its own
-// full-width section on the Train tab (see IA rework — Objetivo + Mis Pesos moved to
-// ProfileScreen, Benchmark stays on Train). Shows the "has a result" state — no equivalent
-// benchmark_small.png asset exists in this mock, so it reuses imgPerformanceImage1 (BIGG gym
-// wall photo, already imported below) for the dark/graphite textured background.
-
-function BenchmarkContainer() {
-  return (
-    <div
-      className="relative w-full min-h-[150px] rounded-[8px] overflow-hidden flex flex-col justify-between p-[20px]"
-      style={{ backgroundImage: `url(${imgPerformanceImage1})`, backgroundSize: "cover", backgroundPosition: "center" }}
-      data-name="Benchmark Container"
-    >
-      <div
-        className="absolute inset-0"
-        style={{ backgroundImage: "linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.4) 45%, rgba(0,0,0,0.65) 100%)" }}
-      />
-      <div className="relative z-10 flex flex-col gap-[4px]">
-        <p className="font-['MessinaSansWeb:Bold',sans-serif] text-white text-[13px] tracking-[-0.39px]">
-          BIGG Benchmark
-        </p>
-        <p className="font-['Druk_Wide:Medium',sans-serif] text-white text-[44px] leading-[0.9] tracking-[-2.2px]">
-          78%
-        </p>
-      </div>
-      <div className="relative z-10 flex flex-col gap-[2px]">
-        <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-white text-[13px] tracking-[-0.26px]">
-          14 Julio 2026
-        </p>
-        <p className="font-['MessinaSansWeb:Regular',sans-serif] text-white/70 text-[12px] tracking-[-0.24px]">
-          Último resultado del benchmark
-        </p>
-      </div>
-    </div>
-  );
-}
-
 // ─── Performance ──────────────────────────────────────────────────────────────
 
 function PerformanceButton() {
@@ -1250,10 +1211,10 @@ function MainContent({ onReservar, onOpenFab, onOpenDetail, onOpenProgramming, o
           activities={activities}
           cardVariant={cardVariant}
           showMorning={!isRestDay && !isSaturday}
-          // "Mobility & recovery" hidden 2026-07-28 at the user's request — temporary, so the
-          // milestone and AfternoonRecommendationCard are left intact. Flip back to `true` to
-          // restore it on every day, or `!isToday` to keep it off today only.
-          showAfternoon={false}
+          // "Mobility & recovery" is off on training days (hidden 2026-07-28) and only shows on
+          // rest days, where DailyWorkoutCard hoists it directly under the rest milestone.
+          showAfternoon={isRestDay}
+          isRestDay={isRestDay}
           isFutureDay={isFutureDay}
           isToday={isToday}
           onCompleteDay={onCompleteDay}
@@ -1263,16 +1224,6 @@ function MainContent({ onReservar, onOpenFab, onOpenDetail, onOpenProgramming, o
           defaultLocation={isSunday ? "BIGG Outdoors" : undefined}
         />
       </div>
-
-      {/* Thursday rest-day pill — future days only */}
-      {isFutureDay && isRestDay && (
-        <div className="w-full max-w-[388px] flex items-center gap-[10px] backdrop-blur-sm bg-[#6ab5ff]/15 border border-[#6ab5ff]/30 rounded-full px-[16px] py-[10px]">
-          <Moon size={15} className="text-[#4a90d9] shrink-0" />
-          <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[#4a6fa5] text-[13px] tracking-[-0.26px]">
-            Día de descanso recomendado
-          </p>
-        </div>
-      )}
 
       {/* ── Today-only: Recommendations carousel ── */}
       {isToday && (
@@ -1290,12 +1241,6 @@ function MainContent({ onReservar, onOpenFab, onOpenDetail, onOpenProgramming, o
       <div className="w-full max-w-[388px]">
         <ActivityContainer />
       </div>
-      {/* BIGG Benchmark — Train tab only (moved here from the Activity tail, see IA rework) */}
-      {cardVariant === 3 && (
-        <div className="w-full max-w-[388px]">
-          <BenchmarkContainer />
-        </div>
-      )}
       <div className="w-full max-w-[388px]">
         <Group17 />
       </div>

@@ -2,12 +2,13 @@ import { motion } from "motion/react";
 import { Pencil, ChevronRight, Dumbbell } from "lucide-react";
 import imgEllipse167 from "../../imports/BiggDay/0bdccca1063fe17c8030deb1278cb4c21c493290.png";
 import imgObjetivoPhoto from "../../imports/BiggDay/f40c659e63fd5fa932f8372e95797919cca4e6f9.png";
+import imgBenchmarkPhoto from "../../imports/BiggDay/8cade1b4c1d3008a22f39d72876291dacbe66283.png";
 
 // Profile screen — ported from biggapp's Screens/Profile/Profile.js (light version, for design
 // iteration only). Real screen has image-picker, i18n switching, sign-out/delete-account logic —
 // out of scope here. This keeps: avatar + edit badge, member-since/friends line, "Editar" pill,
 // and the two Activity-page tail components reassigned here (Objetivo, Mis Pesos) per the new IA
-// (the third, BIGG Benchmark, moved to the Train tab instead — see BiggDayScreen's BenchmarkContainer).
+// (Objetivo, Mis Pesos and — as of 2026-07-28 — BIGG Benchmark, which briefly lived on the Train tab).
 
 // ─── Objetivo card — ported from biggapp Components/Objetives/Objetives.js ────────────────────
 // Always shows the "has an objective" state (skips the empty state — more interesting visually).
@@ -66,6 +67,43 @@ function MisPesosCard() {
 
 interface ProfileScreenProps {
   onClose: () => void;
+}
+
+// ─── BIGG Benchmark ───────────────────────────────────────────────────────────
+// Ported from biggapp Components/Benchmark/BenchmarkActivity.js. Moved here 2026-07-28 to
+// rejoin the other two Activity-tail cards (Objetivo, Mis Pesos) — it had been promoted to
+// the Train tab in the earlier IA pass. Shows the "has a result" state; no benchmark_small.png
+// exists in this mock, so it reuses the BIGG gym wall photo for the dark textured background.
+
+function BenchmarkContainer() {
+  return (
+    <div
+      className="relative w-full min-h-[150px] rounded-[8px] overflow-hidden flex flex-col justify-between p-[20px]"
+      style={{ backgroundImage: `url(${imgBenchmarkPhoto})`, backgroundSize: "cover", backgroundPosition: "center" }}
+      data-name="Benchmark Container"
+    >
+      <div
+        className="absolute inset-0"
+        style={{ backgroundImage: "linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.4) 45%, rgba(0,0,0,0.65) 100%)" }}
+      />
+      <div className="relative z-10 flex flex-col gap-[4px]">
+        <p className="font-['MessinaSansWeb:Bold',sans-serif] text-white text-[13px] tracking-[-0.39px]">
+          BIGG Benchmark
+        </p>
+        <p className="font-['Druk_Wide:Medium',sans-serif] text-white text-[44px] leading-[0.9] tracking-[-2.2px]">
+          78%
+        </p>
+      </div>
+      <div className="relative z-10 flex flex-col gap-[2px]">
+        <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-white text-[13px] tracking-[-0.26px]">
+          14 Julio 2026
+        </p>
+        <p className="font-['MessinaSansWeb:Regular',sans-serif] text-white/70 text-[12px] tracking-[-0.24px]">
+          Último resultado del benchmark
+        </p>
+      </div>
+    </div>
+  );
 }
 
 export default function ProfileScreen({ onClose }: ProfileScreenProps) {
@@ -133,6 +171,9 @@ export default function ProfileScreen({ onClose }: ProfileScreenProps) {
           <div className="flex w-full">
             <MisPesosCard />
           </div>
+
+          {/* ── BIGG Benchmark (moved from the Train tab 2026-07-28) ── */}
+          <BenchmarkContainer />
 
           {/* ── Decorative tail rows — static, matching the real Profile screen's language row / sign-out row ── */}
           <div className="flex flex-col mt-[4px]">

@@ -933,6 +933,8 @@ interface DailyWorkoutCardProps {
   activities?: ActivityEntry[];
   showMorning?: boolean;
   showAfternoon?: boolean;
+  /** Rest day (no programmed session): the timeline leads with a rest milestone, then Mobility. */
+  isRestDay?: boolean;
   cardVariant?: 1 | 2 | 3 | 4;
   /** Sleep check-in reports on last night — never shown for days that haven't happened yet. */
   isFutureDay?: boolean;
@@ -950,7 +952,7 @@ interface DailyWorkoutCardProps {
   onCompleteDay?: () => void;
 }
 
-export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, onOpenProgramming, reservedClass, activities, showMorning = true, showAfternoon = true, cardVariant = 1, isFutureDay = false, blockTitles, weatherNote, showRunClub = false, defaultLocation = "BIGG Recoleta", isToday = false, onCompleteDay }: DailyWorkoutCardProps) {
+export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, onOpenProgramming, reservedClass, activities, showMorning = true, showAfternoon = true, isRestDay = false, cardVariant = 1, isFutureDay = false, blockTitles, weatherNote, showRunClub = false, defaultLocation = "BIGG Recoleta", isToday = false, onCompleteDay }: DailyWorkoutCardProps) {
   const [selectedLocation, setSelectedLocation] = useState(defaultLocation);
   const [showLocationSheet, setShowLocationSheet] = useState(false);
   const [locationSheetFromCta, setLocationSheetFromCta] = useState(false);
@@ -968,9 +970,25 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
   // Sleep/nutrition check-ins report on last night / today — never valid for a day that hasn't happened yet
   const showSleepContent = !isFutureDay && (selectedFilter === "todos" || selectedFilter === "sueno");
   const showNutritionContent = !isFutureDay && (selectedFilter === "todos" || selectedFilter === "nutricion");
+  // "Pasos de hoy" is a live counter, so like the sleep/nutrition check-ins it has no
+  // meaning on a day that hasn't happened yet.
+  const showStepsContent = !isFutureDay && showTrainingContent;
   // Run Club appears on training days (Wed/Sat) whenever training content is visible
   const showRunClubContent = showRunClub && showTrainingContent;
   const isFilterEmpty = !showTrainingContent && !showSleepContent && !showNutritionContent && !showRunClubContent;
+
+  // Defined once so it can render either in its normal slot or hoisted directly under the
+  // rest-day milestone, without duplicating the JSX.
+  const mobilityMilestone = showAfternoon && showTrainingContent ? (
+    <div className="relative z-10 flex flex-col items-start w-full">
+      <div className="relative z-10 flex flex-row items-center gap-[10px]">
+        <TimePill label="Mobility & recovery" style={CONNECTED_PILL_STYLE} />
+      </div>
+      <div className="relative z-10 w-full" style={{ transform: "translateY(-15px)" }}>
+        <AfternoonRecommendationCard />
+      </div>
+    </div>
+  ) : null;
 
   const handleLocationSelect = (loc: string) => {
     setSelectedLocation(loc);
@@ -986,25 +1004,59 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
   //    card shell all stay put, and only that card's *contents* switch. ──
   return (
     <>
-    <div className="relative z-10 flex items-center justify-between w-full mb-[16px] gap-[8px]">
-      <p className="shrink-0 font-['MessinaSansWeb:Bold',sans-serif] text-[20px] text-[#3d3d3d] tracking-[-0.4px] whitespace-nowrap">
-        Tu BIGG day
-      </p>
-      <button
-        type="button"
-        onClick={() => setShowFilterSheet(true)}
-        className="flex items-center gap-[4px] min-w-0 active:opacity-70 transition-opacity"
-      >
-        <span className="truncate max-w-[130px] font-['MessinaSansWeb:SemiBold',sans-serif] text-[14px] text-[#565656] tracking-[-0.28px]">
-          {activeFilterLabel}
-        </span>
-        <ChevronDown size={14} className="text-[#565656] shrink-0" strokeWidth={2} />
-      </button>
-    </div>
+    {/* A rest day has nothing to filter, so it drops the "Tu BIGG day" header and the filter
+        entirely and is titled by the centred rest block below instead. */}
+    {!isRestDay && (
+      <div className="relative z-10 flex items-center justify-between w-full mb-[16px] gap-[8px]">
+        <p className="shrink-0 font-['MessinaSansWeb:Bold',sans-serif] text-[20px] text-[#3d3d3d] tracking-[-0.4px] whitespace-nowrap">
+          Tu BIGG day
+        </p>
+        <button
+          type="button"
+          onClick={() => setShowFilterSheet(true)}
+          className="flex items-center gap-[4px] min-w-0 active:opacity-70 transition-opacity"
+        >
+          <span className="truncate max-w-[130px] font-['MessinaSansWeb:SemiBold',sans-serif] text-[14px] text-[#565656] tracking-[-0.28px]">
+            {activeFilterLabel}
+          </span>
+          <ChevronDown size={14} className="text-[#565656] shrink-0" strokeWidth={2} />
+        </button>
+      </div>
+    )}
+
+    {/* Rest-day title — a centred heading ABOVE the timeline, not a milestone inside it:
+        icon, then title, then note, all centre-aligned. The timeline starts under it. */}
+    {isRestDay && showTrainingContent && (
+      <div className="relative w-full mb-[24px]">
+        {/* Blurred blue ambience bleeding down behind the start of the timeline — decorative,
+            so it is aria-hidden and never intercepts taps. */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute left-1/2 -translate-x-1/2 top-[40px] z-0 w-[520px] h-[300px]"
+          style={{
+            background: "radial-gradient(closest-side, rgba(74,144,217,0.75) 0%, rgba(106,181,255,0.38) 45%, rgba(106,181,255,0) 100%)",
+            filter: "blur(36px)",
+          }}
+        />
+        <div className="relative z-10 flex flex-col items-center text-center gap-[8px] px-[20px]">
+          <Moon size={30} className="text-[#4a90d9]" strokeWidth={1.5} />
+          <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] font-['Druk_Wide:Medium',sans-serif] text-[22px] text-[#565656] tracking-[-1.1px] leading-[1.05]">
+            Día de descanso
+          </p>
+          <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[13px] text-[#6b7280] tracking-[-0.26px] leading-[1.4] max-w-[280px]">
+            Tu plan no programa entrenamiento hoy — aprovechá para recuperar.
+          </p>
+        </div>
+      </div>
+    )}
 
     <div className="relative w-full">
       <div className="absolute left-[22px] top-0 bottom-0 w-[2.5px] bg-[#3d3d3d] z-0" />
       <div className="flex flex-col items-start gap-[24px]">
+
+        {/* Rest day: the timeline itself starts with the mobility recommendation, since the
+            rest heading now sits above the timeline rather than inside it. */}
+        {isRestDay && mobilityMilestone}
 
         {/* BIGG Class at 10AM */}
         {showMorning && showTrainingContent && (
@@ -1364,22 +1416,14 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
           </div>
         )}
 
-        {/* Afternoon Mobility recommendation */}
-        {showAfternoon && showTrainingContent && (
-          <div className="relative z-10 flex flex-col items-start w-full">
-            <div className="relative z-10 flex flex-row items-center gap-[10px]">
-              <TimePill label="Mobility & recovery" style={CONNECTED_PILL_STYLE} />
-            </div>
-            <div className="relative z-10 w-full" style={{ transform: "translateY(-15px)" }}>
-              <AfternoonRecommendationCard />
-            </div>
-          </div>
-        )}
+        {/* Afternoon Mobility recommendation — on a rest day it is hoisted to the top of the
+            timeline instead, directly under the rest milestone (see mobilityMilestone above). */}
+        {!isRestDay && mobilityMilestone}
 
         {/* Nutrición + Pasos — side by side at 50% each. `flex-1` (not a hard 50%)
             so whichever one survives the active filter still fills the row on its own.
             Steps are activity data, so they follow the training filter, not the sleep one. */}
-        {(showNutritionContent || showTrainingContent) && (
+        {(showNutritionContent || showStepsContent) && (
           <div className="relative z-10 flex flex-row items-stretch gap-[10px] w-full">
             {showNutritionContent && (
               <div className="relative z-10 flex flex-1 min-w-0 flex-col items-start">
@@ -1391,7 +1435,7 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
                 </div>
               </div>
             )}
-            {showTrainingContent && <StepsEntry onCompleteDay={onCompleteDay} />}
+            {showStepsContent && <StepsEntry onCompleteDay={onCompleteDay} />}
           </div>
         )}
 
