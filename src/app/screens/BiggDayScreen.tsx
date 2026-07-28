@@ -382,58 +382,22 @@ function WindDownCard() {
 
 // ─── Recommendations carousel ─────────────────────────────────────────────────
 
+// Padel and Lower Body were pulled 2026-07-28 ("for now"), leaving Wind down as the only
+// recommendation. `WorkoutCard` / `AgregarButton` are deliberately kept — restoring the two
+// entries is a revert of that commit, not a rewrite.
 const RECOMMENDATION_ITEMS = [
   {
     subtitle: NEXT_SESSION ? `Mañana entrenás ${NEXT_SESSION.time}` : "Preparate para descansar mejor",
     card: <WindDownCard />,
-  },
-  {
-    subtitle: "Llegá mejor preparado a la cancha",
-    card: (
-      <WorkoutCard
-        gradient="linear-gradient(165.134deg, rgb(255, 255, 255) 20.391%, rgb(248, 179, 46) 105.1%)"
-        title="Padel"
-        badge="COMPLETE IN 15' : UPPER BODY"
-        exercises={["20'' Pivot + Backhand", "20'' Banded Heidens", "20'' Skipping In & Out of a Bumper"]}
-        drawerBadge={
-          <div className="flex items-center gap-[10px]">
-            <div className="bg-[rgba(248,179,46,0.15)] px-[12px] py-[6px] rounded-full flex items-center gap-[6px]">
-              <div className="size-[7px] rounded-full bg-[#f8b32e]" />
-              <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[#b07c00] text-[13px] tracking-[-0.3px]">Padel</p>
-            </div>
-            <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[#a3a3a3] text-[13px] tracking-[-0.26px]">actividad cargada recientemente</p>
-          </div>
-        }
-        drawerBody={<>Cargaste una actividad de{" "}<span className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[#3d3d3d]">Padel</span>, así que armamos este bloque de movilidad y técnica específico para que llegués mejor preparado a la cancha y reduzcas el riesgo de lesiones.</>}
-      />
-    ),
-  },
-  {
-    subtitle: "Balanceá tu entrenamiento",
-    card: (
-      <WorkoutCard
-        gradient="linear-gradient(165.134deg, rgb(255, 255, 255) 20.391%, rgb(194, 194, 194) 105.1%)"
-        title="Lower Body"
-        badge="COMPLETE IN 15' : LOWER BODY"
-        exercises={["20'' Sentadillas con Pausa", "20'' Romanian Deadlift", "20'' Hip Thrust"]}
-        drawerBadge={
-          <div className="flex items-center gap-[10px]">
-            <div className="bg-[rgba(163,163,163,0.15)] px-[12px] py-[6px] rounded-full flex items-center gap-[6px]">
-              <div className="size-[7px] rounded-full bg-[#a3a3a3]" />
-              <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[#666666] text-[13px] tracking-[-0.3px]">Upper Body × 3</p>
-            </div>
-            <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[#a3a3a3] text-[13px] tracking-[-0.26px]">entrenamientos esta semana</p>
-          </div>
-        }
-        drawerBody={<>Realizaste 3 sesiones de{" "}<span className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[#3d3d3d]">Upper Body</span>{" "}esta semana — equilibrá con Lower Body para evitar desbalances musculares y fortalecer el tren inferior.</>}
-      />
-    ),
   },
 ];
 
 function RecommendationsCarousel() {
   const [activeIndex, setActiveIndex] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
+  // With a single recommendation there is nothing to swipe between, so the card takes the full
+  // width and the dot strip is dropped — otherwise it reads as a broken carousel with dead space.
+  const isSingle = RECOMMENDATION_ITEMS.length === 1;
 
   const handleScroll = useCallback(() => {
     const el = scrollRef.current;
@@ -461,7 +425,7 @@ function RecommendationsCarousel() {
         {RECOMMENDATION_ITEMS.map(({ subtitle, card }, i) => (
           <div
             key={i}
-            className="flex flex-col gap-[8px] shrink-0 flex-[0_0_76%]"
+            className={`flex flex-col gap-[8px] ${isSingle ? "w-full" : "shrink-0 flex-[0_0_76%]"}`}
             style={{ scrollSnapAlign: "start" }}
           >
             <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[#565656] text-[13px] tracking-[-0.3px] leading-[1.3]">
@@ -474,8 +438,8 @@ function RecommendationsCarousel() {
         <div className="shrink-0 w-[1px]" aria-hidden />
       </div>
 
-      {/* Dot indicator */}
-      <div className="flex items-center justify-center gap-[6px]">
+      {/* Dot indicator — hidden when there is only one card to show */}
+      <div className={`items-center justify-center gap-[6px] ${isSingle ? "hidden" : "flex"}`}>
         {RECOMMENDATION_ITEMS.map((_, i) => (
           <div
             key={i}
