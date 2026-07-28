@@ -102,6 +102,7 @@ Después de implementar cualquier cambio en un proyecto web o de UI, SIEMPRE ver
 
 <!-- Add a one-liner per session here, newest first -->
 
+- **2026-07-28 (cont.):** Clase reservada dejó de ser un timeline aparte — ahora sólo cambia el **contenido** del card. Rest day como título centrado sobre gradiente violeta→azul (sin header ni filtro). Pasos sólo en días no futuros. Perfil: Benchmark de vuelta + `BiggFriendsCard` + `MembresiaCard` + nueva `ObjetivosScreen` (permite sumar objetivos; "Hacer principal" intercambia, no pisa). Carrusel: sólo Wind down — `WorkoutCard` queda sin usar a propósito para poder revertir.
 - **2026-07-28:** `WindDownCard` ahora se deriva de la sesión de mañana (`NEXT_SESSION` + `windDownWindow()`): nombra la clase y calcula la ventana ideal hacia atrás (08:00 → 22:15–23:00). `NEXT_SESSION = null` muestra el fallback sin entrenamiento.
 - **2026-07-28:** Wind down al principio del carrusel de recomendaciones. El achique de todas las cards que se había hecho en `d6bbd73` fue **revertido** a pedido — las cards mantienen su tamaño original.
 - **2026-07-28:** Card de nutrición apilada en `flex-col` (ícono / pregunta / pulgares), espejando la de Pasos. ⚠️ Detectado bug pre-existente: el toast `fixed` de nutrición se posiciona contra el wrapper con `transform`, no contra el viewport — marcado, sin arreglar.

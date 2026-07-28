@@ -4,6 +4,58 @@
 
 ---
 
+## 2026-07-28 — Estado reservado dentro del card, rest day, objetivos, perfil y limpieza del carrusel
+
+Tanda larga, documentada al final de la sesión a pedido de Mateo (se pausaron las actualizaciones de docs a mitad de camino para no interrumpir la iteración). Commits: `5ee4e64` → `0362ae8`.
+
+### Clase reservada: deja de ser un timeline aparte
+
+Se sembró hoy (mar 28) con la clase ya reservada (`TODAY_RESERVED_CLASS`, compartida con el `onConfirm` del flujo de Reservar para que la reserva sembrada y una hecha por el usuario no se separen). Al hacerlo apareció el problema real: `reservedClass` hacía un **early return con un timeline propio y mucho más pobre**, así que reservar hacía desaparecer en silencio el header "Tu BIGG day", el filtro, el check-in de sueño y la fila Nutrición + Pasos.
+
+Se eliminó esa rama y `ReservedClassCard`. Ahora la clase reservada pasa por el timeline normal y **sólo cambia el contenido del card "Actividad del día"**: cuerpo con tipo de clase, `hora · sede`, `AttendeeAvatars` y los bloques de la clase en la misma grilla 2×2 que usa el entrenamiento sugerido; footer sin selector de sede ni "Reservar clase", en su lugar confirmación ("Tenés tu lugar reservado") + **Ver mi clase** → `onOpenDetail`; el chevron del header también va al detalle. Se borró el import `Pencil` que quedó sin uso.
+
+### Rest day (jueves)
+
+Primero se puso el hito de descanso + Mobility dentro del timeline; después Mateo pidió que **no fuera un hito sino un título**. Quedó así: bloque centrado **arriba del timeline** (ícono, título, nota, todo centrado) sobre un gradiente radial violeta→azul difuminado (`aria-hidden`, `pointer-events-none`), y **sin header "Tu BIGG day" ni filtro** — un día de descanso no tiene nada que filtrar. El timeline arranca directamente con Mobility & recovery, izado a ese lugar con un const compartido `mobilityMilestone` para no duplicar el JSX. Se borró el chip suelto que estaba en `BiggDayScreen`.
+
+`showAfternoon` pasó de `false` (oculto en todos lados, pedido anterior) a `isRestDay`: apagado en días de entrenamiento, prendido el jueves.
+
+### Pasos: sólo en días que ya pasaron
+
+"Pasos de hoy" es un contador en vivo, así que sigue la misma regla que los check-ins de sueño y nutrición: nuevo `showStepsContent = !isFutureDay && showTrainingContent`, que además gatea el wrapper de la fila para que colapse limpio en vez de quedar media vacía.
+
+### Card de nutrición en columna
+
+El contenido pasó de fila a columna (`flex-col justify-center gap-[8px]`): ícono 13→16px, pregunta y par de pulgares, cada uno en su fila. A 50% de ancho la pregunta dejó de wrappear y quedó estructuralmente igual a la de Pasos.
+
+**⚠️ Bug pre-existente detectado, no arreglado:** el toast "Nutrición guardada" es `position: fixed` pero se renderiza dentro del wrapper con `transform: translateY(-15px)`; un ancestro con `transform` hace que `fixed` se resuelva contra ese ancestro y no contra el viewport, así que el toast aparece al lado del card. El `transform` viene de `2ac0720`, muy anterior. El arreglo sería portalear el toast fuera del árbol transformado.
+
+### Perfil
+
+- **BIGG Benchmark** volvió al perfil, reencontrándose con Objetivo y Mis Pesos (de los que lo habíamos separado en la IA del 21/07). `BiggDayScreen` conserva su import de `imgPerformanceImage1` porque otro componente lo sigue usando.
+- **`BiggFriendsCard`** (nueva) al lado de Mis Pesos, mitad y mitad (`w-[47%]` → `flex-1 min-w-0` en ambas). Misma cáscara, pero en el lugar del ícono van 4 burbujas de avatar superpuestas, igual que el card de clase reservada.
+- **`MembresiaCard`** (nueva) — contraparte de `MembershipContainer` del tab Train: aquel es el **upsell** para quien no es premium, esta es la card de **estado** para quien ya la tiene (superficie oscura, badge lime "Activa", BIGG PREMIUM en Druk, sede + antigüedad, próxima renovación, fila "Gestionar membresía").
+
+### `ObjetivosScreen` (nueva)
+
+El card de objetivo del perfil ahora es un botón que abre una pantalla nueva, construida sobre un diseño que pasó Mateo: copy introductorio, objetivo principal como hero con su plan, y las tres metas medibles que alimentan la racha — Actividad semanal (strip L·M·M·J·V·S·D donde cada día se togglea y el contador se actualiza en vivo), Sueño y Pasos diarios — más la nota de recálculo.
+
+Lo que el diseño de referencia no cubría y era el pedido real: **sumar otros objetivos**. Sección "Otros objetivos" con "Agregar objetivo" que abre un sheet con el resto del catálogo. Decisión de diseño: **"Hacer principal" intercambia** el objetivo elegido con el principal actual en vez de pisarlo, así no se pierde ninguno. Todo estado local; no hay API de objetivos en este repo.
+
+### Carrusel de recomendaciones
+
+Bastante ida y vuelta: Wind down se ató al entrenamiento de mañana (ver entrada anterior), después fue al final, después al principio; se probó achicar todas las cards y se revirtió por completo (`94df5c2`). Al cierre Mateo pidió sacar **Padel y Lower Body** "por ahora", así que quedó sólo Wind down. `WorkoutCard` y `AgregarButton` se **dejaron a propósito aunque quedaron sin referencias**, para que restaurarlas sea revertir el commit y no reescribirlas. `RecommendationsCarousel` se adapta cuando hay un solo item: la card ocupa el ancho completo en vez del 76% del snap y se esconde la tira de dots — si no, se lee como un carrusel roto con espacio muerto. Las dos condiciones dependen del largo del array, así que al restaurar los items vuelve el swipe sin tocar nada más.
+
+### Deploy
+
+Todo el trabajo está en producción vía la integración Git de Vercel: cada push disparó su build. Verificado que el hash del bundle servido por `bigg-mock.vercel.app` coincide con el build local. Ojo al compartir: el proyecto tiene `ssoProtection: all_except_custom_domains`, así que las URLs de deploy sueltas piden login — para pasar el mock hay que usar `bigg-mock.vercel.app`.
+
+Verificado en Chrome a 390×844 en cada paso: hoy (reservada), miércoles (sin pasos), jueves (rest day), perfil y objetivos. `pnpm build` limpio.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
 ## 2026-07-28 — Wind down atado al entrenamiento de mañana
 
 Mateo marcó que el wind down tiene que estar relacionado con el entrenamiento: si el usuario tiene clase mañana a las 8, la card lo tiene que señalar y decir la ventana ideal de wind down. Antes era un recordatorio fijo de "HOY 22:00HS" sin ninguna relación con lo que venía después.
