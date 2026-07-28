@@ -4,6 +4,20 @@
 
 ---
 
+## 2026-07-28 — Wind down al principio del carrusel + todas las cards más chicas
+
+**Orden:** Wind down pasó al primer lugar del carrusel de recomendaciones (queda Wind down → Padel → Lower Body). Notar que hace un rato lo habíamos mandado al final, por mi lectura de "move the final block to the end of the list" — Mateo ahora lo quiso al principio, así que esa interpretación quedó revertida.
+
+**Tamaño:** se achicaron todas las cards del carrusel para acercarlas al formato compacto del `StepsEntry` del timeline. En `WorkoutCard`: cuerpo `h-[214px]` → `h-[150px]`, título 22→17px, ejercicios 13→11px con gap 6→4, badge `h-[18px]`→`h-[16px]`, SVG del reloj 38×67→28×50, padding más ajustado y el ícono de info 20→17px. En `AgregarButton`: `pt-[45px]`/`pb-[15px]` → `pt-[38px]`/`pb-[13px]`, ícono 24→20px, texto 15→13px. `WindDownCard` quedó en `h-[193px]` (su `10'` de 40→30px) para igualar la altura total nueva de las workout cards.
+
+**Cuidado con el overlap:** el `AgregarButton` se mete debajo del card con un margen negativo (`mb-[-34px]` → `mb-[-28px]`). Ese valor tiene que quedar ~10px por debajo del `pt` del botón, si no el texto "Agregar a mi entrenamiento" queda tapado por el card. Verificado que no se corta.
+
+Verificado en Chrome a 390×844: las tres cards a la misma altura, botón sin clipping, orden nuevo. `pnpm build` limpio.
+
+**Source:** Claude Code — Macbook Pro
+
+---
+
 ## 2026-07-28 — Card de nutrición apilada en columna
 
 A pedido de Mateo, el contenido de la card de nutrición pasó de fila a columna: el contenedor es ahora `flex h-full flex-col justify-center gap-[8px]` y sus tres hijos (ícono `Utensils`, la pregunta "¿Comiste bien hoy?", y el par de botones pulgar arriba/abajo) se apilan. El ícono subió de 13 a 16px para que no quede como un punto suelto arriba de todo.
