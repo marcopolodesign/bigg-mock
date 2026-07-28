@@ -1032,9 +1032,9 @@ export default function DailyWorkoutCard({ onReservar, onOpenFab, onOpenDetail, 
             so it is aria-hidden and never intercepts taps. */}
         <div
           aria-hidden
-          className="pointer-events-none absolute left-1/2 -translate-x-1/2 top-[40px] z-0 w-[520px] h-[300px]"
+          className="pointer-events-none absolute left-1/2 -translate-x-1/2 -top-[28px] z-0 w-[520px] h-[300px]"
           style={{
-            background: "radial-gradient(closest-side, rgba(74,144,217,0.75) 0%, rgba(106,181,255,0.38) 45%, rgba(106,181,255,0) 100%)",
+            background: "radial-gradient(closest-side, rgba(139,120,230,0.72) 0%, rgba(116,140,235,0.48) 38%, rgba(106,181,255,0.28) 65%, rgba(106,181,255,0) 100%)",
             filter: "blur(36px)",
           }}
         />
