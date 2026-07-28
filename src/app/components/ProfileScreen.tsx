@@ -107,6 +107,58 @@ function BiggFriendsCard() {
   );
 }
 
+// ─── Membresía premium ───────────────────────────────────────────────────────────────────────
+// Profile-side counterpart to BiggDayScreen's MembershipContainer: that one is the UPSELL for
+// non-premium users ("Probá nuestra membresía premium"), this one is the STATUS card for someone
+// who already has it — plan, sede, renewal, and a way in to manage it. Kept dark so it reads as
+// the premium tier against the light profile surface.
+
+function MembresiaCard() {
+  return (
+    <div className="relative w-full rounded-[12px] overflow-hidden bg-[#3d3d3d] flex flex-col">
+      <div className="flex flex-col gap-[10px] px-[20px] pt-[20px] pb-[16px]">
+        <div className="flex items-center justify-between gap-[10px]">
+          <p className="font-['MessinaSansWeb:Bold',sans-serif] text-[rgba(255,255,255,0.5)] text-[10px] tracking-[0.8px] uppercase">
+            Membresía
+          </p>
+          <div className="flex items-center gap-[6px] bg-[rgba(173,255,25,0.15)] rounded-full px-[10px] py-[4px] shrink-0">
+            <div className="size-[6px] rounded-full bg-[#adff19]" />
+            <span className="font-['MessinaSansWeb:SemiBold',sans-serif] text-[#adff19] text-[11px] tracking-[-0.22px]">
+              Activa
+            </span>
+          </div>
+        </div>
+        <p className="[text-box-edge:cap_alphabetic] [text-box-trim:trim-both] font-['Druk_Wide:Medium',sans-serif] text-white text-[24px] leading-[1.05] tracking-[-1.2px] uppercase">
+          BIGG Premium
+        </p>
+        <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[rgba(255,255,255,0.6)] text-[13px] tracking-[-0.26px]">
+          BIGG Recoleta · desde marzo 2023
+        </p>
+      </div>
+
+      <div className="flex items-center justify-between px-[20px] py-[13px]" style={{ borderTop: "1px solid rgba(255,255,255,0.1)" }}>
+        <p className="font-['MessinaSansWeb:Regular',sans-serif] text-[rgba(255,255,255,0.6)] text-[13px] tracking-[-0.26px]">
+          Próxima renovación
+        </p>
+        <p className="font-['MessinaSansWeb:SemiBold',sans-serif] text-white text-[13px] tracking-[-0.26px]">
+          5 de agosto
+        </p>
+      </div>
+
+      <button
+        type="button"
+        className="flex items-center justify-between px-[20px] py-[14px] active:opacity-70 transition-opacity"
+        style={{ borderTop: "1px solid rgba(255,255,255,0.1)" }}
+      >
+        <span className="font-['MessinaSansWeb:SemiBold',sans-serif] text-white text-[14px] tracking-[-0.28px]">
+          Gestionar membresía
+        </span>
+        <ChevronRight size={17} strokeWidth={2} className="text-[rgba(255,255,255,0.6)]" />
+      </button>
+    </div>
+  );
+}
+
 // ─── Screen ─────────────────────────────────────────────────────────────────────────────────
 
 interface ProfileScreenProps {
@@ -222,6 +274,9 @@ export default function ProfileScreen({ onClose }: ProfileScreenProps) {
 
           {/* ── BIGG Benchmark (moved from the Train tab 2026-07-28) ── */}
           <BenchmarkContainer />
+
+          {/* ── Membresía premium — status card (the upsell version lives on Train) ── */}
+          <MembresiaCard />
 
           {/* ── Decorative tail rows — static, matching the real Profile screen's language row / sign-out row ── */}
           <div className="flex flex-col mt-[4px]">
